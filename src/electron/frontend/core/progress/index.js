@@ -143,7 +143,7 @@ export const getAll = (progressFiles) => {
     return progressFiles.map((progressFile) => {
         let progressFilePath = joinPath(guidedProgressFilePath, progressFile);
         return transformProgressFile(
-            JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFilePath))
+            JSON.parse(fs ? fs.readFileSync(progressFilePath) : localStorage.getItem(progressFile))
         );
     });
 };
