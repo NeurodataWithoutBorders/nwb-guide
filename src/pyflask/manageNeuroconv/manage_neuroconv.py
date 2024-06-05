@@ -7,6 +7,7 @@ import math
 import os
 import re
 import traceback
+import zoneinfo
 from datetime import datetime
 from pathlib import Path
 from shutil import copytree, rmtree
@@ -509,6 +510,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
     if has_ecephys:
 
+        if "definitions" not in ecephys_schema:
+            ecephys_schema["definitions"] = ecephys_properties["definitions"]
+
         has_electrodes = "ElectrodeColumns" in ecephys_metadata
 
         original_units_schema = ecephys_properties.pop("UnitProperties", None)
@@ -640,34 +644,48 @@ def run_check_function(check_function: callable, arg: dict) -> dict:
 
 
 def validate_subject_metadata(
-    subject_metadata: dict, check_function_name: str
+    subject_metadata: dict, check_function_name: str, timezone: Optional[str] = None
 ):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """Function used to validate subject metadata."""
+    import pytz
     from pynwb.file import Subject
 
     check_function = get_check_function(check_function_name)
 
     if isinstance(subject_metadata.get("date_of_birth"), str):
         subject_metadata["date_of_birth"] = datetime.fromisoformat(subject_metadata["date_of_birth"])
+        if timezone is not None:
+            subject_metadata["date_of_birth"] = subject_metadata["date_of_birth"].replace(
+                tzinfo=pytz.timezone(timezone)
+            )
 
     return run_check_function(check_function, Subject(**subject_metadata))
 
 
 def validate_nwbfile_metadata(
-    nwbfile_metadata: dict, check_function_name: str
+    nwbfile_metadata: dict, check_function_name: str, timezone: Optional[str] = None
 ):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """Function used to validate NWBFile metadata."""
+    import pytz
     from pynwb.testing.mock.file import mock_NWBFile
 
     check_function = get_check_function(check_function_name)
 
     if isinstance(nwbfile_metadata.get("session_start_time"), str):
         nwbfile_metadata["session_start_time"] = datetime.fromisoformat(nwbfile_metadata["session_start_time"])
+        if timezone is not None:
+            nwbfile_metadata["session_start_time"] = nwbfile_metadata["session_start_time"].replace(
+                tzinfo=pytz.timezone(timezone)
+            )
 
     return run_check_function(check_function, mock_NWBFile(**nwbfile_metadata))
 
 
-def validate_metadata(metadata: dict, check_function_name: str) -> dict:
+def validate_metadata(
+    metadata: dict,
+    check_function_name: str,
+    timezone: Optional[str] = None,
+) -> dict:
     """Function used to validate data using an arbitrary NWB Inspector function."""
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pynwb.file import NWBFile, Subject
@@ -675,9 +693,9 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     check_function = get_check_function(check_function_name)
 
     if issubclass(check_function.neurodata_type, Subject):
-        result = validate_subject_metadata(metadata, check_function_name)
+        result = validate_subject_metadata(metadata, check_function_name, timezone)
     elif issubclass(check_function.neurodata_type, NWBFile):
-        result = validate_nwbfile_metadata(metadata, check_function_name)
+        result = validate_nwbfile_metadata(metadata, check_function_name, timezone)
     else:
         raise ValueError(
             f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} "
@@ -848,52 +866,45 @@ def get_interface_alignment(info: dict) -> dict:
     )
 
 
-def convert_to_nwb(
+def create_file(
     info: dict,
-    log_url=None,
-) -> str:
-    """Function used to convert the source data to NWB format using the specified metadata."""
+    log_url: Optional[str] = None,
+) -> dict:
 
     import requests
-    from neuroconv import NWBConverter
     from tqdm_publisher import TQDMProgressSubscriber
 
-    url = info.get("url", None)
-    request_id = info.get("request_id", None)
-
-    nwbfile_path = Path(info["nwbfile_path"])
-    custom_output_directory = info.get("output_folder")
     project_name = info.get("project_name")
+
     run_stub_test = info.get("stub_test", False)
-    default_output_base = STUB_SAVE_FOLDER_PATH if run_stub_test else CONVERSION_SAVE_FOLDER_PATH
-    default_output_directory = default_output_base / project_name
+
+    overwrite = info.get("overwrite", False)
+
+    # Progress update info
+    url = info.get("url")
+    request_id = info.get("request_id")
+
+    # Backend configuration info
+    backend_configuration = info.get("configuration", {})
+    backend = backend_configuration.get("backend", "hdf5")
+
+    converter, metadata, path_info = get_conversion_info(info)
+
+    nwbfile_path = path_info["file"]
 
     try:
 
-        # add a subdirectory to a filepath if stub_test is true
-        resolved_output_base = Path(custom_output_directory) if custom_output_directory else default_output_base
-        resolved_output_directory = resolved_output_base / project_name
-        resolved_output_path = resolved_output_directory / nwbfile_path
-
-        # Remove symlink placed at the default_output_directory if this will hold real data
-        if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
-            default_output_directory.unlink()
-
-        resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
-
-        resolved_source_data = replace_none_with_nan(
-            info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema())
-        )
-
-        converter = instantiate_custom_converter(
-            source_data=resolved_source_data,
-            interface_class_dict=info["interfaces"],
-            alignment_info=info.get("alignment", dict()),
-        )
+        # Delete files manually if using Zarr
+        if overwrite:
+            if nwbfile_path.exists():
+                if nwbfile_path.is_dir():
+                    rmtree(nwbfile_path)
+                else:
+                    nwbfile_path.unlink()
 
         def update_conversion_progress(message):
             update_dict = dict(request_id=request_id, **message)
-            if (url) or not run_stub_test:
+            if url or not run_stub_test:
                 requests.post(url=url, json=update_dict)
             else:
                 progress_handler.announce(update_dict)
@@ -923,102 +934,18 @@ def convert_to_nwb(
                     progress_bar_options=progress_bar_options,
                 )
 
-        # Ensure Ophys NaN values are resolved
-        resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
-
-        ecephys_metadata = resolved_metadata.get("Ecephys")
-
-        if ecephys_metadata:
-
-            # Quick fix to remove units
-            has_units = "Units" in ecephys_metadata
-
-            if has_units:
-
-                ## NOTE: Currently do not allow editing units properties
-                # shared_units_columns = ecephys_metadata["UnitColumns"]
-                # for interface_name, interface_unit_results in ecephys_metadata["Units"].items():
-                #     interface = converter.data_interface_objects[interface_name]
-
-                #     update_sorting_properties_from_table_as_json(
-                #         interface,
-                #         unit_table_json=interface_unit_results,
-                #         unit_column_info=shared_units_columns,
-                #     )
-
-                # ecephys_metadata["UnitProperties"] = [
-                #     {"name": entry["name"], "description": entry["description"]} for entry in shared_units_columns
-                # ]
-
-                del ecephys_metadata["Units"]
-                del ecephys_metadata["UnitColumns"]
-
-            has_electrodes = "Electrodes" in ecephys_metadata
-            if has_electrodes:
-
-                shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
-
-                for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
-                    name_split = interface_name.split(" — ")
-
-                    if len(name_split) == 1:
-                        sub_interface = name_split[0]
-                    elif len(name_split) == 2:
-                        sub_interface, sub_sub_interface = name_split
-
-                    interface_or_subconverter = converter.data_interface_objects[sub_interface]
-
-                    if isinstance(interface_or_subconverter, NWBConverter):
-                        subconverter = interface_or_subconverter
-
-                        update_recording_properties_from_table_as_json(
-                            recording_interface=subconverter.data_interface_objects[sub_sub_interface],
-                            electrode_table_json=interface_electrode_results,
-                            electrode_column_info=shared_electrode_columns,
-                        )
-                    else:
-                        interface = interface_or_subconverter
-
-                        update_recording_properties_from_table_as_json(
-                            recording_interface=interface,
-                            electrode_table_json=interface_electrode_results,
-                            electrode_column_info=shared_electrode_columns,
-                        )
-
-                ecephys_metadata["Electrodes"] = [
-                    {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
-                ]
-
-                del ecephys_metadata["ElectrodeColumns"]
-
-        # Actually run the conversion
-        converter.run_conversion(
-            metadata=resolved_metadata,
-            nwbfile_path=resolved_output_path,
-            overwrite=info.get("overwrite", False),
+        run_conversion_kwargs = dict(
+            metadata=metadata,
+            nwbfile_path=nwbfile_path,
+            overwrite=overwrite,
             conversion_options=options,
+            backend=backend,
         )
 
-        # Create a symlink between the fake data and custom data
-        if not resolved_output_directory == default_output_directory:
-            if default_output_directory.exists():
-                # If default default_output_directory is not a symlink, delete all contents and create a symlink there
-                if not default_output_directory.is_symlink():
-                    rmtree(default_output_directory)
+        if not run_stub_test:
+            run_conversion_kwargs.update(dict(backend_configuration=update_backend_configuration(info)))
 
-                # If the location is already a symlink, but points to a different output location
-                # remove the existing symlink before creating a new one
-                elif (
-                    default_output_directory.is_symlink()
-                    and default_output_directory.readlink() is not resolved_output_directory
-                ):
-                    default_output_directory.unlink()
-
-            # Create a pointer to the actual conversion outputs
-            if not default_output_directory.exists():
-                os.symlink(resolved_output_directory, default_output_directory)
-
-        return dict(file=str(resolved_output_path))
+        converter.run_conversion(**run_conversion_kwargs)
 
     except Exception as e:
         if log_url:
@@ -1033,6 +960,247 @@ def convert_to_nwb(
             )
 
         raise e
+
+
+def update_backend_configuration(info: dict) -> dict:
+
+    from neuroconv.tools.nwb_helpers import (
+        get_default_backend_configuration,
+        make_nwbfile_from_metadata,
+    )
+
+    PROPS_TO_IGNORE = ["full_shape"]
+
+    info_from_frontend = info.get("configuration", {})
+    backend = info_from_frontend.get("backend", "hdf5")
+    backend_configuration_from_frontend = info_from_frontend.get("results", {}).get(backend, {})
+
+    converter, metadata, __ = get_conversion_info(info)
+
+    nwbfile = make_nwbfile_from_metadata(metadata=metadata)
+    converter.add_to_nwbfile(nwbfile, metadata=metadata)
+
+    backend_configuration = get_default_backend_configuration(nwbfile=nwbfile, backend=backend)
+
+    for location_in_file, dataset_configuration in backend_configuration_from_frontend.items():
+        for key, value in dataset_configuration.items():
+            if key not in PROPS_TO_IGNORE:
+                # Pydantic models only allow setting of attributes
+                setattr(backend_configuration.dataset_configurations[location_in_file], key, value)
+
+    return backend_configuration
+
+
+def get_backend_configuration(info: dict) -> dict:
+
+    import numpy as np
+
+    PROPS_TO_REMOVE = [
+        # Immutable
+        "object_id",
+        "dataset_name",
+        "location_in_file",
+        "dtype",
+    ]
+
+    info["overwrite"] = True  # Always overwrite the file
+
+    backend = info.get("backend", "hdf5")
+    configuration = update_backend_configuration(info)
+
+    def custom_encoder(obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        if isinstance(obj, np.dtype):
+            return str(obj)
+        raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")
+
+    # Provide metadata on configuration dictionary
+    configuration_dict = configuration.dict()
+
+    itemsizes = {}
+    for key, dataset in configuration_dict["dataset_configurations"].items():
+        itemsizes[key] = dataset["dtype"].itemsize
+
+    serialized = json.loads(json.dumps(configuration_dict, default=custom_encoder))
+
+    dataset_configurations = serialized["dataset_configurations"]  # Only provide dataset configurations
+
+    for dataset in dataset_configurations.values():
+        for key in PROPS_TO_REMOVE:
+            del dataset[key]
+
+    schema = list(configuration.schema()["$defs"].values())[0]
+    for key in PROPS_TO_REMOVE:
+        existed = schema["properties"].pop(key, None)  # Why is dtype not included but the rest are?
+        if existed:
+            schema["required"].remove(key)
+
+    return dict(results=dataset_configurations, schema=schema, backend=backend, itemsizes=itemsizes)
+
+
+def get_conversion_path_info(info: dict) -> dict:
+    """Function used to resolve the path details for the conversion."""
+
+    nwbfile_path = Path(info["nwbfile_path"])
+    custom_output_directory = info.get("output_folder")
+    project_name = info.get("project_name")
+    run_stub_test = info.get("stub_test", False)
+    default_output_base = STUB_SAVE_FOLDER_PATH if run_stub_test else CONVERSION_SAVE_FOLDER_PATH
+    default_output_directory = default_output_base / project_name
+
+    # add a subdirectory to a filepath if stub_test is true
+    resolved_output_base = Path(custom_output_directory) if custom_output_directory else default_output_base
+    resolved_output_directory = resolved_output_base / project_name
+    resolved_output_path = resolved_output_directory / nwbfile_path
+
+    return dict(file=resolved_output_path, directory=resolved_output_directory, default=default_output_directory)
+
+
+def get_conversion_info(info: dict) -> dict:
+    """Function used to organize the required information for conversion."""
+
+    from neuroconv import NWBConverter
+
+    path_info = get_conversion_path_info(info)
+    resolved_output_path = path_info["file"]
+    resolved_output_directory = path_info["directory"]
+    default_output_directory = path_info["default"]
+
+    # Remove symlink placed at the default_output_directory if this will hold real data
+    if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
+        default_output_directory.unlink()
+
+    resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
+
+    resolved_source_data = replace_none_with_nan(
+        info["source_data"], resolve_references(get_custom_converter(info["interfaces"]).get_source_schema())
+    )
+
+    converter = instantiate_custom_converter(
+        source_data=resolved_source_data,
+        interface_class_dict=info["interfaces"],
+        alignment_info=info.get("alignment", dict()),
+    )
+
+    # Ensure Ophys NaN values are resolved
+    resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
+
+    ecephys_metadata = resolved_metadata.get("Ecephys")
+
+    if ecephys_metadata:
+
+        # Quick fix to remove units
+        has_units = "Units" in ecephys_metadata
+
+        if has_units:
+
+            ## NOTE: Currently do not allow editing units properties
+            # shared_units_columns = ecephys_metadata["UnitColumns"]
+            # for interface_name, interface_unit_results in ecephys_metadata["Units"].items():
+            #     interface = converter.data_interface_objects[interface_name]
+
+            #     update_sorting_properties_from_table_as_json(
+            #         interface,
+            #         unit_table_json=interface_unit_results,
+            #         unit_column_info=shared_units_columns,
+            #     )
+
+            # ecephys_metadata["UnitProperties"] = [
+            #     {"name": entry["name"], "description": entry["description"]} for entry in shared_units_columns
+            # ]
+
+            del ecephys_metadata["Units"]
+            del ecephys_metadata["UnitColumns"]
+
+        has_electrodes = "Electrodes" in ecephys_metadata
+        if has_electrodes:
+
+            shared_electrode_columns = ecephys_metadata["ElectrodeColumns"]
+
+            for interface_name, interface_electrode_results in ecephys_metadata["Electrodes"].items():
+                name_split = interface_name.split(" — ")
+
+                if len(name_split) == 1:
+                    sub_interface = name_split[0]
+                elif len(name_split) == 2:
+                    sub_interface, sub_sub_interface = name_split
+
+                interface_or_subconverter = converter.data_interface_objects[sub_interface]
+
+                if isinstance(interface_or_subconverter, NWBConverter):
+                    subconverter = interface_or_subconverter
+
+                    update_recording_properties_from_table_as_json(
+                        recording_interface=subconverter.data_interface_objects[sub_sub_interface],
+                        electrode_table_json=interface_electrode_results,
+                        electrode_column_info=shared_electrode_columns,
+                    )
+                else:
+                    interface = interface_or_subconverter
+
+                    update_recording_properties_from_table_as_json(
+                        recording_interface=interface,
+                        electrode_table_json=interface_electrode_results,
+                        electrode_column_info=shared_electrode_columns,
+                    )
+
+            ecephys_metadata["Electrodes"] = [
+                {"name": entry["name"], "description": entry["description"]} for entry in shared_electrode_columns
+            ]
+
+            del ecephys_metadata["ElectrodeColumns"]
+
+    # Correct timezone in metadata fields
+    resolved_metadata["NWBFile"]["session_start_time"] = datetime.fromisoformat(
+        resolved_metadata["NWBFile"]["session_start_time"]
+    ).replace(tzinfo=zoneinfo.ZoneInfo(info["timezone"]))
+
+    if "date_of_birth" in resolved_metadata["Subject"]:
+        resolved_metadata["Subject"]["date_of_birth"] = datetime.fromisoformat(
+            resolved_metadata["Subject"]["date_of_birth"]
+        ).replace(tzinfo=zoneinfo.ZoneInfo(info["timezone"]))
+
+    return (
+        converter,
+        resolved_metadata,
+        path_info,
+    )
+
+
+def convert_to_nwb(
+    info: dict,
+    log_url: Optional[str] = None,
+) -> str:
+    """Function used to convert the source data to NWB format using the specified metadata."""
+
+    path_info = get_conversion_path_info(info)
+    output_path = path_info["file"]
+    resolved_output_directory = path_info["directory"]
+    default_output_directory = path_info["default"]
+
+    create_file(info, log_url=log_url)
+
+    # Create a symlink between the fake data and custom data
+    if not resolved_output_directory == default_output_directory:
+        if default_output_directory.exists():
+            # If default default_output_directory is not a symlink, delete all contents and create a symlink there
+            if not default_output_directory.is_symlink():
+                rmtree(default_output_directory)
+
+            # If the location is already a symlink, but points to a different output location
+            # remove the existing symlink before creating a new one
+            elif (
+                default_output_directory.is_symlink()
+                and default_output_directory.readlink() is not resolved_output_directory
+            ):
+                default_output_directory.unlink()
+
+        # Create a pointer to the actual conversion outputs
+        if not default_output_directory.exists():
+            os.symlink(resolved_output_directory, default_output_directory)
+
+    return dict(file=str(output_path))
 
 
 def convert_all_to_nwb(

@@ -7,6 +7,7 @@ from manageNeuroconv import (
     convert_all_to_nwb,
     get_all_converter_info,
     get_all_interface_info,
+    get_backend_configuration,
     get_interface_alignment,
     get_metadata_schema,
     get_source_schema,
@@ -93,9 +94,17 @@ class Alignment(Resource):
         return get_interface_alignment(neuroconv_namespace.payload)
 
 
+@neuroconv_namespace.route("/configuration")
+class GetBackendConfiguration(Resource):
+    @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
+    def post(self):
+        return get_backend_configuration(neuroconv_namespace.payload)
+
+
 validate_parser = neuroconv_namespace.parser()
 validate_parser.add_argument("parent", type=dict, required=True)
 validate_parser.add_argument("function_name", type=str, required=True)
+validate_parser.add_argument("timezone", type=str, required=False)
 
 
 @neuroconv_namespace.route("/validate")
@@ -104,7 +113,7 @@ class Validate(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         args = validate_parser.parse_args()
-        return validate_metadata(args.get("parent"), args.get("function_name"))
+        return validate_metadata(args.get("parent"), args.get("function_name"), args.get("timezone"))
 
 
 @neuroconv_namespace.route("/upload/project")

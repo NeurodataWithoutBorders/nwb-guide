@@ -183,7 +183,7 @@ export class Dashboard extends LitElement {
         else if (typeof page === "object") return this.getPage(Object.values(page)[0]);
     }
 
-    updateSections({ sidebar = true, main = false } = {}, globalState = this.page.info.globalState) {
+    updateSections({ sidebar = true, main = false, header = false } = {}, globalState = this.page.info.globalState) {
         const info = this.page.info;
         let parent = info.parent;
 
@@ -199,7 +199,7 @@ export class Dashboard extends LitElement {
                 page: this.page,
                 sections,
             });
-        }
+        } else if (header) this.main.header.sections = sections; // Update header sections
 
         return sections;
     }
@@ -245,6 +245,26 @@ export class Dashboard extends LitElement {
 
         this.page.set(toPass, false);
 
+        // Constrain based on workflow configuration
+        const workflowConfig = page.workflow ?? (page.workflow = {});
+        const workflowValues = page.info.globalState?.project?.workflow ?? {};
+
+        // Define the value for each workflow value
+        Object.entries(workflowValues).forEach(([key, value]) => {
+            const config = workflowConfig[key] ?? (workflowConfig[key] = {});
+            config.value = value;
+        });
+
+        // Toggle elements based on workflow configuration
+        Object.entries(workflowConfig).forEach(([key, config]) => {
+            const { value, elements } = config;
+            if (elements) {
+                if (value) elements.forEach((el) => el.removeAttribute("hidden"));
+                else elements.forEach((el) => el.setAttribute("hidden", true));
+            }
+        });
+
+        // Ensure that all states are synced to the proper state for this page (e.g. conversions have been run)
         this.page
             .checkSyncState()
             .then(async () => {
@@ -254,25 +274,34 @@ export class Dashboard extends LitElement {
                     ? `<h4 style="margin-bottom: 0px;">${projectName}</h4><small>Conversion Pipeline</small>`
                     : projectName;
 
-                this.updateSections({ sidebar: false, main: true });
-
-                if (this.#transitionPromise.value) this.#transitionPromise.trigger(page); // This ensures calls to page.to() can be properly awaited until the next page is ready
-
                 const { skipped } = this.subSidebar.sections[info.section]?.pages?.[info.id] ?? {};
 
                 if (skipped) {
                     if (isStorybook) return; // Do not skip on storybook
 
-                    // Run skip functions
-                    Object.entries(page.workflow).forEach(([key, state]) => {
-                        if (typeof state.skip === "function") state.skip();
-                    });
+                    const backwards = previous && previous.info.previous === this.page;
 
-                    // Skip right over the page if configured as such
-                    if (previous && previous.info.previous === this.page) await this.page.onTransition(-1);
-                    else await this.page.onTransition(1);
+                    return (
+                        Promise.all(
+                            Object.entries(page.workflow).map(async ([_, state]) => {
+                                if (typeof state.skip === "function" && !backwards) return await state.skip(); // Run skip functions
+                            })
+                        )
+
+                            // Skip right over the page if configured as such
+                            .then(async () => {
+                                if (backwards) await this.main.onTransition(-1);
+                                else await this.main.onTransition(1);
+                            })
+                    );
                 }
+
+                page.requestUpdate(); // Re-render the page on each load
+
+                // Update main to render page
+                this.updateSections({ sidebar: false, main: true });
             })
+
             .catch((e) => {
                 const previousId = previous?.info?.id ?? -1;
                 this.main.onTransition(previousId); // Revert back to previous page
@@ -283,6 +312,9 @@ export class Dashboard extends LitElement {
                         : `<h4 style="margin: 0">Fallback to previous page after error occurred</h4><small>${e}</small>`,
                     "error"
                 );
+            })
+            .finally(() => {
+                if (this.#transitionPromise.value) this.#transitionPromise.trigger(this.main.page); // This ensures calls to page.to() can be properly awaited until the next page is ready
             });
     }
 
@@ -300,7 +332,7 @@ export class Dashboard extends LitElement {
                 let state = globalState.sections[section];
                 if (!state)
                     state = globalState.sections[section] = {
-                        open: false,
+                        open: undefined,
                         active: false,
                         pages: {},
                     };
@@ -342,9 +374,15 @@ export class Dashboard extends LitElement {
         if (!active) active = this.activePage; // default to active page
 
         this.main.onTransition = async (transition) => {
-            const promise = (this.#transitionPromise.value = new Promise(
-                (resolve) => (this.#transitionPromise.trigger = resolve)
-            ));
+            const promise =
+                this.#transitionPromise.value ??
+                (this.#transitionPromise.value = new Promise(
+                    (resolve) =>
+                        (this.#transitionPromise.trigger = (v) => {
+                            this.#transitionPromise.value = null; // Reset promise
+                            resolve(v);
+                        })
+                ));
 
             if (typeof transition === "number") {
                 const info = this.page.info;

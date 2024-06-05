@@ -220,11 +220,6 @@ export class GuidedSourceDataPage extends ManagedPage {
         if (this.#globalModal) this.#globalModal.remove();
     }
 
-    updated() {
-        const dashboard = document.querySelector("nwb-dashboard");
-        const page = dashboard.page;
-    }
-
     render() {
         this.localState = { results: structuredClone(this.info.globalState.results ?? {}) };
 
@@ -289,15 +284,12 @@ export class GuidedSourceDataPage extends ManagedPage {
                                     alignment: alignmentInfo,
                                 };
 
-                                console.warn("Sending", sessionInfo);
-
                                 const data = await run("neuroconv/alignment", sessionInfo, {
                                     title: "Checking Alignment",
                                     message: "Please wait...",
                                 });
 
                                 const { metadata } = data;
-                                console.warn("GOT", data);
 
                                 if (Object.keys(metadata).length === 0) {
                                     this.notify(

@@ -45,7 +45,7 @@ export class GuidedStubPreviewPage extends Page {
     };
 
     render() {
-        const { preview, project } = this.info.globalState;
+        const { preview = {}, project } = this.info.globalState;
 
         return preview.stubs
             ? new NWBFilePreview({ project: project.name, files: preview.stubs })

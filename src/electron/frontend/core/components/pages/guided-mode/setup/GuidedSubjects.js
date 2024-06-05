@@ -111,7 +111,7 @@ export class GuidedSubjectsPage extends Page {
             schema,
             formProps: {
                 validateOnChange: (localPath, parent, path) => {
-                    return validateOnChange(localPath, parent, ["Subject", ...path]);
+                    return validateOnChange.call(this, localPath, parent, ["Subject", ...path]);
                 },
             },
         }));

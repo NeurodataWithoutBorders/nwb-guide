@@ -178,9 +178,6 @@ export class GuidedPathExpansionPage extends Page {
     #initialize = () => (this.localState = merge(this.info.globalState.structure, { results: {} }));
 
     workflow = {
-        subject_id: {},
-        session_id: {},
-        base_directory: {},
         locate_data: {
             skip: () => {
                 this.#initialize();

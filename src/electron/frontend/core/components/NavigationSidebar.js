@@ -2,6 +2,8 @@ import { LitElement, html } from "lit";
 import useGlobalStyles from "./utils/useGlobalStyles.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+const autoOpenValue = Symbol("SECTION_AUTO_OPEN");
+
 const componentCSS = `
 
 `;
@@ -61,8 +63,9 @@ export class NavigationSidebar extends LitElement {
                 !isAllSkipped
             );
 
-            if (isActive) this.#toggleDropdown(sectionName, true);
-            else this.#toggleDropdown(sectionName, false);
+            if (isActive) this.#toggleDropdown(sectionName, autoOpenValue);
+            else if (info.open === autoOpenValue) this.#toggleDropdown(sectionName, false);
+            else this.#toggleDropdown(sectionName, info.open);
         });
 
         if (this.#queue.length) {

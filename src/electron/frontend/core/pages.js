@@ -4,9 +4,13 @@ import { GuidedHomePage } from "./components/pages/guided-mode/GuidedHome";
 import { GuidedNewDatasetPage } from "./components/pages/guided-mode/setup/GuidedNewDatasetInfo";
 import { GuidedStructurePage } from "./components/pages/guided-mode/data/GuidedStructure";
 import { sections } from "./components/pages/globals";
+
 import { GuidedSubjectsPage } from "./components/pages/guided-mode/setup/GuidedSubjects";
+
 import { GuidedSourceDataPage } from "./components/pages/guided-mode/data/GuidedSourceData";
 import { GuidedMetadataPage } from "./components/pages/guided-mode/data/GuidedMetadata";
+import { GuidedBackendConfigurationPage } from "./components/pages/guided-mode/data/GuidedBackendConfiguration";
+
 import { GuidedUploadPage } from "./components/pages/guided-mode/options/GuidedUpload";
 import { GuidedResultsPage } from "./components/pages/guided-mode/results/GuidedResults";
 import { Dashboard } from "./components/Dashboard";
@@ -122,6 +126,12 @@ const pages = {
             metadata: new GuidedMetadataPage({
                 title: "File Metadata",
                 label: "File metadata",
+                section: sections[1],
+            }),
+
+            backend: new GuidedBackendConfigurationPage({
+                title: "Backend Configuration",
+                label: "Backend configuration",
                 section: sections[1],
             }),
 
