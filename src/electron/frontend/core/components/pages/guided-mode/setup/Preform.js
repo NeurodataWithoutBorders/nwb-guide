@@ -63,6 +63,12 @@ const questions = {
         },
     },
 
+    upload_to_dandi: {
+        type: "boolean",
+        title: "Will you publish data on DANDI?",
+        default: true,
+    },
+    
     file_format: {
         type: "string",
         enum: ["hdf5", "zarr"],
@@ -84,12 +90,6 @@ const questions = {
         description:
             "<span>Dataset chunking, compression, etc.</span><br><small>This also allows you to change file formats per-session</small>",
         default: false,
-    },
-
-    upload_to_dandi: {
-        type: "boolean",
-        title: "Will you publish data on DANDI?",
-        default: true,
     },
 };
 
