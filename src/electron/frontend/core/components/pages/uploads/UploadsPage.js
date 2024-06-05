@@ -119,7 +119,8 @@ export function createDandiset(results = {}) {
                     token: api_key,
                     type: staging ? "staging" : undefined,
                 });
-                await api.init();
+                
+                await api.authorize();
 
                 const metadata = {
                     description: form.resolved.description,
