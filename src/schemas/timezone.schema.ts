@@ -101,7 +101,6 @@ ready.timezones.then((timezones) => {
 
         if (!filteredTimezones.includes(timezone)) filteredTimezones.push(timezone) // Add the local timezone if it's not in the list
 
-
         timezoneSchema.enumLabels = filteredTimezones.reduce((acc, tz) => {
             const [ _, ...other ] = tz.split('/')
             acc[tz] = other.map(part => header(part)).join(' — ')
