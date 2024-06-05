@@ -63,10 +63,12 @@ export async function validateOnChange(name, parent, path, value) {
             return func.call(this, name, copy, path, value); // Can specify alternative client-side validation
         } else {
             const resolvedFunctionName = func.replace(`{*}`, `${name}`);
+
             return fetch(`${baseUrl}/neuroconv/validate`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
+                    timezone: this.workflow?.timezone?.value,
                     parent: copy,
                     function_name: resolvedFunctionName,
                 }),
