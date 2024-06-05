@@ -8,7 +8,7 @@
             "properties": {
                 "file_path": {
                     "format": "file",
-                    "description": "Path to Blackrock file.",
+                    "description": "Path to Blackrock .nev file.",
                     "type": "string"
                 },
                 "sampling_frequency": {

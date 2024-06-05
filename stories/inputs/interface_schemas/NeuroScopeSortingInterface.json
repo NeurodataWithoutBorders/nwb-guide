@@ -8,18 +8,22 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to folder containing .res and .clu files."
                 },
                 "keep_mua_units": {
                     "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "description": "Whether to return sorted spikes from multi-unit activity."
                 },
                 "exclude_shanks": {
-                    "type": "array"
+                    "type": "array",
+                    "description": "List of indices to ignore."
                 },
                 "xml_file_path": {
                     "format": "file",
-                    "type": "string"
+                    "type": "string",
+                    "description": "Path to .xml file containing device and electrode configuration."
                 },
                 "verbose": {
                     "type": "boolean",
