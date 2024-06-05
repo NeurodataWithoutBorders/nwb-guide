@@ -501,6 +501,19 @@ export class JSONSchemaInput extends LitElement {
         };
     }
 
+    #description;
+    get description() {
+        return this.#description ?? this.schema.description;
+    }
+
+    set description(value) {
+        this.#description = value;
+
+        const descriptionEl = this.shadowRoot.querySelector(".guided--text-input-instructions");
+        if (!descriptionEl) return;
+        descriptionEl.innerHTML = value;
+    }
+
     // Enforce dynamic required properties
     attributeChangedCallback(key, _, latest) {
         super.attributeChangedCallback(...arguments);
@@ -537,6 +550,7 @@ export class JSONSchemaInput extends LitElement {
     controls = [];
     // required;
     validateOnChange = true;
+    allowNaN = true;
 
     constructor(props = {}) {
         super();
@@ -664,7 +678,11 @@ export class JSONSchemaInput extends LitElement {
                           >${(schema.title ? unsafeHTML(schema.title) : null) ?? header(this.path.slice(-1)[0])}</label
                       >`
                     : ""}
-                <main>${input}${this.controls ? html`<div id="controls">${this.controls}</div>` : ""}</main>
+                <main>
+                    ${input}${this.controls && this.controls.length
+                        ? html`<div id="controls">${this.controls}</div>`
+                        : ""}
+                </main>
                 ${descriptionHTML}
             </div>
         `;
@@ -857,6 +875,17 @@ export class JSONSchemaInput extends LitElement {
     #render() {
         const { validateOnChange, schema, path: fullPath } = this;
 
+        // Resolve anyof inside the schema
+        const anyOf = schema.anyOf;
+        if (anyOf) {
+            delete schema.anyOf;
+            for (let key in anyOf[0]) {
+                schema[key] = anyOf[0][key];
+            }
+
+            // schema = {...schema, ...anyOf[0]}
+        }
+
         this.removeAttribute("data-table");
 
         // Do your best to fill in missing schema values
@@ -907,25 +936,52 @@ export class JSONSchemaInput extends LitElement {
             return filesystemSelectorElement;
         };
 
-        // Transform to single item if maxItems is 1
-        if (isArray && schema.maxItems === 1 && !isTable) {
-            return new JSONSchemaInput({
-                value: this.value?.[0],
-                schema: {
-                    ...schema.items,
-                    strict: schema.strict,
-                },
-                path: fullPath,
-                validateEmptyValue: this.validateEmptyValue,
-                required: this.required,
-                validateOnChange: () => (validateOnChange ? this.#triggerValidation(name, path) : ""),
-                form: this.form,
-                onUpdate: (value) => this.#updateData(fullPath, [value]),
+        // Transform to single item if maxItems is 1 OR the array has a fixed length
+        if (
+            isArray &&
+            (schema.maxItems === 1 || (schema.maxItems && schema.minItems && schema.maxItems === schema.minItems)) &&
+            !isTable
+        ) {
+            const len = schema.maxItems ?? 1;
+            const array = this.value ?? [];
+
+            // JSONified arrays will convert undefined to null
+            const jsonify = (value) => (value === undefined ? null : value);
+            const jsonschemify = (value) => (value === null ? undefined : value);
+
+            this.required = false;
+
+            const inputs = Array.from({ length: len }).map((_, i) => {
+                const input = new JSONSchemaInput({
+                    value: jsonify(array[i]),
+                    schema: {
+                        ...schema.items,
+                        strict: schema.strict,
+                    },
+                    path: fullPath,
+                    validateEmptyValue: this.validateEmptyValue,
+                    required: this.required,
+                    allowNaN: false,
+                    validateOnChange: () => (validateOnChange ? this.#triggerValidation(name, path) : ""),
+                    form: this.form,
+                    onUpdate: (value) => {
+                        array[i] = jsonschemify(value);
+                        this.#updateData(fullPath, [...array]);
+                    },
+                });
+
+                array[i] = jsonschemify(array[i]);
+
+                return input;
             });
+
+            return inputs;
         }
 
         if (isArray || canAddProperties) {
             // if ('value' in this && !Array.isArray(this.value)) this.value = [ this.value ]
+
+            const editableInline = ["string", "number"];
 
             const allowPatternProperties = isPatternProperties(this.pattern);
             const allowAdditionalProperties = isAdditionalProperties(this.pattern);
@@ -949,12 +1005,18 @@ export class JSONSchemaInput extends LitElement {
             const fileSystemFormat = isFilesystemSelector(name, itemSchema?.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
             // Create tables if possible
-            else if (itemSchema?.type === "string" && !itemSchema.properties) {
+            else if (editableInline.includes(itemSchema?.type) && !itemSchema.properties) {
+                const postprocess = (v) => {
+                    if (itemSchema?.type === "number") return parseFloat(v);
+                    else return v;
+                };
+
                 const list = new List({
                     items: this.value,
-                    emptyMessage: "No items",
+                    emptyMessage: schema.empty ?? "No items selected.",
+                    unordered: false,
                     onChange: ({ items }) => {
-                        this.#updateData(fullPath, items.length ? items.map((o) => o.value) : undefined);
+                        this.#updateData(fullPath, items.length ? items.map((o) => postprocess(o.value)) : undefined);
                         if (validateOnChange) this.#triggerValidation(name, path);
                     },
                 });
@@ -972,6 +1034,7 @@ export class JSONSchemaInput extends LitElement {
                             };
                         }),
                         value: this.value,
+                        placeholder: schema.placeholder,
                         listMode: schema.strict === false ? "click" : "append",
                         showAllWhenEmpty: false,
                         onSelect: async ({ label, value }) => {
@@ -981,12 +1044,16 @@ export class JSONSchemaInput extends LitElement {
                         },
                     });
 
-                    search.style.height = "auto";
-                    return html`<div style="width: 100%;">${search}${list}</div>`;
+                    Object.assign(search.style, { width: "100%" });
+
+                    return html`<div style="width: 100%; margin-bottom: 5px;">
+                        <div style="margin-bottom: 10px;">${search}</div>
+                        ${list}
+                    </div>`;
                 } else {
                     const input = document.createElement("input");
                     input.classList.add("guided--input");
-                    input.placeholder = "Provide an item for the list";
+                    input.placeholder = schema.placeholder ?? "Provide an item for the list";
 
                     const submitButton = new Button({
                         label: "Submit",
@@ -1006,11 +1073,13 @@ export class JSONSchemaInput extends LitElement {
                     });
 
                     return html`<div
-                        style="width: 100%;"
+                        style="width: 100%; margin-bottom: 5px;"
                         class="schema-input"
                         @change=${() => validateOnChange && this.#triggerValidation(name, path)}
                     >
-                        <div style="display: flex; gap: 10px; align-items: center;">${input}${submitButton}</div>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px;">
+                            ${input}${submitButton}
+                        </div>
                         ${list}
                     </div>`;
                 }
@@ -1150,6 +1219,7 @@ export class JSONSchemaInput extends LitElement {
             const search = new Search({
                 options,
                 strict: schema.strict,
+                placeholder: schema.placeholder,
                 value: {
                     value: this.value,
                     key: this.value,
@@ -1188,7 +1258,7 @@ export class JSONSchemaInput extends LitElement {
             if (isInteger) schema.type = "number";
             const isNumber = schema.type === "number";
 
-            const isRequiredNumber = isNumber && this.required;
+            const isRequiredNumber = isNumber && this.required && this.allowNaN;
 
             const fileSystemFormat = isFilesystemSelector(name, schema.format);
             if (fileSystemFormat) return createFilesystemSelector(fileSystemFormat);
@@ -1240,11 +1310,37 @@ export class JSONSchemaInput extends LitElement {
                             else if (isNumber) value = newValue = parseFloat(value);
                             else if (isDateTime) value = newValue = resolveDateTime(value);
 
+                            const isStrict = schema.strict ? true : false;
                             if (isNumber) {
-                                if ("min" in schema && newValue < schema.min) newValue = schema.min;
-                                else if ("max" in schema && newValue > schema.max) newValue = schema.max;
-
-                                if (isNaN(newValue)) newValue = undefined;
+                                // exclusiveMinimum
+                                if ("exclusiveMinimum" in schema && newValue <= schema.exclusiveMinimum) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = schema.exclusiveMinimum + 1; // (schema.step ?? 1);
+                                }
+                                // exclusiveMaximum
+                                else if ("exclusiveMaximum" in schema && newValue >= schema.exclusiveMaximum) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = schema.exclusiveMaximum - 1; // (schema.step ?? 1);
+                                }
+                                // minimum
+                                else if ("minimum" in schema && newValue < schema.minimum) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = schema.minimum;
+                                }
+                                // maximum
+                                else if ("maximum" in schema && newValue > schema.maximum) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = schema.maximum;
+                                }
+                                if (isNaN(newValue)) {
+                                    if (isStrict)
+                                        newValue = this.value; // Set back to last value
+                                    else newValue = undefined;
+                                }
                             }
 
                             if (schema.transform) newValue = schema.transform(newValue, this.value, schema);
@@ -1256,7 +1352,7 @@ export class JSONSchemaInput extends LitElement {
                             // }
 
                             if (isNumber && newValue !== value) {
-                                ev.target.value = newValue;
+                                if (newValue !== undefined) ev.target.value = newValue; // Avoids unnecessary error message
                                 value = newValue;
                             }
 

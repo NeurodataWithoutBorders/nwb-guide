@@ -174,10 +174,11 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
             order: ["channel_name", "group_name", "shank_electrode_number", ...UV_PROPERTIES]
         })
 
-        if (ecephys.properties["Units"]) {
+        const units = ecephys.properties["Units"]
 
-            ecephys.properties["Units"].title = "Summarized Units"
+        if (units) {
 
+            units.title = "Summarized Units"
 
             updateEcephysTable("Units", copy, {
                 properties: {
@@ -187,7 +188,6 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
                 },
                 order: ["unit_id", "unit_name", "clu_id", "group_id"]
             })
-
         }
 
     }
