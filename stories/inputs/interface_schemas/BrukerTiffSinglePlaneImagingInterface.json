@@ -9,7 +9,7 @@
                 "folder_path": {
                     "format": "directory",
                     "type": "string",
-                    "description": "The path that points to the folder containing the Bruker TIF image files and configuration files."
+                    "description": "The folder containing the Bruker TIF image files and configuration files."
                 },
                 "stream_name": {
                     "type": "string"
