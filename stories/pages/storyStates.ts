@@ -23,6 +23,12 @@ export const globalState = {
         Subject: {
             species: "Mus musculus",
         },
+        workflow: {
+            multiple_sessions: true,
+            locate_data: true,
+            base_directory: "path/to/data",
+            upload_to_dandi: true,
+        }
     },
     structure: {
         results: {},
