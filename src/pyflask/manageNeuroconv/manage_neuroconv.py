@@ -641,7 +641,9 @@ def run_check_function(check_function: callable, arg: dict) -> dict:
 
 
 def validate_subject_metadata(
-    subject_metadata: dict, check_function_name: str
+    subject_metadata: dict, 
+    check_function_name: str,
+    timezone: Optional[str] = None
 ):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """Function used to validate subject metadata."""
     from pynwb.file import Subject
@@ -650,25 +652,40 @@ def validate_subject_metadata(
 
     if isinstance(subject_metadata.get("date_of_birth"), str):
         subject_metadata["date_of_birth"] = datetime.fromisoformat(subject_metadata["date_of_birth"])
+        if timezone is not None:
+            subject_metadata["date_of_birth"] = subject_metadata["date_of_birth"].astimezone(pytz.timezone(timezone))
+
+
 
     return run_check_function(check_function, Subject(**subject_metadata))
 
 
 def validate_nwbfile_metadata(
-    nwbfile_metadata: dict, check_function_name: str
+    nwbfile_metadata: dict, 
+    check_function_name: str,
+    timezone: Optional[str] = None
 ):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """Function used to validate NWBFile metadata."""
     from pynwb.testing.mock.file import mock_NWBFile
+    import pytz 
 
     check_function = get_check_function(check_function_name)
 
     if isinstance(nwbfile_metadata.get("session_start_time"), str):
         nwbfile_metadata["session_start_time"] = datetime.fromisoformat(nwbfile_metadata["session_start_time"])
+        if timezone is not None:
+            nwbfile_metadata["session_start_time"] = nwbfile_metadata["session_start_time"].replace(tzinfo=pytz.timezone(timezone))
+
+        # raise ValueError(f"{original}, {nwbfile_metadata['session_start_time']} ({timezone})")
 
     return run_check_function(check_function, mock_NWBFile(**nwbfile_metadata))
 
 
-def validate_metadata(metadata: dict, check_function_name: str) -> dict:
+def validate_metadata(
+        metadata: dict, 
+        check_function_name: str,
+        timezone: Optional[str] = None,
+    ) -> dict:
     """Function used to validate data using an arbitrary NWB Inspector function."""
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pynwb.file import NWBFile, Subject
@@ -676,9 +693,9 @@ def validate_metadata(metadata: dict, check_function_name: str) -> dict:
     check_function = get_check_function(check_function_name)
 
     if issubclass(check_function.neurodata_type, Subject):
-        result = validate_subject_metadata(metadata, check_function_name)
+        result = validate_subject_metadata(metadata, check_function_name, timezone)
     elif issubclass(check_function.neurodata_type, NWBFile):
-        result = validate_nwbfile_metadata(metadata, check_function_name)
+        result = validate_nwbfile_metadata(metadata, check_function_name, timezone)
     else:
         raise ValueError(
             f"Function {check_function_name} with neurodata_type {check_function.neurodata_type} "
@@ -996,6 +1013,7 @@ def convert_to_nwb(
         resolved_metadata["NWBFile"]["session_start_time"] = datetime.fromisoformat(
             resolved_metadata["NWBFile"]["session_start_time"]
         ).replace(tzinfo=zoneinfo.ZoneInfo(info["timezone"]))
+
         if "date_of_birth" in resolved_metadata["Subject"]:
             resolved_metadata["Subject"]["date_of_birth"] = datetime.fromisoformat(
                 resolved_metadata["Subject"]["date_of_birth"]
