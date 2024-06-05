@@ -57,7 +57,7 @@ export const updateDandisets = async (main = true) => {
     const staging = !main
 
     // Fetch My Dandisets
-    const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
+    const whichAPIKey = staging ? "development_api_key" : "main_api_key";
     const DANDI = global.data.DANDI;
     let token = DANDI?.api_keys?.[whichAPIKey];
 
@@ -92,7 +92,7 @@ export const addDandiset = async (info) => {
     if (!idSchema.enumCategories) idSchema.enumCategories = {}
 
 
-    const token = global.data.DANDI.api_keys[staging ? "staging_api_key" : "main_api_key"];
+    const token = global.data.DANDI.api_keys[staging ? "development_api_key" : "main_api_key"];
 
     info = new Dandiset(info, { type: staging ? "staging" : undefined, token })
 

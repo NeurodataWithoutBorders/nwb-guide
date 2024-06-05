@@ -28,29 +28,36 @@ export const uploadToDandi = (subdirectory, forceSkip = false) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const page = dashboard.page
         const modal = page.globalModal
-        const stagingKeyInput = modal.form.getFormElement(['staging_api_key'])
+        const stagingKeyInput = modal.form.getFormElement(['development_api_key'])
         stagingKeyInput.updateData(dandiAPIToken)
       }, dandiInfo.token)
 
       await takeScreenshot(join(subdirectory, 'api-token-added'), 100)
 
 
+      const modalId = 'dandiset-creation-modal-for-test'
+
       // Open dandiset creation modal
-      await evaluate(() => {
+      await evaluate(( modalId: string ) => {
         const dashboard = document.querySelector('nwb-dashboard')
         const form = dashboard.page.form
         const dandisetInput = form.getFormElement(['dandiset'])
         const createDandiset = dandisetInput.controls[0]
-        createDandiset.onClick()
-      })
+        const modal = createDandiset.onClick()
+        modal.setAttribute('id', modalId)
+      }, modalId)
 
       await takeScreenshot(join(subdirectory, 'create-dandiset'), 100)
 
       // Close modal
-      await evaluate(() => {
-        const modal = document.querySelector('nwb-modal') as any
+      await evaluate(( modalId: string ) => {
+        const modal = document.getElementById(modalId) as any
         modal.toggle(false)
-      })
+
+        const page = document.querySelector('nwb-dashboard').page
+        page.dismiss() // Dismiss all internal notifications
+
+      }, modalId)
 
       await evaluate(async (dandisetId) => {
         const dashboard = document.querySelector('nwb-dashboard')
@@ -91,7 +98,7 @@ export default async function runWorkflow(name, workflow, identifier) {
     // Advance to general information page
     await toNextPage('details')
 
-    await takeScreenshot(join(identifier, 'info-page'), 300)
+    await takeScreenshot(join(identifier, 'info-page'), 600)
 
     // Fail to advance without name
     await toNextPage('details')

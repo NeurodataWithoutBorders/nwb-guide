@@ -49,6 +49,13 @@ export class InspectPage extends Page {
         return result;
     };
 
+    #modal;
+
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.#modal) this.#modal.remove();
+    }
+
     showReport = async (value) => {
         if (!value) {
             const message = "Please provide filesystem entries to inspect.";
@@ -92,10 +99,11 @@ export class InspectPage extends Page {
             },
         });
 
-        const modal = new Modal({
+        this.#modal = new Modal({
             header: value.length === 1 ? value : `Selected Filesystem Entries`,
             controls: [downloadJSONButton, downloadTextButton],
             footer: legend,
+            onClose: () => this.#modal.remove(),
         });
 
         const container = document.createElement("div");
@@ -108,10 +116,9 @@ export class InspectPage extends Page {
 
         container.append(list);
 
-        modal.append(container);
-        document.body.append(modal);
-
-        modal.toggle(true);
+        this.#modal.append(container);
+        document.body.append(this.#modal);
+        this.#modal.toggle(true);
     };
 
     form = new JSONSchemaForm({

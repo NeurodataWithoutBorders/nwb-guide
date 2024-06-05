@@ -10,10 +10,10 @@ Workflow Configuration
 
 Update the Workflow page to indicate that you'll:
 
-1. Run on multiple sessions
-2. Locate the source data programmatically
-3. Find source files inside ``~/NWB_GUIDE/test-data/dataset``, where **~** is the home directory of your system.
-4. Skip dataset publication.
+#. Run on multiple sessions
+#. Locate the source data programmatically
+#. Specify your dataset location ``~/NWB_GUIDE/test-data/multi_session_dataset``, where **~** is the home directory of your system.
+#. Skip dataset publication.
 
 .. figure:: ../assets/tutorials/multiple/workflow-page.png
   :align: center
@@ -48,7 +48,7 @@ To avoid specifying the format string path by hand, we can take advantage of **A
   :align: center
   :alt: Autocomplete modal on path expansion page
 
-Provide an example source data path (for example, the ``mouse1_Session1_g0_t0.imec0.lf.bin`` file for SpikeGLX), followed by the Subject (``mouse1``) and Session ID (``Session1``) for this particular path.
+Provide an example source data path (for example, the ``multi_session_dataset/mouse1/mouse1_Session2/mouse1_Session2_phy`` file for Phy), followed by the Subject (``mouse1``) and Session ID (``Session1``) for this particular path.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-autocomplete-filled.png
   :align: center
@@ -60,7 +60,7 @@ When you submit this form, you’ll notice that the Format String Path input has
   :align: center
   :alt: Path expansion page with autocompleted format string
 
-Repeat this process for Phy, where ``mouse1_Session2_phy`` will be the example source data path.
+Repeat this process for SpikeGLX, where ``multi_session_dataset/mouse1/mouse1_Session2/mouse1_Session2_g0/mouse1_Session2_g0_imec0/mouse1_Session1_g0_t0.imec0.lf.bin`` will be the example source data path.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-completed.png
   :align: center
@@ -100,7 +100,7 @@ One notable difference between this and the single-session workflow, however, is
 
 Session Metadata
 ----------------
-Aside from the session manager and global metadata features noted above, the file metadata page in the multi-session workflow is nearly identical to the single-session version.
+Aside from the session manager, the file metadata page in the multi-session workflow is nearly identical to the single-session version.
 
 .. figure:: ../assets/tutorials/multiple/metadata-nwbfile.png
   :align: center
