@@ -4,9 +4,9 @@ Dataset Publication
 For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
 
 .. note::
-    Creating an account on DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the staging server.
+    Creating an account on DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the development server.
 
-    **This tutorial requires an account on the** :dandi-staging:`DANDI staging server <>`. You’ll want to publish your `real` data on the main archive, which will require a separate approval but otherwise follows the same workflow defined in this tutorial.
+    **This tutorial requires an account on the** :dandi-staging:`DANDI Development server <>`. You’ll want to publish your `real` data on the main archive, which will require a separate approval but otherwise follows the same workflow defined in this tutorial.
 
     Once your account is approved, you can move on to the next steps.
 
@@ -24,7 +24,7 @@ You'll now notice that the **Exit Pipeline** button has been replaced with **Nex
 
 DANDI Upload
 ------------
-You’ll need to specify your DANDI API keys if you haven’t uploaded from the GUIDE before. These keys are unique between the Main and Staging servers.
+You’ll need to specify your DANDI API keys if you haven’t uploaded from the GUIDE before. These keys are unique between the Main and Development servers.
 
 .. figure:: ../assets/tutorials/dandi/api-tokens.png
   :align: center
@@ -34,9 +34,9 @@ To get your API key, visit the :dandi-staging:`staging website <>` and click on 
 
 .. figure:: ../assets/dandi/api-token-location.png
   :align: center
-  :alt: DANDI staging API key added
+  :alt: DANDI Development server API key added
 
-Provide this for the Staging API Key value on the GUIDE.
+Provide this for the Development API Key value on the GUIDE.
 
 .. figure:: ../assets/tutorials/dandi/api-token-added.png
   :align: center
@@ -48,7 +48,7 @@ But what if you don't have any Dandisets to upload to? No problem!
 
 Creating a Dandiset
 ^^^^^^^^^^^^^^^^^^^
-If you don't already have a Dandiset on the Staging server, you can create one directly from the GUIDE.
+If you don't already have a Dandiset on the Development server, you can create one directly from the GUIDE.
 
 Press the **Create New Dandiset** button to open a pop-up that guides you through the required fields for Dandiset creation.
 
