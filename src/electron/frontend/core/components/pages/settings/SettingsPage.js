@@ -232,7 +232,7 @@ export class SettingsPage extends Page {
         super.disconnectedCallback();
         if (this.#releaseNotesModal) {
             this.#releaseNotesModal.remove();
-            delete this.#releaseNotesModal;
+            this.#releaseNotesModal = null;
         }
     }
 
