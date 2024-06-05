@@ -25,16 +25,13 @@ import { Modal } from "../../Modal";
 import { DandiResults } from "../../DandiResults.js";
 
 import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
-import { JSONSchemaInput } from "../../JSONSchemaInput.js";
-import { header } from "../../forms/utils";
-
 import { validateDANDIApiKey } from "../../../validation/dandi";
 
 import * as dandi from "dandi";
 
 import keyIcon from "../../../../assets/icons/key.svg?raw";
 
-import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate } from "./utils";
+import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate, getAPIKey } from "./utils";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
 export async function createDandiset(results = {}) {
@@ -165,82 +162,6 @@ export async function createDandiset(results = {}) {
     }).finally(() => {
         modal.remove();
     });
-}
-
-async function getAPIKey(staging = false) {
-    const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
-    const DANDI = global.data.DANDI;
-    let api_key = DANDI?.api_keys?.[whichAPIKey];
-
-    const errors = await validateDANDIApiKey(api_key, staging);
-
-    const isInvalid = !errors || errors.length;
-
-    if (isInvalid) {
-        const modal = new Modal({
-            header: `${api_key ? "Update" : "Provide"} your ${header(whichAPIKey)}`,
-            open: true,
-        });
-
-        const input = new JSONSchemaInput({
-            path: [whichAPIKey],
-            schema: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey],
-        });
-
-        input.style.padding = "25px";
-
-        modal.append(input);
-
-        let notification;
-
-        const notify = (message, type) => {
-            if (notification) this.dismiss(notification);
-            return (notification = this.notify(message, type));
-        };
-
-        modal.onClose = async () => notify("The updated DANDI API key was not set", "error");
-
-        api_key = await new Promise((resolve) => {
-            const button = new Button({
-                label: "Save",
-                primary: true,
-                onClick: async () => {
-                    const value = input.value;
-                    if (value) {
-                        const errors = await validateDANDIApiKey(input.value, staging);
-                        if (!errors || !errors.length) {
-                            modal.remove();
-
-                            merge(
-                                {
-                                    DANDI: {
-                                        api_keys: {
-                                            [whichAPIKey]: value,
-                                        },
-                                    },
-                                },
-                                global.data
-                            );
-
-                            global.save();
-                            resolve(value);
-                        } else {
-                            notify(errors[0].message, "error");
-                            return false;
-                        }
-                    } else {
-                        notify("Your DANDI API key was not set", "error");
-                    }
-                },
-            });
-
-            modal.footer = button;
-
-            document.body.append(modal);
-        });
-    }
-
-    return api_key;
 }
 
 export async function uploadToDandi(info, type = "project" in info ? "project" : "") {
@@ -422,7 +343,7 @@ export class UploadsPage extends Page {
                             error.message = "Please select at least one file or folder to upload.";
                     },
 
-                    validateOnChange: validate,
+                    validateOnChange: (...args) => validate.call(this, ...args)
                 }));
             })
             .catch((error) => html`<p>${error}</p>`);
