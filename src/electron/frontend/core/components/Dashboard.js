@@ -249,16 +249,20 @@ export class Dashboard extends LitElement {
         const workflowConfig = page.workflow ?? (page.workflow = {});
         const workflowValues = page.info.globalState?.project?.workflow ?? {};
 
+        // Define the value for each workflow value
         Object.entries(workflowValues).forEach(([key, value]) => {
             const config = workflowConfig[key] ?? (workflowConfig[key] = {});
             config.value = value;
+        });
 
-            const { elements } = config;
+        // Toggle elements based on workflow configuration
+        Object.entries(workflowConfig).forEach(([key, config]) => {
+            const { value, elements } = config;
             if (elements) {
                 if (value) elements.forEach((el) => el.removeAttribute("hidden"));
                 else elements.forEach((el) => el.setAttribute("hidden", true));
             }
-        });
+        })
 
         // Ensure that all states are synced to the proper state for this page (e.g. conversions have been run)
         this.page

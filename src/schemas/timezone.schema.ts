@@ -27,7 +27,7 @@ onServerOpen(async () => {
     .then((res) => res.json())
     .then((timezone) => setReady.timezone(timezone))
     .catch(() => {
-        if (isStorybook) setReady.timezone(null)
+        if (isStorybook) setReady.timezone(Intl.DateTimeFormat().resolvedOptions().timeZone)
     });
 });
 
