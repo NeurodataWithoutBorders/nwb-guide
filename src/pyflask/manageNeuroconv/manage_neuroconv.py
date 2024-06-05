@@ -641,9 +641,7 @@ def run_check_function(check_function: callable, arg: dict) -> dict:
 
 
 def validate_subject_metadata(
-    subject_metadata: dict, 
-    check_function_name: str,
-    timezone: Optional[str] = None
+    subject_metadata: dict, check_function_name: str, timezone: Optional[str] = None
 ):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """Function used to validate subject metadata."""
     from pynwb.file import Subject
@@ -660,29 +658,29 @@ def validate_subject_metadata(
 
 
 def validate_nwbfile_metadata(
-    nwbfile_metadata: dict, 
-    check_function_name: str,
-    timezone: Optional[str] = None
+    nwbfile_metadata: dict, check_function_name: str, timezone: Optional[str] = None
 ):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """Function used to validate NWBFile metadata."""
+    import pytz
     from pynwb.testing.mock.file import mock_NWBFile
-    import pytz 
 
     check_function = get_check_function(check_function_name)
 
     if isinstance(nwbfile_metadata.get("session_start_time"), str):
         nwbfile_metadata["session_start_time"] = datetime.fromisoformat(nwbfile_metadata["session_start_time"])
         if timezone is not None:
-            nwbfile_metadata["session_start_time"] = nwbfile_metadata["session_start_time"].replace(tzinfo=pytz.timezone(timezone))
+            nwbfile_metadata["session_start_time"] = nwbfile_metadata["session_start_time"].replace(
+                tzinfo=pytz.timezone(timezone)
+            )
 
     return run_check_function(check_function, mock_NWBFile(**nwbfile_metadata))
 
 
 def validate_metadata(
-        metadata: dict, 
-        check_function_name: str,
-        timezone: Optional[str] = None,
-    ) -> dict:
+    metadata: dict,
+    check_function_name: str,
+    timezone: Optional[str] = None,
+) -> dict:
     """Function used to validate data using an arbitrary NWB Inspector function."""
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
     from pynwb.file import NWBFile, Subject

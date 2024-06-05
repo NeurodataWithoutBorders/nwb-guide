@@ -9,12 +9,7 @@ export function getMessageType(item) {
     return item.type ?? (isErrorImportance.includes(item.importance) ? "error" : "warning");
 }
 
-export async function validateOnChange(
-    name, 
-    parent, 
-    path, 
-    value
-) {
+export async function validateOnChange(name, parent, path, value) {
     let functions = [];
 
     const fullPath = [...path, name];
