@@ -6,6 +6,8 @@ import baseMetadataSchema from './json/base_metadata_schema.json' assert { type:
 
 import { merge } from '../electron/frontend/core/components/pages/utils'
 import { drillSchemaProperties } from '../electron/frontend/core/components/pages/guided-mode/data/utils'
+import { getISODateInTimezone } from './timezone.schema'
+
 
 const UV_MATH_FORMAT = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
 const UV_PROPERTIES = ["gain_to_uV", "offset_to_uV"]
@@ -38,14 +40,6 @@ function getSpeciesInfo(species: any[][] = []) {
         enum: species.map(arr => getSpeciesNameComponents(arr).name), // Remove common names so this passes the validator
     }
 
-}
-
-
-// Borrowed from https://stackoverflow.com/a/29774197/7290573
-function getCurrentDate() {
-    const date = new Date()
-    const offset = date.getTimezoneOffset();
-    return (new Date(date.getTime() - (offset*60*1000))).toISOString();
 }
 
 
@@ -101,6 +95,10 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
 
     copy.order = [ "NWBFile", "Subject" ]
 
+    const minDate = "1900-01-01T00:00"
+    const maxDate = getISODateInTimezone().slice(0, -2) // Restrict date to current date with timezone awareness
+
+
     // Add unit to weight
     const subjectProps = copy.properties.Subject.properties
     subjectProps.weight.unit = 'kg'
@@ -121,13 +119,18 @@ export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, globa
         strict: false,
         description: 'The species of your subject.'
     }
-    subjectProps.date_of_birth.minimum = "1900-01-01T00:00"
-    subjectProps.date_of_birth.maximum = getCurrentDate().slice(0, -2)
+
+    subjectProps.date_of_birth.minimum = minDate
+    subjectProps.date_of_birth.maximum = maxDate
 
     // copy.order = ['NWBFile', 'Subject']
 
-    copy.properties.NWBFile.title = 'General Metadata'
     const nwbProps = copy.properties.NWBFile.properties
+    copy.properties.NWBFile.title = 'General Metadata'
+
+    nwbProps.session_start_time.minimum = minDate
+    nwbProps.session_start_time.maximum = maxDate
+
     nwbProps.keywords.items.description = "Provide a single keyword (e.g. Neural circuits, V1, etc.)"
 
     // Resolve species suggestions

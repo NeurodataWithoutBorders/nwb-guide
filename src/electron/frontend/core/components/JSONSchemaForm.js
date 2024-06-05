@@ -12,6 +12,10 @@ import { resolveProperties } from "./pages/guided-mode/data/utils";
 import { JSONSchemaInput, getEditableItems } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 
+import { Validator } from "jsonschema";
+import { successHue, warningHue, errorHue } from "./globals";
+import { Button } from "./Button";
+
 const encode = (str) => {
     try {
         document.querySelector(`#${str}`);
@@ -64,10 +68,6 @@ export const getSchema = (path, schema, base = []) => {
 const additionalPropPattern = "additional";
 
 const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
-
-import { Validator } from "jsonschema";
-import { successHue, warningHue, errorHue } from "./globals";
-import { Button } from "./Button";
 
 var validator = new Validator();
 
@@ -902,7 +902,7 @@ export class JSONSchemaForm extends LitElement {
         if (!parent) parent = this.#get(path, this.resolved);
         if (!schema) schema = this.getSchema(localPath);
 
-        const value = parent[name];
+        let value = parent[name];
 
         const skipValidation = this.validateEmptyValues === null && value === undefined;
 
@@ -910,6 +910,7 @@ export class JSONSchemaForm extends LitElement {
 
         // Run validation functions
         const jsonSchemaErrors = validateArgs.length === 2 ? this.validateSchema(...validateArgs, name) : [];
+
         const valid = skipValidation ? true : await this.validateOnChange(name, parent, pathToValidate, value);
 
         if (valid === null) return null; // Skip validation / data change if the value is null
