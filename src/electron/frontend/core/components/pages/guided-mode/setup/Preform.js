@@ -172,7 +172,7 @@ export class GuidedPreform extends Page {
         subtitle: "Answer the following questions to simplify your workflow through the GUIDE",
     };
 
-    #setWorkflow = () => (this.info.globalState.project.workflow = merge(this.state, structuredClone(defaults)));
+    #setWorkflow = () => this.info.globalState.project.workflow = this.state; // NOTE: Defaults already populated
 
     beforeSave = async () => {
         await this.form.validate();

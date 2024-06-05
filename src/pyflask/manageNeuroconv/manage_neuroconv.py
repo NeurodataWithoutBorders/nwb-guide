@@ -975,8 +975,6 @@ def update_backend_configuration(info: dict) -> dict:
     backend = info_from_frontend.get("backend", "hdf5")
     backend_configuration_from_frontend = info_from_frontend.get("results", {}).get(backend, {})
 
-    if not backend_configuration_from_frontend:
-        return None  # Do not provide backend configuration if no customization is present
 
     converter, metadata, __ = get_conversion_info(info)
 

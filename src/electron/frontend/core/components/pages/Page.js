@@ -165,6 +165,7 @@ export class Page extends LitElement {
 
         const { close: closeProgressPopup } = swalOpts;
 
+
         const fileConfiguration = [];
 
         try {
@@ -245,9 +246,7 @@ export class Page extends LitElement {
                         this.notify(message, "error");
                         throw error;
                     })
-
-                    .finally(() => closeProgressPopup());
-
+                    
                 results.forEach((info) => {
                     const { file } = info;
                     const fileName = file.split("/").pop();
@@ -259,7 +258,7 @@ export class Page extends LitElement {
             }
 
         } finally {
-            await closeProgressPopup();
+            closeProgressPopup && await closeProgressPopup();
         }
 
         return conversionOutput;
