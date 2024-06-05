@@ -261,7 +261,10 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         header.append(h2, small);
 
-                        const modal = new Modal({ header });
+                        const modal = new Modal({ 
+                            header,
+                            onClose: () => modal.remove()
+                        });
 
                         let alignment;
 
@@ -289,15 +292,12 @@ export class GuidedSourceDataPage extends ManagedPage {
                                     alignment: alignmentInfo,
                                 };
 
-                                console.warn("Sending", sessionInfo);
-
                                 const data = await run("neuroconv/alignment", sessionInfo, {
                                     title: "Checking Alignment",
                                     message: "Please wait...",
                                 });
 
                                 const { metadata } = data;
-                                console.warn("GOT", data);
 
                                 if (Object.keys(metadata).length === 0) {
                                     this.notify(

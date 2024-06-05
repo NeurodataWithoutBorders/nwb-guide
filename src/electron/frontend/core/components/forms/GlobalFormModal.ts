@@ -37,8 +37,10 @@ export function createFormModal ({
     formProps,
     hasInstances = false
 }: BaseFormModalOptions & { onSave: Function }) {
+    
     const modal = new Modal({
-        header
+        header,
+        onClose: () => modal.remove()
     })
 
     const content = document.createElement("div")

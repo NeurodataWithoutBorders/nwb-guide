@@ -159,72 +159,75 @@ export class Page extends LitElement {
         const { close: closeProgressPopup } = swalOpts;
         const fileConfiguration = [];
 
-        for (let info of toRun) {
-            const { subject, session, globalState = this.info.globalState } = info;
-            const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
+        try {
+            for (let info of toRun) {
+                const { subject, session, globalState = this.info.globalState } = info;
+                const file = `sub-${subject}/sub-${subject}_ses-${session}.nwb`;
 
-            const { conversion_output_folder, name, SourceData, alignment } = globalState.project;
+                const { conversion_output_folder, name, SourceData, alignment } = globalState.project;
 
-            const sessionResults = globalState.results[subject][session];
+                const sessionResults = globalState.results[subject][session];
 
-            const sourceDataCopy = structuredClone(sessionResults.source_data);
+                const sourceDataCopy = structuredClone(sessionResults.source_data);
 
-            // Resolve the correct session info from all of the metadata for this conversion
-            const sessionInfo = {
-                ...sessionResults,
-                metadata: resolveMetadata(subject, session, globalState),
-                source_data: merge(SourceData, sourceDataCopy),
-            };
+                // Resolve the correct session info from all of the metadata for this conversion
+                const metadata = resolveMetadata(subject, session, globalState);
 
-            const payload = {
-                output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
-                project_name: name,
-                nwbfile_path: file,
-                overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
-                ...sessionInfo, // source_data and metadata are passed in here
-                ...conversionOptions, // Any additional conversion options override the defaults
+                const sessionInfo = {
+                    ...sessionResults,
+                    metadata,
+                    source_data: merge(SourceData, sourceDataCopy),
+                };
 
-                interfaces: globalState.interfaces,
-                alignment,
-            };
+                const payload = {
+                    output_folder: conversionOptions.stub_test ? undefined : conversion_output_folder,
+                    project_name: name,
+                    nwbfile_path: file,
+                    overwrite: true, // We assume override is true because the native NWB file dialog will not allow the user to select an existing file (unless they approve the overwrite)
+                    ...sessionInfo, // source_data and metadata are passed in here
+                    ...conversionOptions, // Any additional conversion options override the defaults
+                    interfaces: globalState.interfaces,
+                    alignment,
+                    timezone: this.workflow.timezone.value,
+                };
 
-            fileConfiguration.push(payload);
-        }
-
-        const conversionResults = await run(
-            `neuroconv/convert`,
-            {
-                files: fileConfiguration,
-                max_workers: 2, // TODO: Make this configurable and confirm default value
-                request_id: swalOpts.id,
-            },
-            {
-                title: "Running the conversion",
-                onError: () => "Conversion failed with current metadata. Please try again.",
-                ...swalOpts,
+                fileConfiguration.push(payload);
             }
-        ).catch(async (error) => {
-            let message = error.message;
 
-            if (message.includes("The user aborted a request.")) {
-                this.notify("Conversion was cancelled.", "warning");
+            const conversionResults = await run(
+                `neuroconv/convert`,
+                {
+                    files: fileConfiguration,
+                    max_workers: 2, // TODO: Make this configurable and confirm default value
+                    request_id: swalOpts.id,
+                },
+                {
+                    title: "Running the conversion",
+                    onError: () => "Conversion failed with current metadata. Please try again.",
+                    ...swalOpts,
+                }
+            ).catch(async (error) => {
+                let message = error.message;
+
+                if (message.includes("The user aborted a request.")) {
+                    this.notify("Conversion was cancelled.", "warning");
+                    throw error;
+                }
+
+                this.notify(message, "error");
                 throw error;
-            }
+            });
 
-            this.notify(message, "error");
+            conversionResults.forEach((info) => {
+                const { file } = info;
+                const fileName = file.split("/").pop();
+                const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
+                const subRef = results[subject] ?? (results[subject] = {});
+                subRef[session] = info;
+            });
+        } finally {
             await closeProgressPopup();
-            throw error;
-        });
-
-        conversionResults.forEach((info) => {
-            const { file } = info;
-            const fileName = file.split("/").pop();
-            const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
-            const subRef = results[subject] ?? (results[subject] = {});
-            subRef[session] = info;
-        });
-
-        await closeProgressPopup();
+        }
 
         return results;
     }

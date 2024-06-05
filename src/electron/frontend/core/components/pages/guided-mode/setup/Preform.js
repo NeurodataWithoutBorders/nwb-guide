@@ -3,6 +3,8 @@ import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
 
+import timezoneSchema from "../../../../../../../schemas/timezone.schema";
+
 // ------------------------------------------------------------------------------
 // ------------------------ Preform Configuration -------------------------------
 // ------------------------------------------------------------------------------
@@ -55,6 +57,12 @@ const questions = {
         },
     },
 
+    timezone: {
+        ...timezoneSchema,
+        title: "What timezone is your data in?",
+        required: true,
+    },
+
     upload_to_dandi: {
         type: "boolean",
         title: "Would you like to upload your data to DANDI?",
@@ -66,34 +74,56 @@ const questions = {
 // ------------------------ Derived from the above information -------------------------------
 // -------------------------------------------------------------------------------------------
 
-const dependents = Object.entries(questions).reduce((acc, [name, info]) => {
-    acc[name] = [];
+const getSchema = (questions) => {
+    // Inject latest timezone schema each render
+    questions.timezone = { ...questions.timezone, ...timezoneSchema };
 
-    const deps = info.dependencies;
+    const dependents = Object.entries(questions).reduce((acc, [name, info]) => {
+        acc[name] = [];
 
-    if (deps) {
-        if (Array.isArray(deps))
-            deps.forEach((dep) => {
-                if (!acc[dep]) acc[dep] = [];
-                acc[dep].push({ name });
-            });
-        else
-            Object.entries(deps).forEach(([dep, opts]) => {
-                if (!acc[dep]) acc[dep] = [];
-                acc[dep].push({ name, ...opts });
-            });
-    }
-    return acc;
-}, {});
+        const deps = info.dependencies;
 
-const projectWorkflowSchema = {
-    type: "object",
-    properties: Object.entries(questions).reduce((acc, [name, info]) => {
-        acc[name] = info;
+        if (deps) {
+            if (Array.isArray(deps))
+                deps.forEach((dep) => {
+                    if (!acc[dep]) acc[dep] = [];
+                    acc[dep].push({ name });
+                });
+            else
+                Object.entries(deps).forEach(([dep, opts]) => {
+                    if (!acc[dep]) acc[dep] = [];
+                    acc[dep].push({ name, ...opts });
+                });
+        }
         return acc;
-    }, {}),
-    order: Object.keys(questions),
-    additionalProperties: false,
+    }, {});
+
+    const defaults = Object.entries(questions).reduce((acc, [name, info]) => {
+        acc[name] = info.default;
+        return acc;
+    }, {});
+
+    const required = Object.entries(questions).reduce((acc, [name, info]) => {
+        if (info.required) acc.push(name);
+        return acc;
+    }, []);
+
+    const projectWorkflowSchema = {
+        type: "object",
+        properties: Object.entries(questions).reduce((acc, [name, info]) => {
+            acc[name] = info;
+            return acc;
+        }, {}),
+        order: Object.keys(questions),
+        required,
+        additionalProperties: false,
+    };
+
+    return {
+        schema: structuredClone(projectWorkflowSchema),
+        defaults,
+        dependents,
+    };
 };
 
 // ----------------------------------------------------------------------
@@ -125,9 +155,15 @@ export class GuidedPreform extends Page {
     };
 
     updateForm = () => {
-        const schema = structuredClone(projectWorkflowSchema);
+        const { schema, dependents, defaults } = getSchema(questions);
         const projectState = this.info.globalState.project ?? {};
         if (!projectState.workflow) projectState.workflow = {};
+
+        // Set defaults for missing values
+        Object.entries(defaults).forEach(([key, value]) => {
+            if (!(key in projectState.workflow)) projectState.workflow[key] = value;
+        });
+
         this.state = structuredClone(projectState.workflow);
 
         this.form = new JSONSchemaForm({
