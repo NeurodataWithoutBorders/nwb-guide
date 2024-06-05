@@ -1565,7 +1565,7 @@ def _format_spikeglx_meta_file(bin_file_path: str) -> str:
 
     meta_structure = f"""acqApLfSy=384,384,1
 appVersion=20190327
-fileCreateTime={(datetime.now() - timedelta(hours=1)).isoformat(timespec='seconds')}
+fileCreateTime={(datetime.now() - timedelta(hours=24)).isoformat(timespec='seconds')}
 fileName={bin_file_path}
 fileSHA1={file_sha1}
 fileSizeBytes={file_size}
