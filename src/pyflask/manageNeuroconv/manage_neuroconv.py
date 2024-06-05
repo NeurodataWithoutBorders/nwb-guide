@@ -15,7 +15,13 @@ from typing import Any, Dict, List, Optional, Union
 
 from tqdm_publisher import TQDMProgressHandler
 
-from .info import CONVERSION_SAVE_FOLDER_PATH, GUIDE_ROOT_FOLDER, STUB_SAVE_FOLDER_PATH, is_packaged, resource_path
+from .info import (
+    CONVERSION_SAVE_FOLDER_PATH,
+    GUIDE_ROOT_FOLDER,
+    STUB_SAVE_FOLDER_PATH,
+    is_packaged,
+    resource_path,
+)
 from .info.sse import format_sse
 
 progress_handler = TQDMProgressHandler()
@@ -870,9 +876,8 @@ def create_file(
     info: dict,
     log_url: Optional[str] = None,
 ) -> dict:
-    import requests
-
     import neuroconv
+    import requests
     from tqdm_publisher import TQDMProgressSubscriber
 
     project_name = info.get("project_name")
