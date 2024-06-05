@@ -171,9 +171,11 @@ export class GuidedUploadPage extends Page {
                                 buttonStyles: {
                                     width: "max-content",
                                 },
-                                onClick: async () => {
-                                    await createDandiset.call(this, { title: this.form.resolved.dandiset });
-                                    this.requestUpdate();
+                                onClick: () => {
+                                    const result = createDandiset.call(this, { title: this.form.resolved.dandiset });
+                                    const { modal, done } = result;
+                                    done.then(() => this.requestUpdate());
+                                    return modal
                                 },
                             }),
                         ],

@@ -37,7 +37,7 @@ import keyIcon from "../../../../assets/icons/key.svg?raw";
 import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate } from "./utils";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
-export async function createDandiset(results = {}) {
+export function createDandiset(results = {}) {
     let notification;
 
     const notify = (message, type) => {
@@ -102,7 +102,7 @@ export async function createDandiset(results = {}) {
 
     modal.onClose = async () => notify("Dandiset was not created.", "error");
 
-    return new Promise((resolve) => {
+    const promise = new Promise((resolve) => {
         const button = new Button({
             label: "Create",
             primary: true,
@@ -166,6 +166,11 @@ export async function createDandiset(results = {}) {
     }).finally(() => {
         modal.remove();
     });
+
+    return {
+        modal,
+        done: promise,
+    }
 }
 
 async function getAPIKey(staging = false) {
@@ -396,11 +401,14 @@ export class UploadsPage extends Page {
                                 buttonStyles: {
                                     width: "max-content",
                                 },
-                                onClick: async () => {
-                                    await createDandiset.call(this, {
+                                onClick: () => {
+                                    const { modal, done } = createDandiset.call(this, {
                                         title: this.form.resolved.dandiset,
                                     });
-                                    this.requestUpdate();
+
+                                    done.then(() => this.requestUpdate());
+
+                                    return modal
                                 },
                             }),
                         ],
