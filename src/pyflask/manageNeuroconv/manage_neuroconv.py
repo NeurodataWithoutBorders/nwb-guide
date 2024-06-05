@@ -862,7 +862,7 @@ def convert_to_nwb(
     """Function used to convert the source data to NWB format using the specified metadata."""
 
     import requests
-    from neuroconv import NWBConverter
+    import neuroconv
     from tqdm_publisher import TQDMProgressSubscriber
 
     url = info.get("url", None)
@@ -975,7 +975,7 @@ def convert_to_nwb(
 
                     interface_or_subconverter = converter.data_interface_objects[sub_interface]
 
-                    if isinstance(interface_or_subconverter, NWBConverter):
+                    if isinstance(interface_or_subconverter, neuroconv.NWBConverter):
                         subconverter = interface_or_subconverter
 
                         update_recording_properties_from_table_as_json(
@@ -1013,6 +1013,7 @@ def convert_to_nwb(
             package_json = json.load(fp=fp)
         app_version = package_json["version"]
         resolved_metadata["NWBFile"]["source_script"] = f"Created using NWB GUIDE v{app_version}"
+        resolved_metadata["NWBFile"]["source_script_file_name"] = neuroconv.__file__  # Must be included to be valid
 
         # Actually run the conversion
         converter.run_conversion(
