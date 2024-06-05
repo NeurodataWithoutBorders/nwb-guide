@@ -644,15 +644,17 @@ def validate_subject_metadata(
     subject_metadata: dict, check_function_name: str, timezone: Optional[str] = None
 ):  # -> Union[None, InspectorMessage, List[InspectorMessage]]:
     """Function used to validate subject metadata."""
+    import pytz
     from pynwb.file import Subject
-    import pytz 
 
     check_function = get_check_function(check_function_name)
 
     if isinstance(subject_metadata.get("date_of_birth"), str):
         subject_metadata["date_of_birth"] = datetime.fromisoformat(subject_metadata["date_of_birth"])
         if timezone is not None:
-            subject_metadata["date_of_birth"] = subject_metadata["date_of_birth"].replace(tzinfo=pytz.timezone(timezone))
+            subject_metadata["date_of_birth"] = subject_metadata["date_of_birth"].replace(
+                tzinfo=pytz.timezone(timezone)
+            )
 
     return run_check_function(check_function, Subject(**subject_metadata))
 
