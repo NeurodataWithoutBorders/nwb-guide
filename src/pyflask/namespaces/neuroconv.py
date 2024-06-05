@@ -96,6 +96,7 @@ class Alignment(Resource):
 validate_parser = neuroconv_namespace.parser()
 validate_parser.add_argument("parent", type=dict, required=True)
 validate_parser.add_argument("function_name", type=str, required=True)
+validate_parser.add_argument("timezone", type=str, required=False)
 
 
 @neuroconv_namespace.route("/validate")
@@ -104,7 +105,7 @@ class Validate(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
         args = validate_parser.parse_args()
-        return validate_metadata(args.get("parent"), args.get("function_name"))
+        return validate_metadata(args.get("parent"), args.get("function_name"), args.get("timezone"))
 
 
 @neuroconv_namespace.route("/upload/project")

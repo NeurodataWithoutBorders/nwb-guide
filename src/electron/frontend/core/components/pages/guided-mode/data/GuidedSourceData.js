@@ -289,15 +289,12 @@ export class GuidedSourceDataPage extends ManagedPage {
                                     alignment: alignmentInfo,
                                 };
 
-                                console.warn("Sending", sessionInfo);
-
                                 const data = await run("neuroconv/alignment", sessionInfo, {
                                     title: "Checking Alignment",
                                     message: "Please wait...",
                                 });
 
                                 const { metadata } = data;
-                                console.warn("GOT", data);
 
                                 if (Object.keys(metadata).length === 0) {
                                     this.notify(
