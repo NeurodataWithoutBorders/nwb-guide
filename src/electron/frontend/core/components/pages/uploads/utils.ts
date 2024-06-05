@@ -102,7 +102,7 @@ export async function getAPIKey(
     staging = false
 ) {
 
-    const whichAPIKey = staging ? "staging_api_key" : "main_api_key";
+    const whichAPIKey = staging ? "development_api_key" : "main_api_key";
     const DANDI = global.data.DANDI;
     let api_key = DANDI?.api_keys?.[whichAPIKey];
 
@@ -114,6 +114,7 @@ export async function getAPIKey(
         const modal = new Modal({
             header: `${api_key ? "Update" : "Provide"} your ${header(whichAPIKey)}`,
             open: true,
+            onClose: () => modal.remove(),
         });
 
         const input = new JSONSchemaInput({
