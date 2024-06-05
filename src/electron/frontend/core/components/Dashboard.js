@@ -262,7 +262,7 @@ export class Dashboard extends LitElement {
                 if (value) elements.forEach((el) => el.removeAttribute("hidden"));
                 else elements.forEach((el) => el.setAttribute("hidden", true));
             }
-        })
+        });
 
         // Ensure that all states are synced to the proper state for this page (e.g. conversions have been run)
         this.page
