@@ -215,6 +215,18 @@ To see if someone else has developed a third-party component to fit your needs, 
 useful to search for third-party packages (e.g. Handsontable) that implement the feature you need.
 
 
+.. _documentation:
+Documentation
+-------------
+
+Updating Tutorial Screenshots
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Before a release, you'll want to update the tutorial screenshots to reflect the latest changes in the application.
+
+1. Run the End-to-End Tests locally using ``npm test:app``.
+    - This will generate new screenshots in the ``docs/assets/tutorials`` directory.
+2. Review the new screenshots to ensure they are accurate.
+3. If the screenshots are accurate, commit the new screenshots to the repository.
 
 .. _testing:
 
