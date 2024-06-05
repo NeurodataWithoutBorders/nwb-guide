@@ -85,7 +85,7 @@ Source Data Information
 ^^^^^^^^^^^^^^^^^^^^^^^
 On this page, specify the **.ap.bin** (SpikeGLX) file and **phy** folder so that the GUIDE can find this source data to complete the conversion.
 
-As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/data`` directory, where **~** is the home directory of your system.
+As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/single_session_data`` directory, where **~** is the home directory of your system.
 
 You can either click the file selector to navigate to the file or drag-and-drop into the GUIDE from your file navigator.
 

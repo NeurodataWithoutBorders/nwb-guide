@@ -12,7 +12,7 @@ In these tutorials, you'll follow along on a :doc:`local installation of the GUI
 
 .. note::
 
-   If you intend to complete the Dataset Publication section of this tutorial, you'll need to create an account on the DANDI Archive. This will need to be approved by the archive administrators and will require separate approval for both the main archive and the staging server.
+    If you intend to complete the Dataset Publication section of this tutorial, you'll need to create an account on the DANDI Archive. This will need to be approved by the archive administrators and will require separate approval for both the main archive and the staging server.
 
     **This tutorial requires an account on the** :dandi-staging:`DANDI staging server <>`.
 

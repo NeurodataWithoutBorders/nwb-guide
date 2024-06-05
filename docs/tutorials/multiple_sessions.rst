@@ -10,10 +10,10 @@ Workflow Configuration
 
 Update the Workflow page to indicate that you'll:
 
-1. Run on multiple sessions
-2. Locate the source data programmatically
-3. Find source files inside ``~/NWB_GUIDE/test-data/dataset``, where **~** is the home directory of your system.
-4. Skip dataset publication.
+#. Run on multiple sessions
+#. Locate the source data programmatically
+#. Specify your dataset location ``~/NWB_GUIDE/test-data/multi_session_dataset``, where **~** is the home directory of your system.
+#. Skip dataset publication.
 
 .. figure:: ../assets/tutorials/multiple/workflow-page.png
   :align: center
