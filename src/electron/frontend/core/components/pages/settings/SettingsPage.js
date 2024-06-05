@@ -228,6 +228,14 @@ export class SettingsPage extends Page {
 
     #releaseNotesModal;
 
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        if (this.#releaseNotesModal) {
+            this.#releaseNotesModal.remove();
+            delete this.#releaseNotesModal;
+        }
+    }
+
     // Populate the Update Available display
     updated() {
         const updateDiv = this.querySelector("#update-available");
@@ -250,10 +258,12 @@ export class SettingsPage extends Page {
             infoIcon.innerHTML = infoSVG;
 
             infoIcon.onclick = () => {
+
                 if (this.#releaseNotesModal) return (this.#releaseNotesModal.open = true);
 
                 const modal = (this.#releaseNotesModal = new Modal({
                     header: `Release Notes`,
+                    onClose: () => modal.remove()
                 }));
 
                 const releaseNotes = document.createElement("div");

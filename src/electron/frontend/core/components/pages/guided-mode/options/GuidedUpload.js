@@ -41,6 +41,7 @@ export class GuidedUploadPage extends Page {
                 icon: keyIcon,
                 label: "API Keys",
                 onClick: () => {
+                    document.body.append(this.globalModal)
                     this.globalModal.form.results = structuredClone(global.data.DANDI?.api_keys ?? {});
                     this.globalModal.open = true;
                 },
@@ -61,9 +62,10 @@ export class GuidedUploadPage extends Page {
     connectedCallback() {
         super.connectedCallback();
 
-        const modal = (this.globalModal = createFormModal.call(this, {
+        this.globalModal = createFormModal.call(this, {
             header: "DANDI API Keys",
             schema: dandiGlobalSchema.properties.api_keys,
+            onClose: () => this.globalModal.remove(),
             onSave: async (form) => {
                 const apiKeys = form.resolved;
 
@@ -90,8 +92,7 @@ export class GuidedUploadPage extends Page {
                     if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
                 },
             },
-        }));
-        document.body.append(modal);
+        })
     }
 
     disconnectedCallback() {
@@ -188,7 +189,8 @@ export class GuidedUploadPage extends Page {
         promise.then(() => {
             const api_keys = global.data.DANDI?.api_keys;
             if (!api_keys || !Object.keys(api_keys).length) this.globalModal.open = true;
-        });
+            else this.globalModal.remove() // Remove the modal if not needed
+        })
 
         const untilResult = until(promise, html`Loading form contents...`);
 
