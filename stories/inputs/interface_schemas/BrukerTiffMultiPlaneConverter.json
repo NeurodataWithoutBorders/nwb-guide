@@ -8,7 +8,8 @@
             "properties": {
                 "folder_path": {
                     "format": "directory",
-                    "type": "string"
+                    "type": "string",
+                    "description": "The folder that contains the Bruker TIF image files (.ome.tif) and configuration files (.xml, .env)."
                 },
                 "plane_separation_type": {
                     "enum": [
