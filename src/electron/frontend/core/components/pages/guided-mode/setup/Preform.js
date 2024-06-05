@@ -68,7 +68,7 @@ const questions = {
         title: "Will you publish data on DANDI?",
         default: true,
     },
-    
+
     file_format: {
         type: "string",
         enum: ["hdf5", "zarr"],
