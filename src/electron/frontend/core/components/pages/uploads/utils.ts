@@ -1,6 +1,6 @@
 
 import { get } from "dandi";
-import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
+import dandiUploadSchema, { regenerateDandisets } from "../../../../../../schemas/dandi-upload.schema";
 
 import { validateDANDIApiKey } from "../../../validation/dandi";
 import { Modal } from "../../Modal";
@@ -117,14 +117,18 @@ export async function getAPIKey(
             onClose: () => modal.remove(),
         });
 
+        const container = document.createElement("div");
+
         const input = new JSONSchemaInput({
             path: [whichAPIKey],
             schema: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey],
         });
 
-        input.style.padding = "25px";
+        container.append(input);
 
-        modal.append(input);
+        container.style.padding = "25px";
+
+        modal.append(container);
 
         let notification;
 
@@ -173,6 +177,8 @@ export async function getAPIKey(
 
             document.body.append(modal);
         });
+
+        await regenerateDandisets()
     }
 
     return api_key;
