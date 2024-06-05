@@ -36,6 +36,11 @@ export class List extends LitElement {
         overflow: auto;
       }
 
+      ol {
+        margin: 0px;
+      }
+
+
       #empty {
         margin: 1rem;
         margin-left: -40px;

@@ -102,8 +102,8 @@ export const run = async (pathname, payload, options = {}) => {
 export const runConversion = async (info, options = {}) =>
     run(`neuroconv/convert`, info, {
         title: "Running the conversion",
-        onError: (results) => {
-            if (results.message.includes("already exists")) {
+        onError: (error) => {
+            if (error.message.includes("already exists")) {
                 return "File already exists. Please specify another location to store the conversion results";
             } else {
                 return "Conversion failed with current metadata. Please try again.";

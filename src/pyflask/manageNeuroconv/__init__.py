@@ -7,6 +7,7 @@ from .manage_neuroconv import (
     generate_test_data,
     get_all_converter_info,
     get_all_interface_info,
+    get_backend_configuration,
     get_interface_alignment,
     get_metadata_schema,
     get_source_schema,

@@ -32,7 +32,8 @@ import examplePipelines from "../../../../../../example_pipelines.yml";
 import { run } from "../guided-mode/options/utils.js";
 import { joinPath } from "../../../globals";
 import { Modal } from "../../Modal";
-import { ProgressBar, humanReadableBytes } from "../../ProgressBar";
+import { ProgressBar } from "../../ProgressBar";
+import { humanReadableBytes } from "../../utils/size";
 
 const DATA_OUTPUT_PATH = joinPath(testDataFolderPath, "single_session_data");
 const DATASET_OUTPUT_PATH = joinPath(testDataFolderPath, "multi_session_dataset");
