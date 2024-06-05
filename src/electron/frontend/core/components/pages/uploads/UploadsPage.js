@@ -355,7 +355,7 @@ export class UploadsPage extends Page {
                             error.message = "Please select at least one file or folder to upload.";
                     },
 
-                    validateOnChange: (...args) => validate.call(this, ...args)
+                    validateOnChange: (...args) => validate.call(this, ...args),
                 }));
             })
             .catch((error) => html`<p>${error}</p>`);

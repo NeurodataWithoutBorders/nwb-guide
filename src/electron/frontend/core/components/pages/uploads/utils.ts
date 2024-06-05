@@ -46,8 +46,8 @@ function isNumeric(str: string) {
             const staging = isStaging(value)
             const type = staging ? "staging" : undefined;
             const token = await getAPIKey.call(this, staging);
-    
-            const dandiset = await get(value, { 
+
+            const dandiset = await get(value, {
                 type,
                 token
              })
@@ -96,7 +96,7 @@ export function awardNumberValidator(awardNumber: string): boolean {
 export const AWARD_VALIDATION_FAIL_MESSAGE = 'Award number must be properly space-delimited.\n\nExample (exclude quotes):\n"1 R01 CA 123456-01A1"';
 
 
-// this: 
+// this:
 export async function getAPIKey(
     // this: Page,
     staging = false
