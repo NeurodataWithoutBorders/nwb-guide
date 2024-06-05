@@ -256,7 +256,10 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                         header.append(h2, small);
 
-                        const modal = new Modal({ header });
+                        const modal = new Modal({
+                            header,
+                            onClose: () => modal.remove(),
+                        });
 
                         let alignment;
 
