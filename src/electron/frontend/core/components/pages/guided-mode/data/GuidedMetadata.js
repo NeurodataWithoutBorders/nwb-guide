@@ -333,7 +333,7 @@ export class GuidedMetadataPage extends ManagedPage {
 
             onUpdate: () => (this.unsavedUpdates = "conversions"),
 
-            validateOnChange,
+            validateOnChange: (...args) => validateOnChange.call(this, ...args),
             onlyRequired: false,
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
