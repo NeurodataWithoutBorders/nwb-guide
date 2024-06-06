@@ -940,7 +940,7 @@ def create_file(
                 )
 
         # Add GUIDE watermark
-        package_json_file_path = resource_path("../package.json" if is_packaged() else "../package.json")
+        package_json_file_path = resource_path("package.json" if is_packaged() else "../package.json")
         with open(file=package_json_file_path) as fp:
             package_json = json.load(fp=fp)
         app_version = package_json["version"]
