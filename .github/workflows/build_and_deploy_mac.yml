@@ -1,13 +1,15 @@
 name: Mac Release
 run-name: ${{ github.actor }} is building a MAC release for NWB GUIDE
-# NOTE: even though the runner is an arm64 mac, both x64 and arm64 releases will be made
+# NOTE: even though the runner is an x64 mac, both x64 and arm64 releases will be made
 
 on:
   workflow_dispatch:
 
 jobs:
   deploy-on-mac:
-    runs-on: macos-latest
+    runs-on: macos-13
+    # not using macos-latest because that runner is an arm64 mac and there are issues
+    # building and deploying with sonpy (Spike2RecordingInterface) on arm64 mac
 
     defaults:
       run:
