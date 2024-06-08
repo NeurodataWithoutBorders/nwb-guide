@@ -57,7 +57,7 @@ jobs:
           teamId: ${{ secrets.APPLE_TEAM_ID }}
           appleId: ${{ secrets.APPLE_ID }}
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
-          # make build process extra verbose in case of failure
-          DEBUG: electron-builder
-          DEBUG_DMG: true
+          # uncomment below to make build process extra verbose in case of failure
+          # DEBUG: electron-builder
+          # DEBUG_DMG: true
         run: npm run deploy:mac
