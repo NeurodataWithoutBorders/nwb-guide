@@ -7,9 +7,11 @@ on:
 
 jobs:
   deploy-on-mac:
-    runs-on: macos-latest
-    # not using macos-latest because that runner is an arm64 mac and there are issues
-    # building and deploying with sonpy (Spike2RecordingInterface) on arm64 mac
+    runs-on: macos-13
+    # NOTE: macos-latest is an arm64 mac, and the dependency sonpy (Spike2RecordingInterface) has a .so file that
+    # works only on mac x64. This causes issues building and deploying on mac arm64. So we use macos-13 (x64)
+    # to build and deploy both the x64 and arm64 versions of the app.
+    # NOTE: if changing this to macos-latest, make sure to use the apple-silicon conda environment.
 
     defaults:
       run:
@@ -31,7 +33,7 @@ jobs:
           use-mamba: true
 
       - name: Create and activate environment
-        run: mamba env update --name nwb-guide --file environments/environment-MAC-apple-silicon.yml
+        run: mamba env update --name nwb-guide --file environments/environment-MAC-intel.yml
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
