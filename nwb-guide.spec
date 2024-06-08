@@ -16,7 +16,6 @@ hiddenimports = [
     'email_validator',
     *collect_submodules('scipy.special.cython_special'),
     *collect_submodules('scipy.special._cdflib'),
-    *os.path.join(os.path.dirname(scipy.__file__), '.libs')
 ]
 
 datas += collect_data_files('jsonschema_specifications')
