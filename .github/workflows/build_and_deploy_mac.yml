@@ -7,7 +7,7 @@ on:
 
 jobs:
   deploy-on-mac:
-    runs-on: macos-13
+    runs-on: macos-latest
     # not using macos-latest because that runner is an arm64 mac and there are issues
     # building and deploying with sonpy (Spike2RecordingInterface) on arm64 mac
 
