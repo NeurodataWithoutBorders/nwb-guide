@@ -24,4 +24,4 @@
 NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB.
 
 ## Installation
-See the installation instructions in our [documentation](https://nwb-guide.readthedocs.io/en/latest/installation.html).
+See the installation instructions in our [documentation](https://nwb-guide.readthedocs.io/en/stable/installation.html).
