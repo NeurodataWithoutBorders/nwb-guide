@@ -69,7 +69,7 @@ export function createDandiset(results = {}) {
         schema: dandiCreateSchema,
         results,
         validateEmptyValues: false, // Only show errors after submission
-        
+
         validateOnChange: async (name, parent) => {
             const value = parent[name];
 
@@ -90,8 +90,8 @@ export function createDandiset(results = {}) {
         groups: [
             {
                 name: "Embargo your Data",
-                properties: [[ "embargo_status" ], [ "nih_award_number" ]],
-                link: true
+                properties: [["embargo_status"], ["nih_award_number"]],
+                link: true,
             },
         ],
     });
@@ -106,7 +106,6 @@ export function createDandiset(results = {}) {
             label: "Create",
             primary: true,
             onClick: async () => {
-                
                 await form.validate().catch(() => {
                     const message = "Please fill out all required fields";
                     notify("Dandiset was not set", "error");

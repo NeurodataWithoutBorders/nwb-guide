@@ -554,11 +554,10 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
-
         if (this.validateEmptyValues === false) {
             this.validateEmptyValues = true;
             await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for next tick (re-render start)
-            await this.rendered // Wait for re-render
+            await this.rendered; // Wait for re-render
         }
 
         // Validate nested forms (skip disabled)
