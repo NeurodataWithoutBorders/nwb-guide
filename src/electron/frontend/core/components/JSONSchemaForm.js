@@ -1012,8 +1012,17 @@ export class JSONSchemaForm extends LitElement {
         const groupEl = this.#getGroupElement(externalPath);
 
         if (groupEl) {
-            groupEl.classList[resolvedErrors.length ? "add" : "remove"]("error");
-            groupEl.classList[warnings.length ? "add" : "remove"]("warning");
+
+            groupEl.setAttribute(`data-${externalPath}-errors`, updatedErrors.length);
+            groupEl.setAttribute(`data-${externalPath}-warnings`, updatedWarnings.length);
+
+            const allFormSections = groupEl.querySelectorAll(".form-section");
+            const inputs = Array.from(allFormSections).map((section) => section.id);
+            const allErrors = inputs.reduce((acc, id) => acc + parseInt(groupEl.getAttribute(`data-${id}-errors`)), 0);
+            const allWarnings = inputs.reduce((acc, id) => acc + parseInt(groupEl.getAttribute(`data-${id}-warnings`)), 0);
+            
+            groupEl.classList[allErrors ? "add" : "remove"]("error");
+            groupEl.classList[allWarnings ? "add" : "remove"]("warning");
         }
 
         const clearAllErrors = isValid && updatedErrors.length === 0;
