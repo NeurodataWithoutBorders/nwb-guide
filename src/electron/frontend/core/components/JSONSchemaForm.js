@@ -554,7 +554,33 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
-        if (this.validateEmptyValues === false) this.validateEmptyValues = true;
+
+        if (this.validateEmptyValues === false) {
+            this.validateEmptyValues = true;
+            await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for next tick (re-render start)
+            await this.rendered // Wait for re-render
+        }
+
+        // Validate nested forms (skip disabled)
+        for (let name in this.forms) {
+            const accordion = this.accordions[name];
+            if (!accordion || !accordion.disabled)
+                await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
+        }
+
+        for (let key in this.tables) {
+            try {
+                this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
+            } catch (error) {
+                const title = this.tables[key].schema.title;
+                const message = error.message.replace(
+                    "this table",
+                    `the <b>${header(title ?? [...this.base, key].join("."))}</b> table`
+                );
+                this.throw(message);
+                break;
+            }
+        }
 
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
@@ -615,27 +641,6 @@ export class JSONSchemaForm extends LitElement {
         }
 
         if (message) this.throw(message);
-
-        // Validate nested forms (skip disabled)
-        for (let name in this.forms) {
-            const accordion = this.accordions[name];
-            if (!accordion || !accordion.disabled)
-                await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
-        }
-
-        for (let key in this.tables) {
-            try {
-                this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
-            } catch (error) {
-                const title = this.tables[key].schema.title;
-                const message = error.message.replace(
-                    "this table",
-                    `the <b>${header(title ?? [...this.base, key].join("."))}</b> table`
-                );
-                this.throw(message);
-                break;
-            }
-        }
 
         return true;
     };
