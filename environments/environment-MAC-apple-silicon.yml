@@ -21,6 +21,8 @@ dependencies:
       - flask == 2.3.2
       - flask-cors == 4.0.0
       - flask_restx == 1.1.0
+      # NOTE: the neuroconv wheel on pypi includes sonpy which is not compatible with arm64, so build and install
+      # neuroconv from github, which will remove the sonpy dependency when building from mac arm64
       - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@main#neuroconv[full]
       - dandi >= 0.60.0
       - pytest == 7.4.0
