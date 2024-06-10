@@ -1,12 +1,19 @@
 [
     {
         "version": "dev",
-        "url": "https://nwb-guide.readthedocs.io/en/latest/"
+        "url": "https://nwb-guide.readthedocs.io/en/latest/",
+        "preferred": false
+    },
+    {
+        "name": "1.0.0",
+        "version": "v1.0.0"",
+        "url": "https://nwb-guide.readthedocs.io/en/v1.0.0/",
+        "preferred": true
     },
     {
         "name": "0.0.15",
         "version": "v0.0.15",
         "url": "https://nwb-guide.readthedocs.io/en/v0.0.15/",
-        "preferred": true
+        "preferred": false
     }
 ]
