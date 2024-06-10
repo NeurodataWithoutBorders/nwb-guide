@@ -1,8 +1,8 @@
 Example Dataset Generation
 ==========================
 
-Our tutorials focus on converting extracellular electrophysiology data in the SpikeGLX and Phy formats.
-To get you started as quickly as possible, we’ve created a way to generate this Neuropixel-like dataset at the click of a button!
+The NWB GUIDE tutorials focus on converting extracellular electrophysiology data in the SpikeGLX and Phy formats.
+To get started as quickly as possible, you can use NWB GUIDE to generate a Neuropixels-like dataset at the click of a button!
 
 .. note::
   The **SpikeGLX** data format stores electrophysiology recordings.
@@ -17,7 +17,9 @@ Navigate to the **Settings** page using the button at the bottom of the main sid
 
   Press the Generate button on the Settings page to create the dataset.
 
-The generated data will populate in the ``~/NWB_GUIDE/test_data`` directory, where ``~`` is the home directory of your system. This includes both a ``single_session_data`` and ``multi_session_dataset`` folder to accompany the following tutorials.
+The dataset will be generated in a new ``~/NWB_GUIDE/test_data`` directory, where ``~`` is the `home directory <https://en.wikipedia.org/wiki/Home_directory#Default_home_directory_per_operating_system>`_ of your system. This includes both a ``single_session_data`` and ``multi_session_dataset`` folder to use in the following tutorials.
+
+The folder structure of the generated dataset is as follows:
 
 .. code-block:: bash
 
@@ -52,6 +54,4 @@ The generated data will populate in the ``~/NWB_GUIDE/test_data`` directory, whe
   │   │   └── mouse2_Session2/
   │   │       ...
 
-
-
-Now you’re ready to start your first conversion using the NWB GUIDE!
+Now you're ready to start your first conversion using the NWB GUIDE!
