@@ -1011,15 +1011,17 @@ export class JSONSchemaForm extends LitElement {
         const groupEl = this.#getGroupElement(externalPath);
 
         if (groupEl) {
-
             groupEl.setAttribute(`data-${name}-errors`, updatedErrors.length);
             groupEl.setAttribute(`data-${name}-warnings`, updatedWarnings.length);
 
             const allFormSections = groupEl.querySelectorAll(".form-section");
             const inputs = Array.from(allFormSections).map((section) => section.id);
             const allErrors = inputs.reduce((acc, id) => acc + parseInt(groupEl.getAttribute(`data-${id}-errors`)), 0);
-            const allWarnings = inputs.reduce((acc, id) => acc + parseInt(groupEl.getAttribute(`data-${id}-warnings`)), 0);
-            
+            const allWarnings = inputs.reduce(
+                (acc, id) => acc + parseInt(groupEl.getAttribute(`data-${id}-warnings`)),
+                0
+            );
+
             groupEl.classList[allErrors ? "add" : "remove"]("error");
             groupEl.classList[allWarnings ? "add" : "remove"]("warning");
         }
