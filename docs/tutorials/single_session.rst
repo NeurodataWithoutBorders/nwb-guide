@@ -1,9 +1,9 @@
 Converting a Single Session
 ===========================
 
-Let's imagine you've just completed an experimental session and you’d like to convert your data to NWB right away.
+Let's imagine you've just completed an experimental session and you'd like to convert your data to NWB right away.
 
-Upon launching the GUIDE, you'll begin on the **Convert** page. If you’re opening the application for the first time, there should be no pipelines listed on this page.
+Upon launching the GUIDE, you'll begin on the **Convert** page. If you're opening the application for the first time, there should be no pipelines listed on this page.
 
 .. figure:: ../assets/tutorials/home-page.png
   :align: center
@@ -17,49 +17,53 @@ Project Structure
 Project Setup
 ^^^^^^^^^^^^^
 
-The Project Setup page will have you define two pieces of information about your pipeline: the **name** and, optionally, the **output location** for your NWB files. We will not be specifying an output location in this tutorial—so your NWB files will be saved to the default location.
+To begin, set the **name** for this tutorial pipeline to "Single Session Workflow". The red asterisk next to the "Name" field indicates that this is a required field.
 
-You’ll notice that the name property has a red asterisk next to it, which identifies it as a required property.
-
-.. figure:: ../assets/tutorials/single/info-page.png
-  :align: center
-  :alt: Project Setup page with no name (invalid)
-
-
-After specifying a unique project name, the colored background and error message will disappear, allowing you to advance to the next page.
+You can also set the **output location** for your NWB files, but for this tutorial, leave it as the default location.
 
 .. figure:: ../assets/tutorials/single/valid-name.png
   :align: center
   :alt: Project Setup page with valid name
 
-Workflow Configuration
-^^^^^^^^^^^^^^^^^^^^^^
-On this page, you’ll specify the type of **workflow** you’d like to follow for this conversion pipeline.
+Press "Next" to continue.
 
-Since this is a single-session workflow, you’ll need to specify a **Subject ID** and **Session ID** to identify the data you’ll be converting.
+Pipeline Workflow
+^^^^^^^^^^^^^^^^^
+
+On this page, you'll specify the type of **workflow** you'd like to follow for this conversion pipeline.
+
+First, you can set the time zone for the data. If the data was collected in a different time zone than your local time zone, you can search for and select that time zone. For this tutorial, leave it as the default time zone.
+
+For the next question "Will this pipeline be run on multiple sessions?", keep the "No" button selected.
+
+For a single-session workflow, you'll need to specify a **Subject ID** and **Session ID** to identify the data you'll be converting. Enter "sub1" for the Subject ID and "ses1" for the Session ID.
 
 .. figure:: ../assets/tutorials/single/workflow-page.png
   :align: center
   :alt: Workflow page
 
-Additionally, we’ll turn off the option to upload to the DANDI Archive and approach this in a later tutorial.
+For this tutorial, turn off the option to publish the data to the DANDI Archive. This will be covered in a later tutorial.
+
+For the last question "Would you like to customize low-level data storage options?", keep the "No" button selected.
+
+Press "Next" to continue.
 
 Data Formats
 ^^^^^^^^^^^^
-Next, you’ll specify the data formats you’re working with on the Data Formats page. The GUIDE supports 40+ total neurophysiology formats. A full registry of available formats is available :doc:`here </format_support>`.
+
+Next, you'll specify the data formats you're working with. The GUIDE supports 40+ neurophysiology formats. A full registry of available formats is available :doc:`here </format_support>`.
 
 .. figure:: ../assets/tutorials/single/formats-page.png
   :align: center
-  :alt: Date Formats page
+  :alt: Data Formats page
 
-The tutorial we're working with uses the SpikeGLX and Phy formats, a common output for Neuropixels recordings and subsequent spike sorting. To specify that your pipeline will handle these files, you’ll press the “Add Format” button.
+This tutorial uses the SpikeGLX format, a common output for Neuropixels recordings, and the Phy format, a common output of spike sorting and curation. To specify that your pipeline will handle these files, press the “Add Format” button.
 
 .. figure:: ../assets/tutorials/single/format-options.png
   :align: center
   :alt: Format pop-up on the Data Formats page
 
-Then, select the relevant formats—in this case, **SpikeGLX Recording** and **Phy Sorting**—from the pop-up list. Use the search bar to filter for the format you need.
-
+Then, select the relevant formats—in this case, **SpikeGLX Recording** (not SpikeGLX Converter) and **Phy Sorting**—from the pop-up list. Use the search bar to filter for the format you need.
 
 .. figure:: ../assets/tutorials/single/search-behavior.png
   :align: center
@@ -67,12 +71,11 @@ Then, select the relevant formats—in this case, **SpikeGLX Recording** and **P
 
 The selected formats will then display above the button.
 
-
 .. figure:: ../assets/tutorials/single/interface-added.png
   :align: center
   :alt: Data Formats page with SpikeGLX Recording added to the list
 
-Advance to the next page when you have **SpikeGLX Recording** and **Phy Sorting** selected.
+Press "Next" after you have selected **SpikeGLX Recording** and **Phy Sorting**.
 
 .. figure:: ../assets/tutorials/single/all-interfaces-added.png
   :align: center
@@ -83,31 +86,39 @@ Data Entry
 
 Source Data Information
 ^^^^^^^^^^^^^^^^^^^^^^^
+
 On this page, specify the **phy** folder and **.ap.bin** (SpikeGLX) file so that the GUIDE can find this source data to complete the conversion.
 
-As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/single_session_data`` directory, where **~** is the home directory of your system.
+As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/single_session_data`` directory, where ``~`` is the home directory of your system. If you just generated the dataset, this folder may still be open in your file navigator.
 
-Within each data format accordion, you'll find a file selector that will accept relevant source data. You can either click this to navigate to your files or drag-and-drop into the GUIDE from your file navigator.
+Click the **Phy Sorting** header to expand the section. Under "Folder Path", you can either drag-and-drop the **phy** folder into the box from your file navigator or click the box to navigate to and select the **phy** folder.
 
 .. figure:: ../assets/tutorials/single/sourcedata-page-specified.png
   :align: center
   :alt: Source Data page with source locations specified
 
-Advance to the next page to extract metadata from the source data.
+Next, click the **SpikeGLX Recording** header to expand the section. Under "File Path", you can either click the box to navigate to the **.ap.bin** file or drag-and-drop the **.ap.bin** file into the box from your file navigator. The **.ap.bin** file is located in the ``~/NWB_GUIDE/test-data/single_session_data/spikeglx/Session1_g0/Session1_g0_imec0`` folder.
+
+Press "Next" to extract metadata from these source data files and folders.
 
 Session Metadata
 ^^^^^^^^^^^^^^^^
-The file metadata page is a great opportunity to add rich annotations to the file, which will be read by anyone reusing your data in the future!
 
-The Session Start Time in the **General Metadata** section is already specified because this field was automatically extracted from the SpikeGLX source data.
+The file metadata page is a great opportunity to add rich annotations to the NWB file, which will be read by anyone reusing your data in the future!
+
+Click the **General Metadata** header to expand the section.
+
+The Session Start Time is already specified because this field was automatically extracted from the SpikeGLX source data.
 
 .. figure:: ../assets/tutorials/single/metadata-nwbfile.png
   :align: center
   :alt: Metadata page with invalid Subject information
 
-While the **General Metadata** section is complete, take some time to fill out additional information such as the **Institutional Info** box and the **Experimenter** field.
+The **General Metadata** header is underlined yellow because all required fields have been set, but some recommended fields are missing values, such as **Institution** and **Experiment Description**. These fields are not required, but they can be useful for future users of the data.
 
-We also need to add the **Subject** information—as noted by the red accents around that item. Let’s say that our subject is a male mouse with an age of P25W, which represents 25 weeks old.
+Take a minute to fill out some of these fields, such as the fields in the **Institutional Info** box and the **Experimenter** field.
+
+The **Subject** header is underlined red, indicating that required fields are missing values. Click the **Subject** header to expand the section. The subject's **sex**, **species**, and **age** are missing. Select "Male" for **sex**, "Mus musculus - House mouse" for **species**, and "P25W", which represents 25 weeks old, for **age**.
 
 .. figure:: ../assets/tutorials/single/metadata-subject-complete.png
   :align: center
@@ -115,15 +126,13 @@ We also need to add the **Subject** information—as noted by the red accents ar
 
   The status of the Subject information will update in real-time as you fill out the form.
 
-
-This dataset will also have **Ecephys** metadata extracted from the SpikeGLX source data, though we aren't interested in modifying this information at the moment.
+Click the **Ecephys** header to expand the section. Ecephys is short-hand for "extracellular electrophysiology". This section contains metadata about the probes and electrodes used. For the test SpikeGLX data, these metadata have been extracted from the SpikeGLX source data. You do not need to modify it in this tutorial.
 
 .. figure:: ../assets/tutorials/single/metadata-ecephys.png
   :align: center
   :alt: Ecephys metadata extracted from the SpikeGLX source data
 
-
-Let's leave this as-is and advance to the next page. This will trigger the conversion of your source data into a preview NWB file.
+Press "Next" to trigger the conversion of a small part of your source data into a preview NWB file.
 
 File Conversion
 ---------------
@@ -131,19 +140,22 @@ File Conversion
 Inspector Report
 ^^^^^^^^^^^^^^^^
 
-The Inspector Report page allows you to validate the preview file against the latest Best Practices and make suggestions to improve the content or representations.
+This page shows the output of the NWB Inspector tool, which validated your preview NWB file against the latest NWB Best Practices. Red boxes represent errors, and yellow boxes represent best practice warnings that could be ignored.
 
 .. figure:: ../assets/tutorials/single/inspect-page.png
   :align: center
   :alt: NWB Inspector report
 
-Advance to the next page when you are satisfied with the Inspector Report.
+When you are satisfied with the Inspector Report, press "Next".
 
 Conversion Preview
 ^^^^^^^^^^^^^^^^^^
-On the Conversion Preview, Neurosift allows you to explore the structure of the NWB file and ensure the packaged data matches your expectations.
 
-In particular, take a look at the lefthand metadata table and check that the information provided on the previous pages is present in the NWB file.
+This page uses the Neurosift tool to allow you to explore the structure of your NWB file so that you can ensure the packaged data matches your expectations.
+
+In particular, take a look at the lefthand metadata table and check that the information you provided on the previous pages is present in the NWB file.
+
+Expand the yellow "acquisition" section and select "ElectricalSeriesAP" to view a plot of the test SpikeGLX data.
 
 .. figure:: ../assets/tutorials/single/preview-page.png
   :align: center
@@ -151,12 +163,14 @@ In particular, take a look at the lefthand metadata table and check that the inf
 
 Neurosift can be useful for many other exploration tasks—but this will not be covered in this tutorial.
 
-Advancing from this page will trigger the full conversion of your data to the NWB format, a process that may take some time depending on the dataset size.
+The NWB file shown here is just a preview NWB file that was created using only a small part of the source data. Press "Run Conversion" to trigger the full conversion of your data to the NWB format. This conversion that may take some time depending on the dataset size.
 
 Conversion Review
 ^^^^^^^^^^^^^^^^^
 
-Congratulations on finishing your first conversion of neurophysiology files using the NWB GUIDE!
+Congratulations on finishing your first conversion of neurophysiology data to NWB using the NWB GUIDE! Click the file name ``sub-sub1_ses-ses1.nwb`` to view the location of the NWB file in your file navigator.
+
+If you had other data to add to the NWB file that are in formats not supported by NWB GUIDE, you can use PyNWB (Python) or MatNWB (MATLAB) to open the NWB file and add the data programmatically. See the documentation links at the bottom of the "Conversion Review" page for tutorials and more information.
 
 .. figure:: ../assets/tutorials/single/conversion-results-page.png
   :align: center

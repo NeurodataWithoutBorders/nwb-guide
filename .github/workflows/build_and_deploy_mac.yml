@@ -1,13 +1,17 @@
 name: Mac Release
 run-name: ${{ github.actor }} is building a MAC release for NWB GUIDE
-# NOTE: even though the runner is an arm64 mac, both x64 and arm64 releases will be made
+# NOTE: even though the runner is an x64 mac, both x64 and arm64 releases will be made
 
 on:
   workflow_dispatch:
 
 jobs:
   deploy-on-mac:
-    runs-on: macos-latest
+    runs-on: macos-13
+    # NOTE: macos-latest is an arm64 mac, and the dependency sonpy (Spike2RecordingInterface) has a .so file that
+    # works only on mac x64. This causes issues building and deploying on mac arm64. So we use macos-13 (x64)
+    # to build and deploy both the x64 and arm64 versions of the app.
+    # NOTE: if changing this to macos-latest, make sure to use the apple-silicon conda environment.
 
     defaults:
       run:
@@ -29,7 +33,7 @@ jobs:
           use-mamba: true
 
       - name: Create and activate environment
-        run: mamba env update --name nwb-guide --file environments/environment-MAC-apple-silicon.yml
+        run: mamba env update --name nwb-guide --file environments/environment-MAC-intel.yml
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
@@ -40,7 +44,7 @@ jobs:
         run: npm install --verbose
 
       - name: Remove bad sonpy file (might make Spike2 format unusable on Mac - should exclude from selection)
-        run: rm -f /usr/local/miniconda/envs/nwb-guide/lib/python3.9/site-packages/sonpy/linux/sonpy.so
+        run: rm -f "$CONDA_PREFIX/lib/python3.9/site-packages/sonpy/linux/sonpy.so"
 
       - uses: apple-actions/import-codesign-certs@v2
         with:
@@ -55,4 +59,7 @@ jobs:
           teamId: ${{ secrets.APPLE_TEAM_ID }}
           appleId: ${{ secrets.APPLE_ID }}
           appleIdPassword: ${{ secrets.APPLE_PASSWORD }}
+          # uncomment below to make build process extra verbose in case of failure
+          # DEBUG: electron-builder
+          # DEBUG_DMG: true
         run: npm run deploy:mac

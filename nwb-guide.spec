@@ -16,7 +16,6 @@ hiddenimports = [
     'email_validator',
     *collect_submodules('scipy.special.cython_special'),
     *collect_submodules('scipy.special._cdflib'),
-    *os.path.join(os.path.dirname(scipy.__file__), '.libs')
 ]
 
 datas += collect_data_files('jsonschema_specifications')
@@ -47,6 +46,8 @@ datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('dlc2nwb')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('ndx-pose')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('tzdata')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 block_cipher = None
