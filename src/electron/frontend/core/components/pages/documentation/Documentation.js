@@ -7,31 +7,35 @@ import { startLottie } from "../../../dependencies.js";
 import { Button } from "../../Button.js";
 
 export class DocumentationPage extends Page {
-    header = {
-        title: "Documentation",
-        subtitle: "Learn more about the GUIDE.",
-    };
+  header = {
+    title: "Documentation",
+    subtitle: "Learn more about the GUIDE.",
+  };
 
-    constructor(...args) {
-        super(...args);
-    }
+  constructor(...args) {
+    super(...args);
+  }
 
-    updated() {
-        let doc_lottie = (this.shadowRoot ?? this).querySelector("#documentation-lottie");
+  updated() {
+    let doc_lottie = (this.shadowRoot ?? this).querySelector(
+      "#documentation-lottie",
+    );
 
-        startLottie(doc_lottie, docu_lottie);
-        const svg = doc_lottie.querySelector("svg");
-        console.log(svg);
-        svg.setAttribute("viewBox", "50 100 300 200");
+    startLottie(doc_lottie, docu_lottie);
+    const svg = doc_lottie.querySelector("svg");
+    console.log(svg);
+    svg.setAttribute("viewBox", "50 100 300 200");
 
-        doc_lottie.style.marginBottom = "20px";
+    doc_lottie.style.marginBottom = "20px";
 
-        const container = (this.shadowRoot ?? this).querySelector(".document-content");
-        container.style.height = "200px";
-    }
+    const container = (this.shadowRoot ?? this).querySelector(
+      ".document-content",
+    );
+    container.style.height = "200px";
+  }
 
-    render() {
-        return html`
+  render() {
+    return html`
             <p>
                 The NWB GUIDE walks users step-by-step through all the requirements for converting their data to the NWB
                 format and uploading datasets to the DANDI Archive. Each stage is designed to conveniently guide users
@@ -42,25 +46,27 @@ export class DocumentationPage extends Page {
             <div class="document-content">
                 <div id="documentation-lottie" class="documentation-lottie_style"></div>
                 ${new Button({
-                    label: "NWB GUIDE Official Documentation",
-                    onClick: () => {
-                        window.open("https://nwb-guide.readthedocs.io/en/latest/");
-                    },
+                  label: "NWB GUIDE Official Documentation",
+                  onClick: () => {
+                    window.open("https://nwb-guide.readthedocs.io/en/latest/");
+                  },
                 })}
             </div>
 
                 <h3 style="padding: 0; margin-top: 25px;">Getting Started</h3>
                 <p>Follow along with our <a target="_blank" href="https://nwb-guide.readthedocs.io/en/latest/tutorials/index.html">tutorials</a> and learn how to create pipelines that convert neurophysiology data to NWB and publish results to the DANDI Archive.</p>
 
-                <p>The NWB GUIDE also provides standalone utilities to <a @click=${(ev) => {
-                    ev.preventDefault();
-                    this.to("validate");
+                <p>The NWB GUIDE also provides standalone utilities to <a @click=${(
+                  ev,
+                ) => {
+                  ev.preventDefault();
+                  this.to("validate");
                 }}>validate</a>, <a @click=${(ev) => {
-                    ev.preventDefault();
-                    this.to("explore");
+                  ev.preventDefault();
+                  this.to("explore");
                 }}>explore</a>, and <a @click=${(ev) => {
-                    ev.preventDefault();
-                    this.to("dandiset");
+                  ev.preventDefault();
+                  this.to("dandiset");
                 }}>upload</a> existing NWB files.</p>
 
                 <h3 style="padding: 0; margin-top: 25px;">Additional Resources</h3>
@@ -106,8 +112,8 @@ export class DocumentationPage extends Page {
                 <br>
             </div>
         `;
-    }
+  }
 }
 
 customElements.get("nwbguide-documentation-page") ||
-    customElements.define("nwbguide-documentation-page", DocumentationPage);
+  customElements.define("nwbguide-documentation-page", DocumentationPage);

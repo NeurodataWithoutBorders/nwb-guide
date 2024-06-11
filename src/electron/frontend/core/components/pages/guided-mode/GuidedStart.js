@@ -6,49 +6,61 @@ import { InspectorListItem } from "../../preview/inspector/InspectorList.js";
 import { sections } from "../globals";
 
 export class GuidedStartPage extends Page {
-    constructor(...args) {
-        super(...args);
-    }
+  constructor(...args) {
+    super(...args);
+  }
 
-    updated() {
-        // this.content = (this.shadowRoot ?? this).querySelector("#content");
-        // Handle dropdown text
-        const infoDropdowns = (this.shadowRoot ?? this).getElementsByClassName("guided--info-dropdown");
-        for (const infoDropdown of Array.from(infoDropdowns)) {
-            const infoTextElement = infoDropdown.querySelector(".guided--dropdown-text");
+  updated() {
+    // this.content = (this.shadowRoot ?? this).querySelector("#content");
+    // Handle dropdown text
+    const infoDropdowns = (this.shadowRoot ?? this).getElementsByClassName(
+      "guided--info-dropdown",
+    );
+    for (const infoDropdown of Array.from(infoDropdowns)) {
+      const infoTextElement = infoDropdown.querySelector(
+        ".guided--dropdown-text",
+      );
 
-            // Auto-add icons if they're not there
-            const dropdownType = infoTextElement.dataset.dropdownType;
-            if (infoTextElement.previousSibling.tagName !== "I") {
-                if (dropdownType === "info") {
-                    //insert the info icon before the text
-                    infoTextElement.insertAdjacentHTML("beforebegin", ` <i class="fas fa-info-circle"></i>`);
-                }
-                if (dropdownType === "warning") {
-                    //insert the warning icon before the text
-                    infoTextElement.insertAdjacentHTML("beforebegin", ` <i class="fas fa-exclamation-triangle"></i>`);
-                }
-            }
-
-            infoDropdown.onclick = () => {
-                const infoContainer = infoDropdown.nextElementSibling;
-                const infoContainerChevron = infoDropdown.querySelector(".fa-chevron-right");
-
-                const infoContainerIsopen = infoContainer.classList.contains("container-open");
-
-                if (infoContainerIsopen) {
-                    infoContainerChevron.style.transform = "rotate(0deg)";
-                    infoContainer.classList.remove("container-open");
-                } else {
-                    infoContainerChevron.style.transform = "rotate(90deg)";
-                    infoContainer.classList.add("container-open");
-                }
-            };
+      // Auto-add icons if they're not there
+      const dropdownType = infoTextElement.dataset.dropdownType;
+      if (infoTextElement.previousSibling.tagName !== "I") {
+        if (dropdownType === "info") {
+          //insert the info icon before the text
+          infoTextElement.insertAdjacentHTML(
+            "beforebegin",
+            ` <i class="fas fa-info-circle"></i>`,
+          );
         }
-    }
+        if (dropdownType === "warning") {
+          //insert the warning icon before the text
+          infoTextElement.insertAdjacentHTML(
+            "beforebegin",
+            ` <i class="fas fa-exclamation-triangle"></i>`,
+          );
+        }
+      }
 
-    render() {
-        return html`
+      infoDropdown.onclick = () => {
+        const infoContainer = infoDropdown.nextElementSibling;
+        const infoContainerChevron =
+          infoDropdown.querySelector(".fa-chevron-right");
+
+        const infoContainerIsopen =
+          infoContainer.classList.contains("container-open");
+
+        if (infoContainerIsopen) {
+          infoContainerChevron.style.transform = "rotate(0deg)";
+          infoContainer.classList.remove("container-open");
+        } else {
+          infoContainerChevron.style.transform = "rotate(90deg)";
+          infoContainer.classList.add("container-open");
+        }
+      };
+    }
+  }
+
+  render() {
+    return html`
                 <div class="guided--panel" style="flex-grow: 1">
                     <div class="title-border">
                         <h1 class="guided--text-sub-step">Designing a Conversion Pipeline: A Look Ahead</h1>
@@ -68,14 +80,16 @@ export class GuidedStartPage extends Page {
                         </p>
 
                         ${new InspectorListItem({
-                            message: html`Red boxes are <b>Error</b> messages. These will block your conversion progress
-                                until resolved.`,
-                            type: "error",
+                          message: html`Red boxes are <b>Error</b> messages.
+                            These will block your conversion progress until
+                            resolved.`,
+                          type: "error",
                         })}
                         ${new InspectorListItem({
-                            message: html`Yellow boxes are <b>Warning</b> messages. Fixing them will align your NWB
-                                files with best practices.`,
-                            type: "warning",
+                          message: html`Yellow boxes are
+                            <b>Warning</b> messages. Fixing them will align your
+                            NWB files with best practices.`,
+                          type: "warning",
                         })}
 
                         <p>
@@ -99,8 +113,9 @@ export class GuidedStartPage extends Page {
                         <h2 style="padding: 0; font-size: 20px;">Additional Resources</h2>
                         <hr>
                         ${new InfoBox({
-                            header: "Where can I learn more about the conversion process?",
-                            content: `
+                          header:
+                            "Where can I learn more about the conversion process?",
+                          content: `
                                 Although not required to use the GUIDE, you can learn more about the NWB conversion
                                 process in the
                                 <a href="https://neuroconv.readthedocs.io/en/main" target="_blank"
@@ -111,8 +126,8 @@ export class GuidedStartPage extends Page {
                 </div>
             </div>
         `;
-    }
+  }
 }
 
 customElements.get("nwbguide-guided-start-page") ||
-    customElements.define("nwbguide-guided-start-page", GuidedStartPage);
+  customElements.define("nwbguide-guided-start-page", GuidedStartPage);

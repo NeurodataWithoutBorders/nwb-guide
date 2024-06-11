@@ -21,32 +21,48 @@ export const remote = isElectron ? require("@electron/remote") : {};
 export const app = remote.app;
 
 // Electron Information
-export const port = isElectron ? electron.ipcRenderer.sendSync("get-port") : 4242;
-export const SERVER_FILE_PATH = isElectron ? electron.ipcRenderer.sendSync("get-server-file-path") : "";
+export const port = isElectron
+  ? electron.ipcRenderer.sendSync("get-port")
+  : 4242;
+export const SERVER_FILE_PATH = isElectron
+  ? electron.ipcRenderer.sendSync("get-server-file-path")
+  : "";
 
 // Link the renderer to the main process
 if (isElectron) {
-    electron.ipcRenderer.on("fileOpened", (info, filepath) => {
-        updateURLParams({ file: filepath });
-        const dashboard = document.querySelector("nwb-dashboard");
-        const activePage = dashboard.getAttribute("activePage");
-        if (activePage === "preview") dashboard.requestUpdate();
-        else dashboard.setAttribute("activePage", "preview");
-    });
+  electron.ipcRenderer.on("fileOpened", (info, filepath) => {
+    updateURLParams({ file: filepath });
+    const dashboard = document.querySelector("nwb-dashboard");
+    const activePage = dashboard.getAttribute("activePage");
+    if (activePage === "preview") dashboard.requestUpdate();
+    else dashboard.setAttribute("activePage", "preview");
+  });
 
-    ["log", "warn", "error"].forEach((method) =>
-        electron.ipcRenderer.on(`console.${method}`, (_, ...args) => console[method](`[main-process]:`, ...args))
-    );
+  ["log", "warn", "error"].forEach((method) =>
+    electron.ipcRenderer.on(`console.${method}`, (_, ...args) =>
+      console[method](`[main-process]:`, ...args),
+    ),
+  );
 
-    console.log("User OS:", os.type(), os.platform(), "version:", os.release());
+  console.log("User OS:", os.type(), os.platform(), "version:", os.release());
 
-    // Update Handling
-    electron.ipcRenderer.on(`checking-for-update`, (_, ...args) => console.log(`[Update]:`, ...args));
+  // Update Handling
+  electron.ipcRenderer.on(`checking-for-update`, (_, ...args) =>
+    console.log(`[Update]:`, ...args),
+  );
 
-    electron.ipcRenderer.on(`update-available`, (_, info) => (info ? registerUpdate(info) : ""));
+  electron.ipcRenderer.on(`update-available`, (_, info) =>
+    info ? registerUpdate(info) : "",
+  );
 
-    electron.ipcRenderer.on(`update-progress`, (_, info) => registerUpdateProgress(info));
-    electron.ipcRenderer.on(`update-complete`, (_, ...args) => console.log(`[Update]:`, ...args));
+  electron.ipcRenderer.on(`update-progress`, (_, info) =>
+    registerUpdateProgress(info),
+  );
+  electron.ipcRenderer.on(`update-complete`, (_, ...args) =>
+    console.log(`[Update]:`, ...args),
+  );
 
-    electron.ipcRenderer.on(`update-error`, (_, ...args) => console.log(`[Update]:`, ...args));
+  electron.ipcRenderer.on(`update-error`, (_, ...args) =>
+    console.log(`[Update]:`, ...args),
+  );
 }

@@ -15,69 +15,72 @@ import { CodeBlock } from "../../../CodeBlock.js";
 const { ipcRenderer } = electron;
 
 export class GuidedResultsPage extends Page {
-    constructor(...args) {
-        super(...args);
-    }
+  constructor(...args) {
+    super(...args);
+  }
 
-    header = {
-        controls: () =>
-            html`<nwb-button
-                size="small"
-                @click=${() => {
-                    if (ipcRenderer) ipcRenderer.send("showItemInFolder", this.#sharedPath());
-                }}
-                >${unsafeSVG(folderOpenSVG)}</nwb-button
-            >`,
-    };
+  header = {
+    controls: () =>
+      html`<nwb-button
+        size="small"
+        @click=${() => {
+          if (ipcRenderer)
+            ipcRenderer.send("showItemInFolder", this.#sharedPath());
+        }}
+        >${unsafeSVG(folderOpenSVG)}</nwb-button
+      >`,
+  };
 
-    footer = {};
+  footer = {};
 
-    #sharedPath = () => {
-        const { conversion } = this.info.globalState;
-        if (!conversion) return "";
-        return getSharedPath(getStubArray(conversion).map((item) => item.file));
-    };
+  #sharedPath = () => {
+    const { conversion } = this.info.globalState;
+    if (!conversion) return "";
+    return getSharedPath(getStubArray(conversion).map((item) => item.file));
+  };
 
-    updated() {
-        this.save(); // Save the current state
-    }
+  updated() {
+    this.save(); // Save the current state
+  }
 
-    render() {
-        const { conversion } = this.info.globalState;
+  render() {
+    const { conversion } = this.info.globalState;
 
-        if (!conversion)
-            return html`<div style="text-align: center;"><p>Your conversion failed. Please try again.</p></div>`;
+    if (!conversion)
+      return html`<div style="text-align: center;">
+        <p>Your conversion failed. Please try again.</p>
+      </div>`;
 
-        // Show a snippet for how to open the NWB file
-        return html`
-            <p>Your data was successfully converted to NWB!</p>
-            <ol style="margin: 10px 0px; padding-top: 0;">
-                ${getStubArray(conversion)
-                    .map(({ file }) => {
-                        return { file, id: file.split(path.sep).slice(-1)[0] };
-                    })
-                    .sort((a, b) => a.id.localeCompare(b.id))
-                    .map(
-                        ({ id, file }) =>
-                            html`<li>
-                                <a
-                                    @click=${() => {
-                                        if (ipcRenderer) ipcRenderer.send("showItemInFolder", file);
-                                    }}
-                                    >${id}</a
-                                >
-                            </li>`
-                    )}
-            </ol>
-            <h4>But what about my other data?</h4>
-            <p>
-                The GUIDE still can't do everything. You may need to manually adjust the NWB file to ensure it contains
-                all the necessary data. <br /><br />
+    // Show a snippet for how to open the NWB file
+    return html`
+      <p>Your data was successfully converted to NWB!</p>
+      <ol style="margin: 10px 0px; padding-top: 0;">
+        ${getStubArray(conversion)
+          .map(({ file }) => {
+            return { file, id: file.split(path.sep).slice(-1)[0] };
+          })
+          .sort((a, b) => a.id.localeCompare(b.id))
+          .map(
+            ({ id, file }) =>
+              html`<li>
+                <a
+                  @click=${() => {
+                    if (ipcRenderer) ipcRenderer.send("showItemInFolder", file);
+                  }}
+                  >${id}</a
+                >
+              </li>`,
+          )}
+      </ol>
+      <h4>But what about my other data?</h4>
+      <p>
+        The GUIDE still can't do everything. You may need to manually adjust the
+        NWB file to ensure it contains all the necessary data. <br /><br />
 
-                For example, to append to the file using PyNWB you would start with:
-            </p>
-            ${new CodeBlock({
-                text: `from pynwb import NWBHDF5IO, NWBFile
+        For example, to append to the file using PyNWB you would start with:
+      </p>
+      ${new CodeBlock({
+        text: `from pynwb import NWBHDF5IO, NWBFile
 
 nwbfile_path= "${this.#sharedPath()}"
 
@@ -89,30 +92,42 @@ with NWBHDF5IO(path=nwbfile_path, mode="r+") as io:
 
     # ...
 `,
-            })}
-            <h5>Related Documentation</h5>
+      })}
+      <h5>Related Documentation</h5>
+      <div
+        style="display: flex; gap: 10px; margin-top: 15px; padding-bottom: 5px; margin-bottom: 10px; overflow: auto;"
+      >
+        ${manualActionsJSON.map(
+          ({ name, description, url }) => html`
             <div
-                style="display: flex; gap: 10px; margin-top: 15px; padding-bottom: 5px; margin-bottom: 10px; overflow: auto;"
+              style="min-width: 300px; padding: 20px; background-color: #f0f0f0; border-radius: 5px;"
             >
-                ${manualActionsJSON.map(
-                    ({ name, description, url }) => html`
-                        <div style="min-width: 300px; padding: 20px; background-color: #f0f0f0; border-radius: 5px;">
-                            <h4 style="margin-bottom: 5px;">
-                                <a href=${url} target="_blank" style="text-decoration: none;">${name}</a>
-                            </h4>
-                            <small>${description}</small>
-                        </div>
-                    `
-                )}
+              <h4 style="margin-bottom: 5px;">
+                <a href=${url} target="_blank" style="text-decoration: none;"
+                  >${name}</a
+                >
+              </h4>
+              <small>${description}</small>
             </div>
-            <p>
-                For more information, please refer to the
-                <a href="https://pynwb.readthedocs.io/en/stable/" target="_blank">PyNWB</a> and
-                <a href="https://neurodatawithoutborders.github.io/matnwb/" target="_blank">MatNWB</a> documentation.
-            </p>
-        `;
-    }
+          `,
+        )}
+      </div>
+      <p>
+        For more information, please refer to the
+        <a href="https://pynwb.readthedocs.io/en/stable/" target="_blank"
+          >PyNWB</a
+        >
+        and
+        <a
+          href="https://neurodatawithoutborders.github.io/matnwb/"
+          target="_blank"
+          >MatNWB</a
+        >
+        documentation.
+      </p>
+    `;
+  }
 }
 
 customElements.get("nwbguide-guided-results-page") ||
-    customElements.define("nwbguide-guided-results-page", GuidedResultsPage);
+  customElements.define("nwbguide-guided-results-page", GuidedResultsPage);

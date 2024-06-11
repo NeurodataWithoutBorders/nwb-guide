@@ -5,11 +5,18 @@ import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import folderOpenSVG from "../../../../../assets/icons/folder_open.svg?raw";
 
 import { electron } from "../../../../../utils/electron.js";
-import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../preview/NWBFilePreview.js";
+import {
+  getSharedPath,
+  removeFilePaths,
+  truncateFilePaths,
+} from "../../../preview/NWBFilePreview.js";
 const { ipcRenderer } = electron;
 import { until } from "lit/directives/until.js";
 import { run } from "./utils.js";
-import { InspectorList, InspectorLegend } from "../../../preview/inspector/InspectorList.js";
+import {
+  InspectorList,
+  InspectorLegend,
+} from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { getMessageType } from "../../../../validation/index.js";
@@ -21,242 +28,256 @@ import { createProgressPopup } from "../../../utils/progress.js";
 import { resolve } from "../../../../promises";
 
 const filter = (list, toFilter) => {
-    return list.filter((item) => {
-        return Object.entries(toFilter)
-            .map(([key, strOrArray]) => {
-                return Array.isArray(strOrArray)
-                    ? strOrArray.map((str) => item[key].includes(str))
-                    : item[key].includes(strOrArray);
-            })
-            .flat()
-            .every(Boolean);
-    });
+  return list.filter((item) => {
+    return Object.entries(toFilter)
+      .map(([key, strOrArray]) => {
+        return Array.isArray(strOrArray)
+          ? strOrArray.map((str) => item[key].includes(str))
+          : item[key].includes(strOrArray);
+      })
+      .flat()
+      .every(Boolean);
+  });
 };
 
 const emptyMessage = "No issues detected in these files!";
 
 export class GuidedInspectorPage extends Page {
-    constructor(...args) {
-        super(...args);
-        this.style.height = "100%"; // Fix main section
+  constructor(...args) {
+    super(...args);
+    this.style.height = "100%"; // Fix main section
 
-        Object.assign(this.style, {
-            display: "grid",
-            gridTemplateRows: "calc(100% - 120px) 1fr",
-            rowGap: "10px",
-        });
-    }
+    Object.assign(this.style, {
+      display: "grid",
+      gridTemplateRows: "calc(100% - 120px) 1fr",
+      rowGap: "10px",
+    });
+  }
 
-    headerButtons = [
-        new Button({
-            label: "JSON",
-            primary: true,
+  headerButtons = [
+    new Button({
+      label: "JSON",
+      primary: true,
+    }),
+
+    new Button({
+      label: "Text",
+      primary: true,
+    }),
+  ];
+
+  header = {
+    subtitle: `The NWB Inspector has scanned your files for adherence to <a target="_blank" href="https://nwbinspector.readthedocs.io/en/dev/best_practices/best_practices_index.html">best practices</a>.`,
+    controls: () => [
+      ...this.headerButtons,
+      html`<nwb-button
+        size="small"
+        @click=${() => {
+          if (ipcRenderer)
+            ipcRenderer.send(
+              "showItemInFolder",
+              getSharedPath(
+                getStubArray(this.info.globalState.preview.stubs).map(
+                  ({ file }) => file,
+                ),
+              ),
+            );
+        }}
+        >${unsafeSVG(folderOpenSVG)}</nwb-button
+      >`,
+    ],
+  };
+
+  // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
+  footer = {};
+
+  #toggleRendered;
+  #rendered;
+  #updateRendered = (force) =>
+    force || this.#rendered === true
+      ? (this.#rendered = new Promise(
+          (resolve) =>
+            (this.#toggleRendered = () => resolve((this.#rendered = true))),
+        ))
+      : this.#rendered;
+
+  get rendered() {
+    return resolve(this.#rendered, () => true);
+  }
+
+  getStatus = (list) => {
+    return list.reduce((acc, messageInfo) => {
+      const res = getMessageType(messageInfo);
+      if (acc === "error") return acc;
+      else return res;
+    }, "valid");
+  };
+
+  updated() {
+    const [downloadJSONButton, downloadTextButton] = this.headerButtons;
+
+    downloadJSONButton.onClick = () =>
+      download("nwb-inspector-report.json", {
+        header: this.report.header,
+        messages: this.report.messages,
+      });
+
+    downloadTextButton.onClick = () =>
+      download("nwb-inspector-report.txt", this.report.text);
+  }
+
+  render() {
+    this.#updateRendered(true);
+
+    const { globalState } = this.info;
+    const { stubs, inspector } = globalState.preview;
+
+    const legendProps = { multiple: this.workflow.multiple_sessions.value };
+
+    const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
+    const title = "Inspecting your file";
+
+    const fileArr = Object.entries(stubs)
+      .map(([subject, v]) =>
+        Object.entries(v).map(([session, info]) => {
+          return { subject, session, info };
         }),
+      )
+      .flat();
+    return html`
+      ${until(
+        (async () => {
+          if (fileArr.length <= 1) {
+            this.report = inspector;
 
-        new Button({
-            label: "Text",
-            primary: true,
-        }),
-    ];
+            if (!this.report) {
+              const result = await run(
+                "neuroconv/inspect_file",
+                { nwbfile_path: fileArr[0].info.file, ...options },
+                { title },
+              ).catch((error) => {
+                this.notify(error.message, "error");
+                return null;
+              });
 
-    header = {
-        subtitle: `The NWB Inspector has scanned your files for adherence to <a target="_blank" href="https://nwbinspector.readthedocs.io/en/dev/best_practices/best_practices_index.html">best practices</a>.`,
-        controls: () => [
-            ...this.headerButtons,
-            html`<nwb-button
-                size="small"
-                @click=${() => {
-                    if (ipcRenderer)
-                        ipcRenderer.send(
-                            "showItemInFolder",
-                            getSharedPath(getStubArray(this.info.globalState.preview.stubs).map(({ file }) => file))
-                        );
-                }}
-                >${unsafeSVG(folderOpenSVG)}</nwb-button
-            >`,
-        ],
-    };
+              if (!result) return "Failed to generate inspector report.";
 
-    // NOTE: We may want to trigger this whenever (1) this page is visited AND (2) data has been changed.
-    footer = {};
+              this.report = globalState.preview.inspector = {
+                ...result,
+                messages: removeFilePaths(result.messages),
+              };
+            }
 
-    #toggleRendered;
-    #rendered;
-    #updateRendered = (force) =>
-        force || this.#rendered === true
-            ? (this.#rendered = new Promise(
-                  (resolve) => (this.#toggleRendered = () => resolve((this.#rendered = true)))
-              ))
-            : this.#rendered;
+            if (!inspector) await this.save();
 
-    get rendered() {
-        return resolve(this.#rendered, () => true);
-    }
+            const items = this.report.messages;
 
-    getStatus = (list) => {
-        return list.reduce((acc, messageInfo) => {
-            const res = getMessageType(messageInfo);
-            if (acc === "error") return acc;
-            else return res;
-        }, "valid");
-    };
+            const list = new InspectorList({ items, emptyMessage });
 
-    updated() {
-        const [downloadJSONButton, downloadTextButton] = this.headerButtons;
-
-        downloadJSONButton.onClick = () =>
-            download("nwb-inspector-report.json", {
-                header: this.report.header,
-                messages: this.report.messages,
+            Object.assign(list.style, {
+              height: "100%",
             });
 
-        downloadTextButton.onClick = () => download("nwb-inspector-report.txt", this.report.text);
-    }
+            return html`${list}${new InspectorLegend(legendProps)}`;
+          }
 
-    render() {
-        this.#updateRendered(true);
+          const path = getSharedPath(fileArr.map(({ info }) => info.file));
 
-        const { globalState } = this.info;
-        const { stubs, inspector } = globalState.preview;
+          this.report = inspector;
+          if (!this.report) {
+            const swalOpts = await createProgressPopup({ title: `${title}s` });
 
-        const legendProps = { multiple: this.workflow.multiple_sessions.value };
+            const { close: closeProgressPopup } = swalOpts;
 
-        const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
-        const title = "Inspecting your file";
-
-        const fileArr = Object.entries(stubs)
-            .map(([subject, v]) =>
-                Object.entries(v).map(([session, info]) => {
-                    return { subject, session, info };
-                })
+            const result = await run(
+              "neuroconv/inspect_folder",
+              { path, ...options, request_id: swalOpts.id },
+              swalOpts,
             )
-            .flat();
-        return html`
-            ${until(
-                (async () => {
-                    if (fileArr.length <= 1) {
-                        this.report = inspector;
+              .catch(async (error) => {
+                this.notify(error.message, "error");
+                return null;
+              })
+              .finally(() => closeProgressPopup());
 
-                        if (!this.report) {
-                            const result = await run(
-                                "neuroconv/inspect_file",
-                                { nwbfile_path: fileArr[0].info.file, ...options },
-                                { title }
-                            ).catch((error) => {
-                                this.notify(error.message, "error");
-                                return null;
-                            });
+            if (!result) return "Failed to generate inspector report.";
 
-                            if (!result) return "Failed to generate inspector report.";
+            this.report = globalState.preview.inspector = {
+              ...result,
+              messages: truncateFilePaths(result.messages, path),
+            };
+          }
 
-                            this.report = globalState.preview.inspector = {
-                                ...result,
-                                messages: removeFilePaths(result.messages),
-                            };
-                        }
+          if (!inspector) await this.save();
 
-                        if (!inspector) await this.save();
+          const messages = this.report.messages;
+          const items = truncateFilePaths(messages, path);
 
-                        const items = this.report.messages;
+          const _instances = fileArr.map(({ subject, session, info }) => {
+            const file_path = [
+              `sub-${subject}`,
+              `sub-${subject}_ses-${session}`,
+            ];
+            const filtered = removeFilePaths(filter(items, { file_path }));
 
-                        const list = new InspectorList({ items, emptyMessage });
+            const display = () =>
+              new InspectorList({ items: filtered, emptyMessage });
+            display.status = this.getStatus(filtered);
 
-                        Object.assign(list.style, {
-                            height: "100%",
-                        });
+            return {
+              subject,
+              session,
+              display,
+            };
+          });
 
-                        return html`${list}${new InspectorLegend(legendProps)}`;
-                    }
+          const instances = _instances.reduce(
+            (acc, { subject, session, display }) => {
+              const subLabel = `sub-${subject}`;
+              if (!acc[`sub-${subject}`]) acc[subLabel] = {};
+              acc[subLabel][`ses-${session}`] = display;
+              return acc;
+            },
+            {},
+          );
 
-                    const path = getSharedPath(fileArr.map(({ info }) => info.file));
+          Object.keys(instances).forEach((subLabel) => {
+            // const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+            const subItems = filter(items, { file_path: `${subLabel}_ses-` }); // NOTE: This will not run on web-only now
+            const path = getSharedPath(subItems.map((item) => item.file_path));
+            const filtered = truncateFilePaths(subItems, path);
 
-                    this.report = inspector;
-                    if (!this.report) {
-                        const swalOpts = await createProgressPopup({ title: `${title}s` });
+            const display = () =>
+              new InspectorList({ items: filtered, emptyMessage });
+            display.status = this.getStatus(filtered);
 
-                        const { close: closeProgressPopup } = swalOpts;
+            instances[subLabel] = {
+              ["All Files"]: display,
+              ...instances[subLabel],
+            };
+          });
 
-                        const result = await run(
-                            "neuroconv/inspect_folder",
-                            { path, ...options, request_id: swalOpts.id },
-                            swalOpts
-                        )
-                            .catch(async (error) => {
-                                this.notify(error.message, "error");
-                                return null;
-                            })
-                            .finally(() => closeProgressPopup());
+          const allDisplay = () => new InspectorList({ items, emptyMessage });
+          allDisplay.status = this.getStatus(items);
 
-                        if (!result) return "Failed to generate inspector report.";
+          const allInstances = {
+            ["All Files"]: allDisplay,
+            ...instances,
+          };
 
-                        this.report = globalState.preview.inspector = {
-                            ...result,
-                            messages: truncateFilePaths(result.messages, path),
-                        };
-                    }
+          const manager = new InstanceManager({
+            instances: allInstances,
+          });
 
-                    if (!inspector) await this.save();
-
-                    const messages = this.report.messages;
-                    const items = truncateFilePaths(messages, path);
-
-                    const _instances = fileArr.map(({ subject, session, info }) => {
-                        const file_path = [`sub-${subject}`, `sub-${subject}_ses-${session}`];
-                        const filtered = removeFilePaths(filter(items, { file_path }));
-
-                        const display = () => new InspectorList({ items: filtered, emptyMessage });
-                        display.status = this.getStatus(filtered);
-
-                        return {
-                            subject,
-                            session,
-                            display,
-                        };
-                    });
-
-                    const instances = _instances.reduce((acc, { subject, session, display }) => {
-                        const subLabel = `sub-${subject}`;
-                        if (!acc[`sub-${subject}`]) acc[subLabel] = {};
-                        acc[subLabel][`ses-${session}`] = display;
-                        return acc;
-                    }, {});
-
-                    Object.keys(instances).forEach((subLabel) => {
-                        // const subItems = filter(items, { file_path: `${subLabel}${nodePath.sep}${subLabel}_ses-` }); // NOTE: This will not run on web-only now
-                        const subItems = filter(items, { file_path: `${subLabel}_ses-` }); // NOTE: This will not run on web-only now
-                        const path = getSharedPath(subItems.map((item) => item.file_path));
-                        const filtered = truncateFilePaths(subItems, path);
-
-                        const display = () => new InspectorList({ items: filtered, emptyMessage });
-                        display.status = this.getStatus(filtered);
-
-                        instances[subLabel] = {
-                            ["All Files"]: display,
-                            ...instances[subLabel],
-                        };
-                    });
-
-                    const allDisplay = () => new InspectorList({ items, emptyMessage });
-                    allDisplay.status = this.getStatus(items);
-
-                    const allInstances = {
-                        ["All Files"]: allDisplay,
-                        ...instances,
-                    };
-
-                    const manager = new InstanceManager({
-                        instances: allInstances,
-                    });
-
-                    return html`${manager}${new InspectorLegend(legendProps)}`;
-                })().finally(() => {
-                    this.#toggleRendered();
-                }),
-                "Loading inspector report..."
-            )}
-        `;
-    }
+          return html`${manager}${new InspectorLegend(legendProps)}`;
+        })().finally(() => {
+          this.#toggleRendered();
+        }),
+        "Loading inspector report...",
+      )}
+    `;
+  }
 }
 
 customElements.get("nwbguide-guided-inspector-page") ||
-    customElements.define("nwbguide-guided-inspector-page", GuidedInspectorPage);
+  customElements.define("nwbguide-guided-inspector-page", GuidedInspectorPage);

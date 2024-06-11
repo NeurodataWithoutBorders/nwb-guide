@@ -1,33 +1,33 @@
 /* Improve spacing */
 .version-switcher__container.dropdown {
-    margin-left: 10px;
+  margin-left: 10px;
 }
 
 button.btn.version-switcher__button {
-    margin-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 /* Show on hover */
 .version-switcher__container.dropdown:hover .dropdown-menu {
-    display: block;
-    left: 0;
-    margin-top: var(--bs-dropdown-spacer);
-    top: 100%;
+  display: block;
+  left: 0;
+  margin-top: var(--bs-dropdown-spacer);
+  top: 100%;
 }
 
 .dropdown-menu.show {
-    display: none;
+  display: none;
 }
 
 /* Remove underline and borders */
 button.btn.version-switcher__button:hover {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 .version-switcher__menu a.list-group-item {
-    border: none !important;
+  border: none !important;
 }
 
 .version-switcher__menu a.list-group-item:hover {
-    text-decoration: none !important;
+  text-decoration: none !important;
 }

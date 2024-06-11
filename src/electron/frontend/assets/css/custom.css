@@ -1,51 +1,51 @@
 /* Update Notification Box */
 #update-available:not(:empty) {
-    margin-top: 15px;
-    background-color: #ffe5d2;
-    color: black;
-    padding: 15px 10px;
-    border: 1px solid #f6c39c;
-    border-radius: 5px;
+  margin-top: 15px;
+  background-color: #ffe5d2;
+  color: black;
+  padding: 15px 10px;
+  border: 1px solid #f6c39c;
+  border-radius: 5px;
 }
 
 #update-available .update-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
 }
 
 #update-available .update-container::before {
-    content: "";
-    width: 6px;
-    height: 6px;
-    margin-left: 5px;
-    background-color: #d17128;
-    border-radius: 50%;
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-left: 5px;
+  background-color: #d17128;
+  border-radius: 50%;
 }
 
 #update-available .header {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 #update-available h4 {
-    margin: 0;
+  margin: 0;
 }
 
 #update-available span {
-    color: gray;
-    font-size: 80%;
+  color: gray;
+  font-size: 80%;
 }
 
 #update-available .header svg {
-    height: 15px;
-    width: auto;
-    cursor: pointer;
+  height: 15px;
+  width: auto;
+  cursor: pointer;
 }
 
 #update-available .controls {
-    margin-left: auto;
-    display: flex;
-    gap: 10px;
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
 }
