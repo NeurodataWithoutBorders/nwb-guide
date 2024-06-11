@@ -35,7 +35,6 @@ export class Search extends LitElement {
     }
 
     #close = () => {
-        console.log("CLOSING", this.getSelectedOption());
         if (this.listMode === "input" && this.getAttribute("interacted") === "true") {
             this.setAttribute("interacted", false);
             this.#onSelect(this.getSelectedOption());
