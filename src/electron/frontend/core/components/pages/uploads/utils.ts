@@ -1,7 +1,18 @@
 
 import { get } from "dandi";
-import dandiUploadSchema from "../../../../../../schemas/dandi-upload.schema";
-import { html } from "lit";
+import dandiUploadSchema, { regenerateDandisets } from "../../../../../../schemas/dandi-upload.schema";
+
+import { validateDANDIApiKey } from "../../../validation/dandi";
+import { Modal } from "../../Modal";
+import { header } from "../../forms/utils";
+
+import { JSONSchemaInput } from "../../JSONSchemaInput";
+
+import { Button } from "../../Button.js";
+import { global } from "../../../progress/index.js";
+import { merge } from "../utils";
+
+import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
 
 export const isStaging = (id: string) => parseInt(id) >= 100000;
 
@@ -13,7 +24,7 @@ function isNumeric(str: string) {
   }
 
 
-  export const validate = async (name: string, parent: any) => {
+  export async function validate (name: string, parent: any) {
 
     const value = parent[name]
 
@@ -33,8 +44,13 @@ function isNumeric(str: string) {
             }]
 
             const staging = isStaging(value)
+            const type = staging ? "staging" : undefined;
+            const token = await getAPIKey.call(this, staging);
 
-            const dandiset = await get(value, { type: staging ? "staging" : undefined })
+            const dandiset = await get(value, {
+                type,
+                token
+             })
 
             if (dandiset.detail) {
                 if (dandiset.detail.includes('Not found')) return [{
@@ -44,12 +60,13 @@ function isNumeric(str: string) {
 
                 if (dandiset.detail.includes('credentials were not provided')) return [{
                     type: 'warning',
-                    message: `<b>Authentication error –</b> This Dandiset does not appear to be linked to your account.`
+                    message: `<b>Authentication error –</b> This is an embargoed Dandiset and you haven't provided the correct credentials.`
                 }]
             }
 
             // NOTE: This may not be thrown anymore with the above detail checks
             const { enum: enumValue } = dandiUploadSchema.properties.dandiset;
+
             if (enumValue && !enumValue.includes(value)) return [{
                 type: 'error',
                 message: `<b>No Access –</b> This Dandiset does not belong to you.`
@@ -77,3 +94,92 @@ export function awardNumberValidator(awardNumber: string): boolean {
 }
 
 export const AWARD_VALIDATION_FAIL_MESSAGE = 'Award number must be properly space-delimited.\n\nExample (exclude quotes):\n"1 R01 CA 123456-01A1"';
+
+
+// this:
+export async function getAPIKey(
+    // this: Page,
+    staging = false
+) {
+
+    const whichAPIKey = staging ? "development_api_key" : "main_api_key";
+    const DANDI = global.data.DANDI;
+    let api_key = DANDI?.api_keys?.[whichAPIKey];
+
+    const errors = await validateDANDIApiKey(api_key, staging);
+
+    const isInvalid = !errors || errors.length;
+
+    if (isInvalid) {
+        const modal = new Modal({
+            header: `${api_key ? "Update" : "Provide"} your ${header(whichAPIKey)}`,
+            open: true,
+            onClose: () => modal.remove(),
+        });
+
+        const container = document.createElement("div");
+
+        const input = new JSONSchemaInput({
+            path: [whichAPIKey],
+            schema: dandiGlobalSchema.properties.api_keys.properties[whichAPIKey],
+        });
+
+        container.append(input);
+
+        container.style.padding = "25px";
+
+        modal.append(container);
+
+        let notification;
+
+        const notify = (message, type) => {
+            if (notification) this.dismiss(notification);
+            return (notification = this.notify(message, type));
+        };
+
+        modal.onClose = async () => notify("The updated DANDI API key was not set", "error");
+
+        api_key = await new Promise((resolve) => {
+            const button = new Button({
+                label: "Save",
+                primary: true,
+                onClick: async () => {
+                    const value = input.value;
+                    if (value) {
+                        const errors = await validateDANDIApiKey(input.value, staging);
+                        if (!errors || !errors.length) {
+                            modal.remove();
+
+                            merge(
+                                {
+                                    DANDI: {
+                                        api_keys: {
+                                            [whichAPIKey]: value,
+                                        },
+                                    },
+                                },
+                                global.data
+                            );
+
+                            global.save();
+                            resolve(value);
+                        } else {
+                            notify(errors[0].message, "error");
+                            return false;
+                        }
+                    } else {
+                        notify("Your DANDI API key was not set", "error");
+                    }
+                },
+            });
+
+            modal.footer = button;
+
+            document.body.append(modal);
+        });
+
+        await regenerateDandisets()
+    }
+
+    return api_key;
+}
