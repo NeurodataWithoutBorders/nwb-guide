@@ -94,7 +94,7 @@ if not version_match or version_match.isdigit() or version_match == "latest":
     # Use `python -m http.server -d docs/build/html/` and open the page at http://localhost:8000
     # In local development, the version switcher will always show "dev" and use the local switcher.json
     version_match = "dev"
-    json_url = "_static/switcher.json"
+    #json_url = "_static/switcher.json"
     # if "dev" in release or "rc" in release:
     #     version_match = "dev"
     #     # We want to keep the relative reference if we are in dev mode
