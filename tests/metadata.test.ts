@@ -215,8 +215,9 @@ test('inter-table updates are triggered', async () => {
     })
 
     await sleep(1000) // Wait for the ElectrodeGroup table to update properly
-
     form.requestUpdate() // Re-render the form to update the Electrodes table
+
+    await form.rendered // Wait for the form to re-render and validate properly
 
     // Validate that the new structure is correct
     const hasErrors = await form.validate().then(() => false).catch((e) => true)

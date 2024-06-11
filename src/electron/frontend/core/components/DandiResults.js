@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit";
 
 import { get } from "dandi";
-import { isStaging } from "./pages/uploads/utils";
+import { isStaging, getAPIKey } from "./pages/uploads/utils";
 
 export class DandiResults extends LitElement {
     static get styles() {
@@ -38,8 +38,14 @@ export class DandiResults extends LitElement {
 
         const otherElIds = ["embargo_status"];
 
-        const type = isStaging(this.id) ? "staging" : undefined;
-        const dandiset = await get(this.id, { type });
+        const staging = isStaging(this.id);
+        const type = staging ? "staging" : undefined;
+        const api_key = await getAPIKey.call(this, staging);
+
+        const dandiset = await get(this.id, {
+            type,
+            token: api_key,
+        });
 
         otherElIds.forEach((str) => handleClass(str, dandiset));
         elIds.forEach((str) => handleClass(str, dandiset.draft_version));

@@ -554,7 +554,32 @@ export class JSONSchemaForm extends LitElement {
     };
 
     validate = async (resolved = this.resolved) => {
-        if (this.validateEmptyValues === false) this.validateEmptyValues = true;
+        if (this.validateEmptyValues === false) {
+            this.validateEmptyValues = true;
+            await new Promise((resolve) => setTimeout(resolve, 0)); // Wait for next tick (re-render start)
+            await this.rendered; // Wait for re-render
+        }
+
+        // Validate nested forms (skip disabled)
+        for (let name in this.forms) {
+            const accordion = this.accordions[name];
+            if (!accordion || !accordion.disabled)
+                await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
+        }
+
+        for (let key in this.tables) {
+            try {
+                this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
+            } catch (error) {
+                const title = this.tables[key].schema.title;
+                const message = error.message.replace(
+                    "this table",
+                    `the <b>${header(title ?? [...this.base, key].join("."))}</b> table`
+                );
+                this.throw(message);
+                break;
+            }
+        }
 
         // Validate against the entire JSON Schema
         const copy = structuredClone(resolved);
@@ -615,27 +640,6 @@ export class JSONSchemaForm extends LitElement {
         }
 
         if (message) this.throw(message);
-
-        // Validate nested forms (skip disabled)
-        for (let name in this.forms) {
-            const accordion = this.accordions[name];
-            if (!accordion || !accordion.disabled)
-                await this.forms[name].validate(resolved ? resolved[name] : undefined); // Validate nested forms too
-        }
-
-        for (let key in this.tables) {
-            try {
-                this.tables[key].validate(resolved ? resolved[key] : undefined); // Validate nested tables too
-            } catch (error) {
-                const title = this.tables[key].schema.title;
-                const message = error.message.replace(
-                    "this table",
-                    `the <b>${header(title ?? [...this.base, key].join("."))}</b> table`
-                );
-                this.throw(message);
-                break;
-            }
-        }
 
         return true;
     };
@@ -1007,8 +1011,19 @@ export class JSONSchemaForm extends LitElement {
         const groupEl = this.#getGroupElement(externalPath);
 
         if (groupEl) {
-            groupEl.classList[resolvedErrors.length ? "add" : "remove"]("error");
-            groupEl.classList[warnings.length ? "add" : "remove"]("warning");
+            groupEl.setAttribute(`data-${name}-errors`, updatedErrors.length);
+            groupEl.setAttribute(`data-${name}-warnings`, updatedWarnings.length);
+
+            const allFormSections = groupEl.querySelectorAll(".form-section");
+            const inputs = Array.from(allFormSections).map((section) => section.id);
+            const allErrors = inputs.reduce((acc, id) => acc + parseInt(groupEl.getAttribute(`data-${id}-errors`)), 0);
+            const allWarnings = inputs.reduce(
+                (acc, id) => acc + parseInt(groupEl.getAttribute(`data-${id}-warnings`)),
+                0
+            );
+
+            groupEl.classList[allErrors ? "add" : "remove"]("error");
+            groupEl.classList[allWarnings ? "add" : "remove"]("warning");
         }
 
         const clearAllErrors = isValid && updatedErrors.length === 0;
