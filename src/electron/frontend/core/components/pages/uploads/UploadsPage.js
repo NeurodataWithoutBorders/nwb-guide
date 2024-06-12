@@ -219,6 +219,7 @@ export class UploadsPage extends Page {
                 icon: keyIcon,
                 label: "API Keys",
                 onClick: () => {
+                    document.body.append(this.#globalModal);
                     this.#globalModal.form.results = structuredClone(global.data.DANDI?.api_keys ?? {});
                     this.#globalModal.open = true;
                 },
@@ -253,9 +254,10 @@ export class UploadsPage extends Page {
                 merge(apiKeys, globalDandiData.api_keys);
 
                 global.save();
-                await regenerateDandisets();
-                const input = this.form.getFormElement(["dandisets"]);
-                input.requestUpdate();
+                regenerateDandisets().then(() => {
+                    const input = this.form.getFormElement(["dandiset"]);
+                    input.requestUpdate();
+                });
             },
             formProps: {
                 validateOnChange: async (name, parent) => {
