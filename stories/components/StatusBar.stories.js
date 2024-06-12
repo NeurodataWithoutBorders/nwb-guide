@@ -1,4 +1,4 @@
-import { StatusBar } from "../../src/electron/frontend/core/components/status/StatusBar";
+import { StatusBar } from "../../src/electron/frontend/core/components/StatusBar";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import pythonSVG from "../../src/electron/frontend/assets/icons/python.svg?raw";
 import webAssetSVG from "../../src/electron/frontend/assets/icons/web_asset.svg?raw";

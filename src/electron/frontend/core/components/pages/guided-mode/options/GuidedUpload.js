@@ -16,7 +16,7 @@ import { validate } from "../../../../../utils/upload";
 import { global } from "../../../../progress/index.js";
 
 import dandiGlobalSchema from "../../../../../../../schemas/json/dandi/global.json";
-import { createFormModal } from "../../../GlobalFormModal.js";
+import { createFormModal } from "../../../GlobalFormModal";
 import { validateDANDIApiKey } from "../../../../validation/dandi";
 import { resolve } from "../../../../../utils/promises";
 

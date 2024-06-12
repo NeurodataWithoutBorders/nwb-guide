@@ -21,7 +21,7 @@ import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
 import { NWBFilePreview } from "../../../NWBFilePreview.js";
 
-import { createGlobalFormModal } from "../../../GlobalFormModal.js";
+import { createGlobalFormModal } from "../../../GlobalFormModal";
 import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../../../assets/icons/global.svg?raw";
