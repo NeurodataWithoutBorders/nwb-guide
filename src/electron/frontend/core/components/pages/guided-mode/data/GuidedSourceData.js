@@ -9,7 +9,7 @@ import preprocessSourceDataSchema from "../../../../../../../schemas/source-data
 
 import { TimeAlignment } from "./alignment/TimeAlignment.js";
 
-import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
+import { createGlobalFormModal } from "../../../GlobalFormModal.js";
 import { header } from "../../../../../utils/text";
 import { Button } from "../../../Button.js";
 

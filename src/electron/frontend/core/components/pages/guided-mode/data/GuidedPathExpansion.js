@@ -18,7 +18,6 @@ import { header } from "../../../../../utils/text";
 import { merge } from "../../../../../utils/data";
 import { run } from "../../../../../utils/run";
 
-
 const propOrder = ["path", "subject_id", "session_id"];
 
 export async function autocompleteFormatString(path) {

@@ -47,6 +47,6 @@ export default defineConfig({
                 "src/electron/frontend/utils/upload.ts",
 
             ],
-        }
+        },
     },
 });

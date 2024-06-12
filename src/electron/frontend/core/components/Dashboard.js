@@ -39,7 +39,6 @@ import { getCurrentProjectName, updateAppProgress } from "../progress/index.js";
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
 
 export class Dashboard extends LitElement {
-
     static get properties() {
         return {
             renderNameInSidebar: { type: Boolean, reflect: true },

@@ -2,7 +2,6 @@ import { LitElement, html } from "lit";
 import { header } from "../../utils/text";
 
 export class Sidebar extends LitElement {
-
     static get properties() {
         return {
             pages: { type: Object, reflect: false },

@@ -14,7 +14,7 @@ import dandiUploadSchema, {
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 const dandiSchema = merge(dandiUploadSchema, structuredClone(dandiStandaloneSchema), { arrays: "append" });
 
-import dandiCreateSchema from '../../../../../../schemas/json/dandi/create.json' assert { type: "json" }
+import dandiCreateSchema from "../../../../../../schemas/json/dandi/create.json" assert { type: "json" };
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
@@ -31,7 +31,13 @@ import * as dandi from "dandi";
 
 import keyIcon from "../../../../assets/icons/key.svg?raw";
 
-import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate, getAPIKey } from "../../../../utils/upload";
+import {
+    AWARD_VALIDATION_FAIL_MESSAGE,
+    awardNumberValidator,
+    isStaging,
+    validate,
+    getAPIKey,
+} from "../../../../utils/upload";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
 export function createDandiset(results = {}) {
@@ -219,6 +225,7 @@ export class UploadsPage extends Page {
                 icon: keyIcon,
                 label: "API Keys",
                 onClick: () => {
+                    document.body.append(this.#globalModal);
                     this.#globalModal.form.results = structuredClone(global.data.DANDI?.api_keys ?? {});
                     this.#globalModal.open = true;
                 },
@@ -253,9 +260,10 @@ export class UploadsPage extends Page {
                 merge(apiKeys, globalDandiData.api_keys);
 
                 global.save();
-                await regenerateDandisets();
-                const input = this.form.getFormElement(["dandisets"]);
-                input.requestUpdate();
+                regenerateDandisets().then(() => {
+                    const input = this.form.getFormElement(["dandiset"]);
+                    input.requestUpdate();
+                });
             },
             formProps: {
                 validateOnChange: async (name, parent) => {
