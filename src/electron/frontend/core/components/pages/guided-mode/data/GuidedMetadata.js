@@ -16,7 +16,6 @@ import {
 import { merge } from "./../../../../../utils/pages";
 import { header, tempPropertyKey } from "./../../../../../utils/forms";
 
-
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";

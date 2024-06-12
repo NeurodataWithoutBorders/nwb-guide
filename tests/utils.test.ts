@@ -74,53 +74,53 @@ describe('updateURLParams', () => {
 
 describe('Timezone Utils', () => {
     const originalDateNow = Date.now;
-  
+
     beforeEach(() => {
       Date.now = originalDateNow; // Reset Date.now() mock if it was used
     });
-  
+
     describe('getTimezoneOffset', () => {
       it('should return the correct timezone offset for the local timezone', () => {
         const offset = time.getTimezoneOffset(new Date('2023-06-12T12:00:00Z'));
         expect(offset).toBeTypeOf('number');
       });
-  
+
       it('should return the correct timezone offset for a specific timezone', () => {
         const offset = time.getTimezoneOffset(new Date('2023-06-12T12:00:00Z'), 'America/New_York');
         console.log(offset)
         expect(offset).toBe(14400000); // 4 hours offset in milliseconds
       });
-  
+
       it('should handle string date inputs correctly', () => {
         const offset = time.getTimezoneOffset('2023-06-12T12:00:00Z', 'America/New_York');
         expect(offset).toBe(14400000); // 4 hours offset in milliseconds
       });
     });
-  
+
     describe('formatTimezoneOffset', () => {
       it('should format positive offset correctly', () => {
         const formattedOffset = time.formatTimezoneOffset(-14400000);
         expect(formattedOffset).toBe('+04:00');
       });
-  
+
       it('should format negative offset correctly', () => {
         const formattedOffset = time.formatTimezoneOffset(14400000);
         expect(formattedOffset).toBe('-04:00');
       });
-  
+
       it('should format zero offset correctly', () => {
         const formattedOffset = time.formatTimezoneOffset(0);
         expect(formattedOffset).toBe('+00:00');
       });
     });
-  
+
     describe('getISODateInTimezone', () => {
-  
+
       it('should return the correct ISO date for a specific timezone', () => {
         const isoDate = time.getISODateInTimezone(new Date('2023-06-12T12:00:00Z'), 'America/New_York');
         expect(isoDate).toBe('2023-06-12T08:00:00.000Z'); // Adjusted for 4 hours offset
       });
-  
+
       it('should handle string date inputs correctly', () => {
         const isoDate = time.getISODateInTimezone('2023-06-12T12:00:00Z', 'America/New_York');
         expect(isoDate).toBe('2023-06-12T08:00:00.000Z'); // Adjusted for 4 hours offset

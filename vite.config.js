@@ -34,6 +34,6 @@ export default defineConfig({
                 "src/electron/frontend/core/dependencies.js",
                 "src/electron/frontend/core/errors.ts",
             ],
-        }
+        },
     },
 });

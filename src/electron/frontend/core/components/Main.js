@@ -19,8 +19,6 @@ export const checkIfPageIsSkipped = (page, workflowValues = {}) => {
 };
 
 export class Main extends LitElement {
-
-
     static get properties() {
         return {
             toRender: { type: Object, reflect: false },

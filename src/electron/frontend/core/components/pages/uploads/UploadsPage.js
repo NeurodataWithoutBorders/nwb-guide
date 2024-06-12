@@ -14,7 +14,7 @@ import dandiUploadSchema, {
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 const dandiSchema = merge(dandiUploadSchema, structuredClone(dandiStandaloneSchema), { arrays: "append" });
 
-import dandiCreateSchema from '../../../../../../schemas/json/dandi/create.json' assert { type: "json" }
+import dandiCreateSchema from "../../../../../../schemas/json/dandi/create.json" assert { type: "json" };
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
@@ -31,7 +31,13 @@ import * as dandi from "dandi";
 
 import keyIcon from "../../../../assets/icons/key.svg?raw";
 
-import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate, getAPIKey } from "../../../../utils/upload";
+import {
+    AWARD_VALIDATION_FAIL_MESSAGE,
+    awardNumberValidator,
+    isStaging,
+    validate,
+    getAPIKey,
+} from "../../../../utils/upload";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
 export function createDandiset(results = {}) {

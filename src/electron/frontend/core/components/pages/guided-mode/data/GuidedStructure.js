@@ -9,7 +9,7 @@ import { Modal } from "../../../Modal";
 import { List } from "../../../List";
 import { baseUrl } from "../../../../server/globals";
 import { ready } from "../../../../../../../schemas/interfaces.info";
-import { run } from "../../../../../utils/requests";;
+import { run } from "../../../../../utils/requests";
 
 const defaultEmptyMessage = "No formats selected";
 

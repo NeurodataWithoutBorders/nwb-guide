@@ -7,14 +7,14 @@ export function updateURLParams(paramsToUpdate) {
     }
 
     // Update browser history state
-    const paramString = params.toString()
+    const paramString = params.toString();
     const value = paramString ? `${location.pathname}?${paramString}` : location.pathname;
     if (history.state) {
-        Object.entries((paramsToUpdate)).forEach(([key, value]) => {
+        Object.entries(paramsToUpdate).forEach(([key, value]) => {
             if (value == undefined) delete history.state[key];
-            else history.state[key] = value
+            else history.state[key] = value;
         });
     }
-    
+
     window.history.pushState(history.state, null, value);
 }

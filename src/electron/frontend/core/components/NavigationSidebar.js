@@ -3,14 +3,12 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 const autoOpenValue = Symbol("SECTION_AUTO_OPEN");
 
-
 function isHTML(str) {
     var doc = new DOMParser().parseFromString(str, "text/html");
     return Array.from(doc.body.childNodes).some((node) => node.nodeType === 1);
 }
 
 export class NavigationSidebar extends LitElement {
-
     static get properties() {
         return {
             sections: { type: Object, reflect: false },
