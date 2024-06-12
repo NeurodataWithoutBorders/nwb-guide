@@ -25,7 +25,14 @@ export default defineConfig({
                 "src/schemas/interfaces.info.ts",
                 "src/schemas/timezone.schema.ts",
                 "src/electron/frontend/utils/electron.js",
-                "src/electron/frontend/utils/auto-update.js"
+                "src/electron/frontend/utils/auto-update.js",
+
+                // Essentially Configuration + Backend Interactions
+                "src/electron/frontend/core/index.ts",
+                "src/electron/frontend/core/pages.js",
+                "src/electron/frontend/core/globals.js",
+                "src/electron/frontend/core/dependencies.js",
+                "src/electron/frontend/core/errors.ts",
             ],
         }
     },
