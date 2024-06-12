@@ -1,13 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { createResults } from '../src/electron/frontend/utils/data'
-import { mapSessions } from '../src/electron/frontend/utils/pages'
+import { mapSessions } from '../src/electron/frontend/utils/data'
 
 import baseMetadataSchema from '../src/schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
 import { Validator } from 'jsonschema'
-import { textToArray } from '../src/electron/frontend/utils/forms'
 import { updateResultsFromSubjects } from '../src/electron/frontend/utils/data'
 import { JSONSchemaForm } from '../src/electron/frontend/core/components/JSONSchemaForm'
 
@@ -34,13 +33,6 @@ describe('metadata is specified correctly', () => {
         const res = validator.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })
-})
-
-test('empty rows are not kept for strings converted to arrays', () => {
-    expect(textToArray(' v1\n v2 ')).toEqual(['v1', 'v2'])
-    expect(textToArray(' v1\n\n   v2 ')).toEqual(['v1', 'v2'])
-    expect(textToArray(' v1\n \n   v2 ')).toEqual(['v1', 'v2'])
-    expect(textToArray(' v1\n v3\n   v2 ')).toEqual(['v1', 'v3', 'v2'])
 })
 
 test('removing all existing sessions will maintain the related subject entry on the results object', () => {

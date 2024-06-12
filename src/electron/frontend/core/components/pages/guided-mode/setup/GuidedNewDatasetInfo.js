@@ -8,8 +8,8 @@ import projectGeneralSchema from "../../../../../../../schemas/json/project/gene
 import projectGlobalSchema from "../../../../../../../schemas/json/project/globals.json" assert { type: "json" };
 import { onThrow } from "../../../../errors";
 
-import { merge } from "../../../../../utils/pages";
-import { header } from "../../../../../utils/forms";
+import { merge } from "../../../../../utils/data";
+import { header } from "../../../../../utils/text";
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
 

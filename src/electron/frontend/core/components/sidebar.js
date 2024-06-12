@@ -1,5 +1,5 @@
 import { LitElement, html } from "lit";
-import { header } from "../../utils/forms";
+import { header } from "../../utils/text";
 
 export class Sidebar extends LitElement {
 

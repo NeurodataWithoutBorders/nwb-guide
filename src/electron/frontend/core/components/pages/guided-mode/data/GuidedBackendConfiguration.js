@@ -3,8 +3,8 @@ import { JSONSchemaForm, get } from "../../../JSONSchemaForm.js";
 import { ManagedPage } from "./ManagedPage.js";
 
 import { onThrow } from "../../../../errors";
-import { merge } from "../../../../../utils/pages";
-import { run } from "../../../../../utils/requests";
+import { merge } from "../../../../../utils/data";
+import { run } from "../../../../../utils/run";
 
 import { html } from "lit";
 

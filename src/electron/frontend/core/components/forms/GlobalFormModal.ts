@@ -4,7 +4,7 @@ import { Button } from "../Button.js"
 import { JSONSchemaForm } from "../JSONSchemaForm.js"
 
 import { onThrow } from "../../errors";
-import { merge } from "../../../utils/pages.js";
+import { merge } from "../../../utils/data";
 import { save } from "../../progress/index.js";
 
 type SingleIgnorePropsLevel = {

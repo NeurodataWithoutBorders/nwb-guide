@@ -1,4 +1,4 @@
-import { isElectron, app, port } from '../../utils/electron.js'
+import { isElectron, app, port } from '../../utils/electron'
 
 import serverSVG from "../../assets/icons/server.svg?raw";
 import webAssetSVG from "../../assets/icons/web_asset.svg?raw";

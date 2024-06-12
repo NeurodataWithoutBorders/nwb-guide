@@ -1,4 +1,4 @@
-import { humanReadableBytes } from "../../utils/size";
+import { humanReadableBytes } from "../../utils/bytes";
 
 const prod = (arr: number[]) => arr.reduce((accumulator, currentValue) => accumulator * currentValue, 1);
 

@@ -1,5 +1,5 @@
 import "./pages.js"
-import { isElectron, electron } from '../utils/electron.js'
+import { isElectron, electron } from '../utils/electron'
 import { isTestEnvironment } from './globals.js'
 
 const { ipcRenderer } = electron;

@@ -2,7 +2,7 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
-import { merge } from "../../../../../utils/pages.js";
+import { merge } from "../../../../../utils/data";
 import Swal from "sweetalert2";
 import dandiUploadSchema, { ready, regenerateDandisets } from "../../../../../../../schemas/dandi-upload.schema";
 import { createDandiset, uploadToDandi } from "../../uploads/UploadsPage.js";

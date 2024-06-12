@@ -1,28 +1,23 @@
-import Swal from "sweetalert2";
-import { sanitize } from "./pages";
+import Swal, { SweetAlertOptions } from "sweetalert2";
+import { sanitize } from "./data";
 import { baseUrl } from "../core/server/globals";
+import { openProgressSwal } from "./popups";
 
-export const openProgressSwal = (options, callback) => {
-    return new Promise((resolve) => {
-        Swal.fire({
-            title: "Requesting data from server",
-            allowEscapeKey: false,
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            heightAuto: false,
-            backdrop: "rgba(0,0,0, 0.4)",
-            timerProgressBar: false,
-            didOpen: () => {
-                Swal.showLoading();
-                resolve(Swal);
-            },
-            ...options,
-        }).then((result) => callback?.(result));
-    });
-};
+type Options = {
+    swal?: boolean;
+    fetch?: any;
+    onOpen?: (swal: any) => void;
+} & SweetAlertOptions
 
-export const run = async (pathname, payload, options = {}) => {
-    let internalSwal;
+type PayloadType = Record<string, any>;
+
+export const run = async (
+    pathname: string, 
+    payload: PayloadType,
+    options: Options = {}
+) => {
+
+    let internalSwal = false; 
 
     if (options.swal === false) {
     } else if (!options.swal || options.swal === true) {
@@ -37,17 +32,17 @@ export const run = async (pathname, payload, options = {}) => {
             signal: cancelController.signal,
         };
 
-        const popup = (internalSwal = await openProgressSwal(options, (result) => {
+        internalSwal = await openProgressSwal(options, (result) => {
             if (!result.isConfirmed) cancelController.abort();
         }).then(async (swal) => {
             if (options.onOpen) await options.onOpen(swal);
             return swal;
-        }));
+        });
 
-        const element = popup.getHtmlContainer();
+        const element = Swal.getHtmlContainer()!;
 
-        const actions = popup.getActions();
-        const loader = actions.querySelector(".swal2-loader");
+        const actions = Swal.getActions()!;
+        const loader = actions.querySelector(".swal2-loader")!;
         const container = document.createElement("div");
         container.append(loader);
 
@@ -99,15 +94,10 @@ export const run = async (pathname, payload, options = {}) => {
     return results || true;
 };
 
-export const runConversion = async (info, options = {}) =>
-    run(`neuroconv/convert`, info, {
-        title: "Running the conversion",
-        onError: (error) => {
-            if (error.message.includes("already exists")) {
-                return "File already exists. Please specify another location to store the conversion results";
-            } else {
-                return "Conversion failed with current metadata. Please try again.";
-            }
-        },
-        ...options,
-    });
+export const runConversion = async (
+    info: PayloadType,
+    options = {}
+) => run(`neuroconv/convert`, info, {
+    title: "Running the conversion",
+    ...options,
+});

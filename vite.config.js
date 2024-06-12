@@ -24,8 +24,8 @@ export default defineConfig({
                 "src/schemas/dandi-upload.schema.ts",
                 "src/schemas/interfaces.info.ts",
                 "src/schemas/timezone.schema.ts",
-                "src/electron/frontend/utils/electron.js",
-                "src/electron/frontend/utils/auto-update.js",
+                "src/electron/frontend/utils/electron.ts",
+                "src/electron/frontend/utils/auto-update.ts",
 
                 // Essentially Configuration + Backend Interactions
                 "src/electron/frontend/core/index.ts",
@@ -33,6 +33,19 @@ export default defineConfig({
                 "src/electron/frontend/core/globals.js",
                 "src/electron/frontend/core/dependencies.js",
                 "src/electron/frontend/core/errors.ts",
+
+                // Server Communication
+                "src/electron/frontend/utils/run.ts",
+                "src/electron/frontend/utils/progress.ts",
+
+                // Pure Native Rendering Interaction
+                "src/electron/frontend/utils/table.ts",
+
+                // Unclear how to test
+                "src/electron/frontend/utils/popups.ts",
+                "src/electron/frontend/utils/download.ts",
+                "src/electron/frontend/utils/upload.ts",
+
             ],
         }
     },

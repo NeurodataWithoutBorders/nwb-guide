@@ -2,11 +2,11 @@ import { LitElement, css, html } from "lit";
 import { InspectorList } from "./inspector/InspectorList";
 import { Neurosift, getURLFromFilePath } from "./Neurosift";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { run } from "../../../utils/requests.js";
+import { run } from "../../../utils/run";
 
 import { until } from "lit/directives/until.js";
 import { InstanceManager } from "../InstanceManager";
-import { path } from "../../../utils/electron.js";
+import { path } from "../../../utils/electron";
 import { FullScreenToggle } from "../FullScreenToggle";
 
 export function getSharedPath(array) {

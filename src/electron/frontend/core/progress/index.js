@@ -9,12 +9,12 @@ import {
     ENCRYPTION_IV,
 } from "../globals.js";
 
-import { fs, crypto } from "../../utils/electron.js";
+import { fs, crypto } from "../../utils/electron";
 
 import { joinPath, runOnLoad } from "../globals";
-import { merge } from "../../utils/pages.js";
+import { merge } from "../../utils/data";
 import { updateAppProgress, updateFile } from "./update.js";
-import { updateURLParams } from "../../utils/url.js";
+import { updateURLParams } from "../../utils/url";
 
 import * as operations from "./operations.js";
 

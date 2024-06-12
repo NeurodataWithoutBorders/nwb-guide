@@ -6,7 +6,7 @@ import { Modal } from "../../Modal.js";
 import { SimpleTable } from "../../SimpleTable.js";
 import { JSONSchemaInput } from "../../JSONSchemaInput.js";
 
-import { header } from "../../../../utils/forms.js";
+import { header } from "../../../../utils/text";
 
 export class NestedEditor extends LitElement {
 

@@ -1,10 +1,10 @@
 import { LitElement, css, html, unsafeCSS } from "lit";
-import { header, tempPropertyValueKey } from "../../utils/forms";
+import { header } from "../../utils/text";
 import { checkStatus } from "../validation";
 
 import { TableCell } from "./table/Cell";
 import { ContextMenu } from "./table/ContextMenu";
-import { emojiFontFamily, errorHue, warningHue } from "./globals";
+import { emojiFontFamily, errorHue, tempPropertyValueKey, warningHue } from "./globals";
 
 import { Loader } from "./Loader";
 import { styleMap } from "lit/directives/style-map.js";
@@ -14,7 +14,7 @@ import tippy from "tippy.js";
 import { sortTable, getEditable } from "./Table";
 import { NestedInputCell } from "./table/cells/input";
 import { getIgnore } from "./JSONSchemaForm";
-import { merge } from "../../utils/pages";
+import { merge } from "../../utils/data";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 

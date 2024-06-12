@@ -3,17 +3,18 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
 
 import { BasicTable } from "./BasicTable";
-import { header, tempPropertyKey, tempPropertyValueKey } from "../../utils/forms";
+import { header } from "../../utils/text";
+import { tempPropertyKey, tempPropertyValueKey } from "./globals.js";
 
 import { Button } from "./Button";
 import { List } from "./List";
 import { Modal } from "./Modal";
 
-import { capitalize } from "../../utils/forms";
+import { capitalize } from "../../utils/text";
 import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
-import { merge } from "../../utils/pages";
+import { merge } from "../../utils/data";
 import { OptionalSection } from "./OptionalSection";
 import { InspectorListItem } from "./preview/inspector/InspectorList";
 import { renderDateTime, resolveDateTime } from "./DateTimeSelector";

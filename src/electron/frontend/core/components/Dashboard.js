@@ -31,7 +31,7 @@ import "../../../../../node_modules/fomantic-ui/dist/components/accordion.min.cs
 import "../../../../../node_modules/@sweetalert2/theme-bulma/bulma.css";
 // import "../../node_modules/intro.js/minified/introjs.min.css"
 import "../../assets/css/guided.css";
-import { isElectron } from "../../utils/electron.js";
+import { isElectron } from "../../utils/electron";
 import { isStorybook, reloadPageToHome } from "../globals.js";
 import { getCurrentProjectName, updateAppProgress } from "../progress/index.js";
 

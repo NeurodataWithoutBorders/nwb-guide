@@ -10,14 +10,14 @@ import { validateDANDIApiKey } from "../../../validation/dandi";
 
 import { Button } from "../../Button.js";
 import { global, remove, save } from "../../../progress/index.js";
-import { merge, setUndefinedIfNotDeclared } from "../../../../utils/pages.js";
+import { merge, setUndefinedIfNotDeclared } from "../../../../utils/data";
 
 import { notyf } from "../../../dependencies.js";
 import { homeDirectory, testDataFolderPath } from "../../../globals.js";
 
-import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../../utils/electron.js";
+import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../../utils/electron";
 
-import { onUpdateAvailable, onUpdateProgress } from "../../../../utils/auto-update.js";
+import { onUpdateAvailable, onUpdateProgress } from "../../../../utils/auto-update";
 
 import saveSVG from "../../../../assets/icons/save.svg?raw";
 import folderSVG from "../../../../assets/icons/folder_open.svg?raw";
@@ -26,14 +26,14 @@ import generateSVG from "../../../../assets/icons/restart.svg?raw";
 import downloadSVG from "../../../../assets/icons/download.svg?raw";
 import infoSVG from "../../../../assets/icons/info.svg?raw";
 
-import { header } from "../../../../utils/forms";
+import { header } from "../../../../utils/text";
 
 import examplePipelines from "../../../../../../example_pipelines.yml";
-import { run } from "../../../../utils/requests.js";
+import { run } from "../../../../utils/run";
 import { joinPath } from "../../../globals";
 import { Modal } from "../../Modal";
 import { ProgressBar } from "../../ProgressBar";
-import { humanReadableBytes } from "../../../../utils/size";
+import { humanReadableBytes } from "../../../../utils/bytes";
 
 const DATA_OUTPUT_PATH = joinPath(testDataFolderPath, "single_session_data");
 const DATASET_OUTPUT_PATH = joinPath(testDataFolderPath, "multi_session_dataset");

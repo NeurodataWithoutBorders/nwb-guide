@@ -3,13 +3,13 @@ import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 import { Button } from "../../Button.js";
 
-import { run } from "../../../../utils/requests.js";
+import { run } from "../../../../utils/run";
 import { Modal } from "../../Modal";
 import { getSharedPath, truncateFilePaths } from "../../preview/NWBFilePreview.js";
 import { InspectorList, InspectorLegend } from "../../preview/inspector/InspectorList.js";
-import { download } from "../../../../utils/download.js";
+import { download } from "../../../../utils/download";
 
-import { createProgressPopup } from "../../../../utils/progress.js";
+import { createProgressPopup } from "../../../../utils/popups";
 
 import { ready } from "../../../../../../schemas/dandi-upload.schema";
 import { JSONSchemaForm } from "../../JSONSchemaForm.js";

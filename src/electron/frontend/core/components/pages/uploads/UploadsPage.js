@@ -18,9 +18,9 @@ import dandiCreateSchema from '../../../../../../schemas/json/dandi/create.json'
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
-import { merge } from "../../../../utils/pages.js";
+import { merge } from "../../../../utils/data";
 
-import { run } from "../../../../utils/requests.js";
+import { run } from "../../../../utils/run";
 import { Modal } from "../../Modal";
 import { DandiResults } from "../../DandiResults.js";
 

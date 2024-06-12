@@ -1,7 +1,7 @@
 
 
 import { LitElement, html, css, unsafeCSS } from 'lit';
-import { humanReadableBytes } from '../../utils/size';
+import { humanReadableBytes } from '../../utils/bytes';
 
 export type ProgressProps = {
     size?: string,

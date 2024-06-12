@@ -7,16 +7,16 @@ import { onThrow } from "../../../../errors";
 
 import pathExpansionSchema from "../../../../../../../schemas/json/path-expansion.schema.json" assert { type: "json" };
 import { List } from "../../../List";
-import { fs } from "../../../../../utils/electron.js";
+import { fs } from "../../../../../utils/electron";
 import { Button } from "../../../Button.js";
 import { Modal } from "../../../Modal";
 
 import autocompleteIcon from "../../../../../assets/icons/inspect.svg?raw";
 
 // Utils
-import { header } from "../../../../../utils/forms";
-import { merge } from "../../../../../utils/pages.js";
-import { run } from "../../../../../utils/requests.js";
+import { header } from "../../../../../utils/text";
+import { merge } from "../../../../../utils/data";
+import { run } from "../../../../../utils/run";
 
 
 const propOrder = ["path", "subject_id", "session_id"];

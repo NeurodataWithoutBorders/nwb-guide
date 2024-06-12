@@ -6,7 +6,7 @@ import { Page } from "../../Page.js";
 import { getStubArray } from "../options/GuidedStubPreview.js";
 import { getSharedPath } from "../../../preview/NWBFilePreview.js";
 
-import { electron, path } from "../../../../../utils/electron.js";
+import { electron, path } from "../../../../../utils/electron";
 
 import manualActionsJSON from "../../../../../../../schemas/json/manual_actions.json";
 

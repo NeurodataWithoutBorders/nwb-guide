@@ -4,9 +4,10 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { header, replaceRefsWithValue } from "../../utils/forms";
+import { header } from "../../utils/text";
+import { replaceRefsWithValue } from "../../utils/data";
 import { resolve } from "../promises";
-import { merge } from "../../utils/pages";
+import { merge } from "../../utils/data";
 import { resolveProperties } from "../../utils/data";
 
 import { JSONSchemaInput, getEditableItems } from "./JSONSchemaInput";
@@ -15,6 +16,7 @@ import { InspectorListItem } from "./preview/inspector/InspectorList";
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
 import { Button } from "./Button";
+import { isObject } from "../../utils/typecheck";
 
 const encode = (str) => {
     try {
@@ -69,11 +71,7 @@ const additionalPropPattern = "additional";
 
 const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
 
-var validator = new Validator();
-
-const isObject = (item) => {
-    return item && typeof item === "object" && !Array.isArray(item);
-};
+const validator = new Validator();
 
 export const getIgnore = (o, path) => {
     if (typeof path === "string") path = path.split(".");

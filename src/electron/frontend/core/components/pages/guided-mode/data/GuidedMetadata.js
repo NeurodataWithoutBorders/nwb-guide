@@ -10,11 +10,11 @@ import {
     resolveMetadata,
     getInfoFromId,
     drillSchemaProperties,
-    resolveFromPath,
 } from "./../../../../../utils/data";
 
-import { merge } from "./../../../../../utils/pages";
-import { header, tempPropertyKey } from "./../../../../../utils/forms";
+import { merge } from "../../../../../utils/data";
+import { header } from "../../../../../utils/text";
+import { tempPropertyKey } from "./../../../globals.js";
 
 
 import Swal from "sweetalert2";

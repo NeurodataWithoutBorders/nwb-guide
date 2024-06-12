@@ -1,5 +1,5 @@
 import { getEditableItems } from "../core/components/JSONSchemaInput.js";
-import { merge } from "./pages.js";
+import { isObject } from "./typecheck.js";
 
 // Merge project-wide data into metadata
 export function populateWithProjectMetadata(info, globalState) {
@@ -173,4 +173,130 @@ export const updateResultsFromSubjects = (results: any, subjects: any, sourceDat
 
     return results
 
+}
+
+type Schema = { properties: Record<string, any> };
+
+export const setUndefinedIfNotDeclared = (
+    schemaProps: Schema | Schema["properties"],
+    resolved: Record<string, any> = {}
+) => {
+    
+    const resolvedProps = "properties" in schemaProps ? schemaProps.properties : schemaProps;
+
+    for (const prop in resolvedProps) {
+        const propInfo = resolvedProps[prop]?.properties;
+        if (propInfo) setUndefinedIfNotDeclared(propInfo, resolved[prop]);
+        else if (!(prop in resolved)) resolved[prop] = undefined;
+    }
+};
+
+const isPrivate = (k: string) => k.slice(0, 2) === "__";
+
+type ConditionFunction = (key: string, value: any) => boolean;
+export const sanitize = (
+    item: any, 
+    condition: ConditionFunction = isPrivate
+) => {
+    if (isObject(item)) {
+        for (const [k, value] of Object.entries(item)) {
+            if (condition(k, value)) delete item[k];
+            else sanitize(value, condition);
+        }
+    } else if (Array.isArray(item)) item.forEach((value) => sanitize(value, condition));
+
+    return item;
+};
+
+type Object = Record<string, any>;
+type MergeOptions = {
+    arrays?: "append" | "merge";
+    clone?: boolean;
+    remove?: boolean;
+};
+
+export function merge(
+    toMerge: Object = {}, 
+    target: Object = {}, 
+    mergeOptions: MergeOptions = {}
+) {
+    // Deep merge objects
+    for (const [k, value] of Object.entries(toMerge)) {
+        const targetValue = target[k];
+        // if (isPrivate(k)) continue;
+        const arrayMergeMethod = mergeOptions.arrays;
+        if (arrayMergeMethod && Array.isArray(value) && Array.isArray(targetValue)) {
+            if (arrayMergeMethod === "append")
+                target[k] = [...targetValue, ...value]; // Append array entries together
+            else {
+                target[k] = targetValue.map((targetItem, i) => merge(value[i], targetItem, mergeOptions)); // Merge array entries
+            }
+        } else if (value === undefined) {
+            delete target[k]; // Remove matched values
+            // if (mergeOptions.remove !== false) delete target[k]; // Remove matched values
+        } else if (isObject(value)) {
+            if (isObject(targetValue)) target[k] = merge(value, targetValue, mergeOptions);
+            else {
+                if (mergeOptions.clone)
+                    target[k] = merge(value, {}, mergeOptions); // Replace primitive values
+                else target[k] = value; // Replace object values
+            }
+        } else target[k] = value; // Replace primitive values
+    }
+
+    return target;
+}
+
+export function mapSessions(callback = (value) => value, toIterate = {}) {
+    return Object.entries(toIterate)
+        .map(([subject, sessions]) => {
+            return Object.entries(sessions).map(([session, info], i) => callback({ subject, session, info }, i));
+        })
+        .flat(2);
+}
+
+
+export const replaceRefsWithValue = (
+    schema: any,
+    path: string[] = [],
+    parent: { [x:string]: any } = structuredClone(schema)
+) => {
+
+    if (isObject(schema)) {
+
+        const copy = { ...schema };
+
+        for (let propName in copy) {
+            const prop = copy[propName];
+            if (isObject(prop)) {
+                const internalCopy = (copy[propName] = { ...prop });
+                const refValue = internalCopy["$ref"]
+                const allOfValue = internalCopy['allOf']
+                if (allOfValue) {
+                    copy [propName]= allOfValue.reduce((acc, curr) => {
+                        const result = replaceRefsWithValue({ _temp: curr}, path, parent)
+                        const resolved = result._temp
+                        return merge(resolved, acc)
+                    }, {})
+                }
+                else if (refValue) {
+
+                    const refPath = refValue.split('/').slice(1) // NOTE: Assume from base
+                    const resolved = refPath.reduce((acc, key) => acc[key], parent)
+
+                    if (resolved) copy[propName] = resolved;
+                    else delete copy[propName]
+                } else {
+                    for (let key in internalCopy) {
+                        const fullPath = [...path, propName, key];
+                        internalCopy[key] = replaceRefsWithValue(internalCopy[key], fullPath, parent);
+                    }
+                }
+            }
+        }
+
+        return copy as { [x:string]: any }
+    }
+
+    return schema;
 }
