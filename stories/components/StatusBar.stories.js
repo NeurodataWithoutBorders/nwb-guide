@@ -5,19 +5,19 @@ import webAssetSVG from "../../src/electron/frontend/assets/icons/web_asset.svg?
 import wifiSVG from "../../src/electron/frontend/assets/icons/wifi.svg?raw";
 
 export default {
-  title: "Components/Status Bar",
+    title: "Components/Status Bar",
 };
 
 const Template = (args) => new StatusBar(args);
 
 export const Default = Template.bind({});
 Default.args = {
-  items: [
-    { label: unsafeSVG(webAssetSVG), value: "0.0.3" },
-    { label: unsafeSVG(wifiSVG) },
-    { label: unsafeSVG(pythonSVG), status: true },
-    { label: "Other", status: false },
-  ],
+    items: [
+        { label: unsafeSVG(webAssetSVG), value: "0.0.3" },
+        { label: unsafeSVG(wifiSVG) },
+        { label: unsafeSVG(pythonSVG), status: true },
+        { label: "Other", status: false },
+    ],
 };
 
 // {
