@@ -145,12 +145,8 @@
     "@vitest/coverage-v8": "^1.6.0",
     "chokidar": "^3.5.3",
     "concurrently": "^7.6.0",
-<<<<<<< linux-dev -- Incoming Change
-    "dandi": "^0.0.4",
-    "electron": "^26.2.2",
-=======
     "dandi": "^0.0.6",
->>>>>>> main -- Current Change
+    "electron": "^26.2.2",
     "find-free-port": "^2.0.0",
     "fomantic-ui": "^2.8.8",
     "fs-extra": "^10.0.0",
