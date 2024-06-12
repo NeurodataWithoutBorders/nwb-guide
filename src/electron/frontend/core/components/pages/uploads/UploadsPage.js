@@ -254,7 +254,7 @@ export class UploadsPage extends Page {
 
                 global.save();
                 await regenerateDandisets();
-                const input = this.form.getFormElement(["dandisets"]);
+                const input = this.form.getFormElement(["dandiset"]);
                 input.requestUpdate();
             },
             formProps: {
