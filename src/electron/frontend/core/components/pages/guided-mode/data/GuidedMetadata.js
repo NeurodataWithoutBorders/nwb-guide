@@ -19,9 +19,9 @@ import { tempPropertyKey } from "./../../../globals.js";
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
-import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
+import { NWBFilePreview } from "../../../NWBFilePreview.js";
 
-import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
+import { createGlobalFormModal } from "../../../GlobalFormModal.js";
 import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../../../assets/icons/global.svg?raw";
@@ -226,7 +226,7 @@ export class GuidedMetadataPage extends ManagedPage {
     createForm = ({ subject, session, info }) => {
         const hasMultipleSessions = this.workflow.multiple_sessions.value;
 
-        // const results = createResults({ subject, info }, this.info.globalState);
+        // const results = createResultsForSession({ subject, info }, this.info.globalState);
 
         const { globalState } = this.info;
 

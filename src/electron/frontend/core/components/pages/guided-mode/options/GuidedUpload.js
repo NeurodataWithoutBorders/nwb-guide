@@ -16,9 +16,9 @@ import { validate } from "../../../../../utils/upload";
 import { global } from "../../../../progress/index.js";
 
 import dandiGlobalSchema from "../../../../../../../schemas/json/dandi/global.json";
-import { createFormModal } from "../../../forms/GlobalFormModal";
+import { createFormModal } from "../../../GlobalFormModal.js";
 import { validateDANDIApiKey } from "../../../../validation/dandi";
-import { resolve } from "../../../../promises";
+import { resolve } from "../../../../../utils/promises";
 
 export class GuidedUploadPage extends Page {
     constructor(...args) {

@@ -6,12 +6,12 @@ import { Accordion } from "./Accordion";
 import { checkStatus } from "../validation";
 import { header } from "../../utils/text";
 import { replaceRefsWithValue } from "../../utils/data";
-import { resolve } from "../promises";
+import { resolve } from "../../utils/promises";
 import { merge } from "../../utils/data";
 import { resolveProperties } from "../../utils/data";
 
 import { JSONSchemaInput, getEditableItems } from "./JSONSchemaInput";
-import { InspectorListItem } from "./preview/inspector/InspectorList";
+import { InspectorListItem } from "./InspectorList";
 
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";

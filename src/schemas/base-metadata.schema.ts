@@ -1,4 +1,5 @@
-import { serverGlobals, resolve } from '../electron/frontend/core/server/globals'
+import { serverGlobals } from '../electron/frontend/core/server/globals'
+import { resolve } from '../electron/frontend/utils/promises'
 
 import { header } from '../electron/frontend/utils/text'
 import { replaceRefsWithValue } from '../electron/frontend/utils/data'

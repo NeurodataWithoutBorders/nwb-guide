@@ -17,24 +17,25 @@ export default defineConfig({
                 "**/electron/main",
                 "**/electron/preload",
 
-                // No test for the rendered pages (composed of components)
+                // No test for the rendered pages, as they're composed of components
                 "**/components/pages",
 
-                // Most of the code is conditionally run (Electron only)
+                // Electron Only (for the most part)
                 "src/schemas/dandi-upload.schema.ts",
                 "src/schemas/interfaces.info.ts",
                 "src/schemas/timezone.schema.ts",
                 "src/electron/frontend/utils/electron.ts",
                 "src/electron/frontend/utils/auto-update.ts",
 
-                // Essentially Configuration + Backend Interactions
+                // High-Level App Configuration
                 "src/electron/frontend/core/index.ts",
                 "src/electron/frontend/core/pages.js",
-                "src/electron/frontend/core/globals.js",
                 "src/electron/frontend/core/dependencies.js",
+                "src/electron/frontend/core/globals.js",
                 "src/electron/frontend/core/errors.ts",
 
                 // Server Communication
+                "src/electron/frontend/core/server",
                 "src/electron/frontend/utils/run.ts",
                 "src/electron/frontend/utils/progress.ts",
 

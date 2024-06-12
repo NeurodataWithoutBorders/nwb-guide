@@ -10,9 +10,9 @@ import { html } from "lit";
 
 import { until } from "lit/directives/until.js";
 
-import { resolve } from "../../../../promises";
+import { resolve } from "../../../../../utils/promises";
 import { InstanceManager } from "../../../InstanceManager.js";
-import { InspectorListItem } from "../../../preview/inspector/InspectorList.js";
+import { InspectorListItem } from "../../../InspectorList.js";
 
 import { getResourceUsageBytes } from "../../../../validation/backend-configuration";
 

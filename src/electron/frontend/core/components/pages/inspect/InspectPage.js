@@ -5,8 +5,8 @@ import { Button } from "../../Button.js";
 
 import { run } from "../../../../utils/run";
 import { Modal } from "../../Modal";
-import { getSharedPath, truncateFilePaths } from "../../preview/NWBFilePreview.js";
-import { InspectorList, InspectorLegend } from "../../preview/inspector/InspectorList.js";
+import { getSharedPath, truncateFilePaths } from "../../NWBFilePreview.js";
+import { InspectorList, InspectorLegend } from "../../InspectorList.js";
 import { download } from "../../../../utils/download";
 
 import { createProgressPopup } from "../../../../utils/popups";

@@ -2,7 +2,7 @@ import { LitElement, css, html } from "lit";
 import "./Button";
 import { notify } from "../dependencies";
 import { Accordion } from "./Accordion";
-import { InstanceListItem } from "./instances/item";
+import { InstanceListItem } from "./InstanceListItem";
 import { checkStatus } from "../validation";
 
 export class InstanceManager extends LitElement {

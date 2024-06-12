@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { createResults } from '../src/electron/frontend/utils/data'
+import { createResultsForSession } from '../src/electron/frontend/utils/data'
 import { mapSessions } from '../src/electron/frontend/utils/data'
 
 import baseMetadataSchema from '../src/schemas/base-metadata.schema'
@@ -29,7 +29,7 @@ describe('metadata is specified correctly', () => {
         // Allow mouse (full list populated from server)
         baseMetadataSchema.properties.Subject.properties.species.enum = ['Mus musculus']
 
-        const result = mapSessions(info => createResults(info, globalState), globalState.results)
+        const result = mapSessions(info => createResultsForSession(info, globalState), globalState.results)
         const res = validator.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })

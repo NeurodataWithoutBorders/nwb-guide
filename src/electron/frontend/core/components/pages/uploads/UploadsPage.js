@@ -38,7 +38,7 @@ import {
     validate,
     getAPIKey,
 } from "../../../../utils/upload";
-import { createFormModal } from "../../forms/GlobalFormModal";
+import { createFormModal } from "../../GlobalFormModal.js";
 
 export function createDandiset(results = {}) {
     let notification;

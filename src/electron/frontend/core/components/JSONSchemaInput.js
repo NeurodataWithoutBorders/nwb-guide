@@ -16,8 +16,9 @@ import { Search } from "./Search";
 import tippy from "tippy.js";
 import { merge } from "../../utils/data";
 import { OptionalSection } from "./OptionalSection";
-import { InspectorListItem } from "./preview/inspector/InspectorList";
+import { InspectorListItem } from "./InspectorList.js";
 import { renderDateTime, resolveDateTime } from "./DateTimeSelector";
+import { isObject } from "../../utils/typecheck";
 
 const isDevelopment = !!import.meta.env;
 
@@ -277,8 +278,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 }
 
 // Schema or value indicates editable object
-export const isEditableObject = (schema, value) =>
-    schema.type === "object" || (value && typeof value === "object" && !Array.isArray(value));
+export const isEditableObject = (schema, value) => schema.type === "object" || isObject(value);
 
 export const isAdditionalProperties = (pattern) => pattern === "additional";
 export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);

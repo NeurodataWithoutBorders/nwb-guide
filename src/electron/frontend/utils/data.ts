@@ -1,5 +1,16 @@
-import { getEditableItems } from "../core/components/JSONSchemaInput.js";
 import { isObject } from "./typecheck.js";
+
+type Schema = { properties: Record<string, any> };
+
+type ConditionFunction = (key: string, value: any) => boolean;
+
+type Object = Record<string, any>;
+
+type MergeOptions = {
+    arrays?: "append" | "merge";
+    clone?: boolean;
+    remove?: boolean;
+};
 
 // Merge project-wide data into metadata
 export function populateWithProjectMetadata(info, globalState) {
@@ -37,22 +48,6 @@ export function resolveGlobalOverrides(subject, globalState, resolveMultiSession
     }
 
     return { Subject: subjectMetadataCopy };
-}
-
-const isPatternResult = Symbol("ispatternresult");
-
-export function resolveFromPath(path, target) {
-    return path.reduce((acc, key) => {
-        if (!acc) return;
-        if (acc[isPatternResult]) return acc;
-        if (key in acc) return acc[key];
-        else {
-            const items = getEditableItems(acc, true, { name: key });
-            const object = items.reduce((acc, { key, value }) => (acc[key] = value), {});
-            object[isPatternResult] = true;
-            return object;
-        }
-    }, target);
 }
 
 export function drillSchemaProperties(schema = {}, callback, target, path = [], inPatternProperties = false) {
@@ -117,11 +112,11 @@ export function resolveMetadata(subject, session, globalState) {
     return results;
 }
 
-export function createResults({ subject, info }, globalState) {
+export function createResultsForSession({ subject, info }, globalState) {
     const results = populateWithProjectMetadata(info.metadata, globalState);
     const subjectGlobalsCopy = { ...globalState.subjects[subject] };
     delete subjectGlobalsCopy.sessions; // Remove extra key from metadata
-    merge(subjectGlobalsCopy, results.Subject);
+    results.Subject = merge(subjectGlobalsCopy, results.Subject);
     return results;
 }
 
@@ -175,8 +170,6 @@ export const updateResultsFromSubjects = (results: any, subjects: any, sourceDat
 
 }
 
-type Schema = { properties: Record<string, any> };
-
 export const setUndefinedIfNotDeclared = (
     schemaProps: Schema | Schema["properties"],
     resolved: Record<string, any> = {}
@@ -193,7 +186,6 @@ export const setUndefinedIfNotDeclared = (
 
 const isPrivate = (k: string) => k.slice(0, 2) === "__";
 
-type ConditionFunction = (key: string, value: any) => boolean;
 export const sanitize = (
     item: any, 
     condition: ConditionFunction = isPrivate
@@ -206,13 +198,6 @@ export const sanitize = (
     } else if (Array.isArray(item)) item.forEach((value) => sanitize(value, condition));
 
     return item;
-};
-
-type Object = Record<string, any>;
-type MergeOptions = {
-    arrays?: "append" | "merge";
-    clone?: boolean;
-    remove?: boolean;
 };
 
 export function merge(
@@ -257,23 +242,26 @@ export function mapSessions(callback = (value) => value, toIterate = {}) {
 
 
 export const replaceRefsWithValue = (
-    schema: any,
+    schema: Schema,
     path: string[] = [],
     parent: { [x:string]: any } = structuredClone(schema)
 ) => {
 
+    const copy = { ...schema }
+
     if (isObject(schema)) {
 
-        const copy = { ...schema };
+        const resolvedProps = "properties" in copy ? copy.properties : copy;
 
-        for (let propName in copy) {
-            const prop = copy[propName];
+        for (let propName in resolvedProps) {
+            const prop = resolvedProps[propName];
+
             if (isObject(prop)) {
-                const internalCopy = (copy[propName] = { ...prop });
+                const internalCopy = (resolvedProps[propName] = { ...prop });
                 const refValue = internalCopy["$ref"]
                 const allOfValue = internalCopy['allOf']
                 if (allOfValue) {
-                    copy [propName]= allOfValue.reduce((acc, curr) => {
+                    resolvedProps[propName]= allOfValue.reduce((acc, curr) => {
                         const result = replaceRefsWithValue({ _temp: curr}, path, parent)
                         const resolved = result._temp
                         return merge(resolved, acc)
@@ -284,8 +272,8 @@ export const replaceRefsWithValue = (
                     const refPath = refValue.split('/').slice(1) // NOTE: Assume from base
                     const resolved = refPath.reduce((acc, key) => acc[key], parent)
 
-                    if (resolved) copy[propName] = resolved;
-                    else delete copy[propName]
+                    if (resolved) resolvedProps[propName] = resolved;
+                    else delete resolvedProps[propName]
                 } else {
                     for (let key in internalCopy) {
                         const fullPath = [...path, propName, key];

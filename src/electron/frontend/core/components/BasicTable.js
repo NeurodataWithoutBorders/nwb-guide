@@ -4,7 +4,7 @@ import { header } from "../../utils/text";
 import { checkStatus } from "../validation";
 import { emojiFontFamily, errorHue, warningHue } from "./globals";
 
-import * as promises from "../promises";
+import * as promises from "../../utils/promises";
 
 import "./Button";
 import { sortTable } from "./Table";
