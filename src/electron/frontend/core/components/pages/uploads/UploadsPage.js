@@ -253,9 +253,10 @@ export class UploadsPage extends Page {
                 merge(apiKeys, globalDandiData.api_keys);
 
                 global.save();
-                await regenerateDandisets();
-                const input = this.form.getFormElement(["dandiset"]);
-                input.requestUpdate();
+                regenerateDandisets().then(() => {
+                    const input = this.form.getFormElement(["dandiset"]);
+                    input.requestUpdate();
+                })
             },
             formProps: {
                 validateOnChange: async (name, parent) => {
