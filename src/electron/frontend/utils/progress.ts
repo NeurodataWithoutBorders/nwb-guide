@@ -16,7 +16,7 @@ type ProgressHandlerProps = {
 class ProgressHandler {
 
     source: EventSource;
-    
+
     onopen: OnOpenCallback  = () => {};
     onmessage: OnMessageCallback = () => {};
     onerror: OnErrorCallback = () => {};

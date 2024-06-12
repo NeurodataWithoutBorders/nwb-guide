@@ -8,7 +8,7 @@ import progressHandler from "./progress";
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const openProgressSwal = (
-    options: SweetAlertOptions, 
+    options: SweetAlertOptions,
     callback: (result: any) => void
 ): Promise<true> => {
     return new Promise((resolve) => {
@@ -30,7 +30,7 @@ export const openProgressSwal = (
 };
 
 export const createProgressPopup = async (
-    options: SweetAlertOptions, 
+    options: SweetAlertOptions,
     tqdmCallback: (update: any) => void
 ) => {
     const cancelController = new AbortController();

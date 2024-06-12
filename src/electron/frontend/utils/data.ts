@@ -174,7 +174,7 @@ export const setUndefinedIfNotDeclared = (
     schemaProps: Schema | Schema["properties"],
     resolved: Record<string, any> = {}
 ) => {
-    
+
     const resolvedProps = "properties" in schemaProps ? schemaProps.properties : schemaProps;
 
     for (const prop in resolvedProps) {
@@ -187,7 +187,7 @@ export const setUndefinedIfNotDeclared = (
 const isPrivate = (k: string) => k.slice(0, 2) === "__";
 
 export const sanitize = (
-    item: any, 
+    item: any,
     condition: ConditionFunction = isPrivate
 ) => {
     if (isObject(item)) {
@@ -201,8 +201,8 @@ export const sanitize = (
 };
 
 export function merge(
-    toMerge: Object = {}, 
-    target: Object = {}, 
+    toMerge: Object = {},
+    target: Object = {},
     mergeOptions: MergeOptions = {}
 ) {
     // Deep merge objects

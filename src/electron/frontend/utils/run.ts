@@ -12,12 +12,12 @@ type Options = {
 type PayloadType = Record<string, any>;
 
 export const run = async (
-    pathname: string, 
+    pathname: string,
     payload: PayloadType,
     options: Options = {}
 ) => {
 
-    let internalSwal = false; 
+    let internalSwal = false;
 
     if (options.swal === false) {
     } else if (!options.swal || options.swal === true) {

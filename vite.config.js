@@ -46,7 +46,6 @@ export default defineConfig({
                 "src/electron/frontend/utils/popups.ts",
                 "src/electron/frontend/utils/download.ts",
                 "src/electron/frontend/utils/upload.ts",
-
             ],
         },
     },

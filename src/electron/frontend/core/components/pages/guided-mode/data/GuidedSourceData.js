@@ -16,7 +16,7 @@ import { Button } from "../../../Button.js";
 import globalIcon from "../../../../../assets/icons/global.svg?raw";
 
 import { run } from "../../../../../utils/run";
-import { getInfoFromId } from "../../../../../utils/data";;
+import { getInfoFromId } from "../../../../../utils/data";
 import { Modal } from "../../../Modal";
 import Swal from "sweetalert2";
 

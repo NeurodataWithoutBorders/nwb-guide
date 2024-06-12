@@ -408,7 +408,7 @@ describe('Data Manipulation Utilities', () => {
       expect(result).toEqual({ subject: '1234', session: '5678' });
     });
   });
-  
+
   describe('resolveGlobalOverrides', () => {
     it('should merge subject metadata and project-wide metadata', () => {
       const subject = 'testSubject';
@@ -417,7 +417,7 @@ describe('Data Manipulation Utilities', () => {
       expect(result.Subject).toEqual({ testKey: 'testValue', projectKey: 'projectValue' });
     });
   });
-  
+
   describe('drillSchemaProperties', () => {
     it('should call the callback for each property in the schema', () => {
       const schema = { properties: { key1: { type: 'string' }, key2: { type: 'number' } } };
@@ -426,7 +426,7 @@ describe('Data Manipulation Utilities', () => {
       expect(callback).toHaveBeenCalledTimes(2);
     });
   });
-  
+
   describe('resolveProperties', () => {
     it('should resolve properties and apply default values', () => {
       const properties = { key1: { type: 'string', default: 'defaultValue' } };
@@ -435,12 +435,12 @@ describe('Data Manipulation Utilities', () => {
       expect(target).toEqual({ key1: 'defaultValue' });
     });
   });
-  
+
   describe('resolveMetadata', () => {
     it('should resolve metadata for the subject and session', () => {
       const subject = 'testSubject';
       const session = 'testSession';
-      const globalState = { 
+      const globalState = {
         results: { testSubject: { testSession: { metadata: { testKey: 'testValue' } } } },
         schema: { metadata: { testSubject: { testSession: { properties: { testKey: { type: 'string' } } } } } },
         project: {}
@@ -449,7 +449,7 @@ describe('Data Manipulation Utilities', () => {
       expect(result).toEqual({ testKey: 'testValue' });
     });
   });
-  
+
   describe('createResultsForSession', () => {
     it('should create results with project metadata and subject globals', () => {
       const input = { subject: 'testSubject', info: { metadata: { NWBFile: { key1: 'value1' } } } };
@@ -458,7 +458,7 @@ describe('Data Manipulation Utilities', () => {
       expect(result).toEqual({ NWBFile: { key1: 'value1', global:true }, Subject: { key2: 'value2' } }); // Input value has priority over project metadata
     });
   });
-  
+
   describe('updateResultsFromSubjects', () => {
     it('should update results based on the subjects', () => {
       const results = { subject1: { session1: { metadata: { testKey: 'testValue' } } } };
@@ -470,7 +470,7 @@ describe('Data Manipulation Utilities', () => {
       });
     });
   });
-  
+
   describe('setUndefinedIfNotDeclared', () => {
     it('should set undefined for properties not declared', () => {
       const schemaProps = { properties: { key1: { type: 'string' } } };
@@ -479,7 +479,7 @@ describe('Data Manipulation Utilities', () => {
       expect(resolved).toEqual({ key1: undefined });
     });
   });
-  
+
   describe('sanitize', () => {
     it('should remove private properties from the object', () => {
       const item = { __private: 'value', public: 'value' };
@@ -487,7 +487,7 @@ describe('Data Manipulation Utilities', () => {
       expect(result).toEqual({ public: 'value' });
     });
   });
-  
+
   describe('merge', () => {
     it('should merge two objects deeply', () => {
       const toMerge = { key1: 'value1', key2: { subKey: 'value2' } };
@@ -496,7 +496,7 @@ describe('Data Manipulation Utilities', () => {
       expect(result).toEqual({ key1: 'value1', key2: { subKey: 'value2', subKey2: 'value3' } });
     });
   });
-  
+
   describe('mapSessions', () => {
     it('should map sessions using the provided callback', () => {
       const toIterate = { subject1: { session1: 'info1', session2: 'info2' } };
@@ -505,7 +505,7 @@ describe('Data Manipulation Utilities', () => {
       expect(result).toEqual(['subject1/session1: info1', 'subject1/session2: info2']);
     });
   });
-  
+
   describe('replaceRefsWithValue', () => {
     it('should replace $ref with the referenced value', () => {
       const schema = { properties: { key1: { $ref: '#/definitions/ref1' } }, definitions: { ref1: { type: 'string' } } };

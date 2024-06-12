@@ -8,7 +8,7 @@ import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
 import { ready } from "../../../../../../../schemas/interfaces.info";
-import { run } from "../../../../../utils/run";;
+import { run } from "../../../../../utils/run";
 
 const defaultEmptyMessage = "No formats selected";
 
