@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'vitest'
-import { createResults } from '../src/electron/frontend/core/components/pages/guided-mode/data/utils'
-import { mapSessions } from '../src/electron/frontend/core/components/pages/utils'
+import { createResults } from '../src/electron/frontend/utils/data'
+import { mapSessions } from '../src/electron/frontend/utils/pages'
 
 import baseMetadataSchema from '../src/schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
 import { Validator } from 'jsonschema'
-import { textToArray } from '../src/electron/frontend/core/components/forms/utils'
-import { updateResultsFromSubjects } from '../src/electron/frontend/core/components/pages/guided-mode/setup/utils'
+import { textToArray } from '../src/electron/frontend/utils/forms'
+import { updateResultsFromSubjects } from '../src/electron/frontend/utils/data'
 import { JSONSchemaForm } from '../src/electron/frontend/core/components/JSONSchemaForm'
 
 import { validateOnChange } from "../src/electron/frontend/core/validation/index.js";

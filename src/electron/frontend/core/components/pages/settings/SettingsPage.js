@@ -10,7 +10,7 @@ import { validateDANDIApiKey } from "../../../validation/dandi";
 
 import { Button } from "../../Button.js";
 import { global, remove, save } from "../../../progress/index.js";
-import { merge, setUndefinedIfNotDeclared } from "../utils";
+import { merge, setUndefinedIfNotDeclared } from "../../../../utils/pages.js";
 
 import { notyf } from "../../../dependencies.js";
 import { homeDirectory, testDataFolderPath } from "../../../globals.js";
@@ -26,14 +26,14 @@ import generateSVG from "../../../../assets/icons/restart.svg?raw";
 import downloadSVG from "../../../../assets/icons/download.svg?raw";
 import infoSVG from "../../../../assets/icons/info.svg?raw";
 
-import { header } from "../../forms/utils";
+import { header } from "../../../../utils/forms";
 
 import examplePipelines from "../../../../../../example_pipelines.yml";
-import { run } from "../guided-mode/options/utils.js";
+import { run } from "../../../../utils/requests.js";
 import { joinPath } from "../../../globals";
 import { Modal } from "../../Modal";
 import { ProgressBar } from "../../ProgressBar";
-import { humanReadableBytes } from "../../utils/size";
+import { humanReadableBytes } from "../../../../utils/size";
 
 const DATA_OUTPUT_PATH = joinPath(testDataFolderPath, "single_session_data");
 const DATASET_OUTPUT_PATH = joinPath(testDataFolderPath, "multi_session_dataset");

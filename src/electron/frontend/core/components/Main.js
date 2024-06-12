@@ -1,5 +1,4 @@
 import { LitElement, html } from "lit";
-import useGlobalStyles from "./utils/useGlobalStyles.js";
 import { GuidedFooter } from "./pages/guided-mode/GuidedFooter.js";
 import { GuidedHeader } from "./pages/guided-mode/GuidedHeader.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
@@ -19,21 +18,8 @@ export const checkIfPageIsSkipped = (page, workflowValues = {}) => {
     return false;
 };
 
-const componentCSS = `
-    :host {
-        display: grid;
-        grid-template-rows: fit-content(100%) 1fr fit-content(100%);
-    }
-`;
-
 export class Main extends LitElement {
-    static get styles() {
-        return useGlobalStyles(
-            componentCSS,
-            (sheet) => sheet.href && sheet.href.includes("bootstrap"),
-            this.shadowRoot
-        );
-    }
+
 
     static get properties() {
         return {

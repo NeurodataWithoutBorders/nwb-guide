@@ -14,9 +14,7 @@ export const randomizeElements = (array, count) => {
     return result;
 };
 
-const isObject = (item) => {
-    return item && typeof item === "object" && !Array.isArray(item);
-};
+const isObject = (item) => item && typeof item === "object" && !Array.isArray(item);
 
 export const setUndefinedIfNotDeclared = (schemaProps, resolved) => {
     if ("properties" in schemaProps) schemaProps = schemaProps.properties;

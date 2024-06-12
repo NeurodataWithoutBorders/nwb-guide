@@ -1,4 +1,4 @@
-import { merge } from '../pages/utils'
+import { merge } from './pages'
 
 const toCapitalizeAll = ['nwb', 'api', 'id']
 const toCapitalizeNone = ['or', 'and']

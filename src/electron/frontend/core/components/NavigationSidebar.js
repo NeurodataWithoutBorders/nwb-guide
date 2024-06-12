@@ -1,12 +1,8 @@
 import { LitElement, html } from "lit";
-import useGlobalStyles from "./utils/useGlobalStyles.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 const autoOpenValue = Symbol("SECTION_AUTO_OPEN");
 
-const componentCSS = `
-
-`;
 
 function isHTML(str) {
     var doc = new DOMParser().parseFromString(str, "text/html");
@@ -14,13 +10,6 @@ function isHTML(str) {
 }
 
 export class NavigationSidebar extends LitElement {
-    static get styles() {
-        return useGlobalStyles(
-            componentCSS,
-            (sheet) => sheet.href && sheet.href.includes("bootstrap"),
-            this.shadowRoot
-        );
-    }
 
     static get properties() {
         return {

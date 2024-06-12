@@ -1,7 +1,7 @@
-import { openProgressSwal } from "../pages/guided-mode/options/utils.js";
-import { ProgressBar } from "../ProgressBar";
-import { baseUrl } from "../../server/globals";
-import { createRandomString } from "../forms/utils";
+import { openProgressSwal } from "./requests.js";
+import { ProgressBar } from "../core/components/ProgressBar";
+import { baseUrl } from "../core/server/globals";
+import { createRandomString } from "./forms";
 
 export const createProgressPopup = async (options, tqdmCallback) => {
     const cancelController = new AbortController();

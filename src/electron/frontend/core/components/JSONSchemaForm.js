@@ -4,10 +4,10 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { header, replaceRefsWithValue } from "./forms/utils";
+import { header, replaceRefsWithValue } from "../../utils/forms";
 import { resolve } from "../promises";
-import { merge } from "./pages/utils";
-import { resolveProperties } from "./pages/guided-mode/data/utils";
+import { merge } from "../../utils/pages";
+import { resolveProperties } from "../../utils/data";
 
 import { JSONSchemaInput, getEditableItems } from "./JSONSchemaInput";
 import { InspectorListItem } from "./preview/inspector/InspectorList";

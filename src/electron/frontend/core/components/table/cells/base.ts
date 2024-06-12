@@ -1,5 +1,5 @@
 import { LitElement, PropertyValueMap, css, html } from "lit"
-import { placeCaretAtEnd } from "../utils"
+import { placeCaretAtEnd } from "../../../../utils/tables"
 
 type BaseTableProps = {
     info: {

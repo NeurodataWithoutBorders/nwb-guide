@@ -3,11 +3,11 @@ import { JSONSchemaForm, get } from "../../../JSONSchemaForm.js";
 import { ManagedPage } from "./ManagedPage.js";
 
 import { onThrow } from "../../../../errors";
-import { merge } from "../../utils.js";
+import { merge } from "../../../../../utils/pages";
+import { run } from "../../../../../utils/requests";
 
 import { html } from "lit";
 
-import { run } from "../options/utils.js";
 import { until } from "lit/directives/until.js";
 
 import { resolve } from "../../../../promises";
@@ -17,7 +17,7 @@ import { InspectorListItem } from "../../../preview/inspector/InspectorList.js";
 import { getResourceUsageBytes } from "../../../../validation/backend-configuration";
 
 import { resolveBackendResults, updateSchema } from "../../../../../../../schemas/backend-configuration.schema";
-import { getInfoFromId } from "./utils.js";
+import { getInfoFromId } from "../../../../../utils/data";
 
 const itemIgnore = {
     full_shape: true,

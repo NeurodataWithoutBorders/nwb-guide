@@ -1,15 +1,15 @@
 import { LitElement, html } from "lit";
-import { run } from "./guided-mode/options/utils.js";
+import { run } from "../../../utils/requests.js";
 import { get, save } from "../../progress/index.js";
 
 import { dismissNotification, notify } from "../../dependencies.js";
 import { isStorybook } from "../../globals.js";
 
-import { randomizeElements, mapSessions, merge } from "./utils";
+import { randomizeElements, mapSessions, merge } from "../../../utils/pages.js";
 
-import { resolveMetadata } from "./guided-mode/data/utils.js";
+import { resolveMetadata } from "../../../utils/data";
 import Swal from "sweetalert2";
-import { createProgressPopup } from "../utils/progress.js";
+import { createProgressPopup } from "../../../utils/progress.js";
 
 export class Page extends LitElement {
     // static get styles() {

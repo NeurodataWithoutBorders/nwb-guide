@@ -11,14 +11,16 @@ import {
     getInfoFromId,
     drillSchemaProperties,
     resolveFromPath,
-} from "./utils";
+} from "./../../../../../utils/data";
+
+import { merge } from "./../../../../../utils/pages";
+import { header, tempPropertyKey } from "./../../../../../utils/forms";
+
 
 import Swal from "sweetalert2";
 import { SimpleTable } from "../../../SimpleTable.js";
 import { onThrow } from "../../../../errors";
-import { merge } from "../../utils";
 import { NWBFilePreview } from "../../../preview/NWBFilePreview.js";
-import { header, tempPropertyKey } from "../../../forms/utils";
 
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
 import { Button } from "../../../Button.js";

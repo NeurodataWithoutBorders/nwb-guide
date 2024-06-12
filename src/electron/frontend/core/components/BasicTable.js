@@ -1,6 +1,6 @@
 import { LitElement, css, html, unsafeCSS } from "lit";
 import { styleMap } from "lit/directives/style-map.js";
-import { header } from "./forms/utils";
+import { header } from "../../utils/forms";
 import { checkStatus } from "../validation";
 import { emojiFontFamily, errorHue, warningHue } from "./globals";
 

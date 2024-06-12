@@ -1,5 +1,4 @@
 import { LitElement, html } from "lit";
-import useGlobalStyles from "./utils/useGlobalStyles.js";
 
 import { Main, checkIfPageIsSkipped } from "./Main.js";
 import { Sidebar } from "./sidebar.js";
@@ -39,28 +38,7 @@ import { getCurrentProjectName, updateAppProgress } from "../progress/index.js";
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
 
-const componentCSS = `
-    :host {
-        display: flex;
-        height: 100%;
-        width: 100%;
-    }
-
-    nwb-main {
-        background: #fff;
-        border-top: 1px solid #c3c3c3;
-    }
-`;
-
 export class Dashboard extends LitElement {
-    static get styles() {
-        const style = useGlobalStyles(
-            componentCSS,
-            (sheet) => sheet.href && sheet.href.includes("bootstrap"),
-            this.shadowRoot
-        );
-        return style;
-    }
 
     static get properties() {
         return {

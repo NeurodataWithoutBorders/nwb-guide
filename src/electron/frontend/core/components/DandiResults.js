@@ -1,7 +1,7 @@
 import { LitElement, css, html } from "lit";
 
 import { get } from "dandi";
-import { isStaging, getAPIKey } from "./pages/uploads/utils";
+import { isStaging, getAPIKey } from "../../utils/upload";
 
 export class DandiResults extends LitElement {
     static get styles() {

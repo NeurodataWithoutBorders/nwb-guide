@@ -1,5 +1,5 @@
-import { getEditableItems } from "../../../JSONSchemaInput.js";
-import { merge } from "../../utils.js";
+import { getEditableItems } from "../core/components/JSONSchemaInput.js";
+import { merge } from "./pages.js";
 
 // Merge project-wide data into metadata
 export function populateWithProjectMetadata(info, globalState) {
@@ -123,4 +123,54 @@ export function createResults({ subject, info }, globalState) {
     delete subjectGlobalsCopy.sessions; // Remove extra key from metadata
     merge(subjectGlobalsCopy, results.Subject);
     return results;
+}
+
+
+
+export const updateResultsFromSubjects = (results: any, subjects: any, sourceDataObject = {}, nameMap: {[x:string]: string} = {}) => {
+
+    const oldResults = structuredClone(results);
+
+    const toRemove = Object.keys(results).filter((sub) => !Object.keys(subjects).includes(sub));
+    for (let sub of toRemove) {
+        if (sub in nameMap) results[nameMap[sub]] = results[sub];
+        delete results[sub]; // Delete extra subjects from results
+    }
+
+
+    for (let subject in subjects) {
+        const { sessions = [] } = subjects[subject];
+        let subObj = results[subject];
+
+        if (!subObj) subObj = results[subject] = {};
+        else {
+            const toRemove = Object.keys(subObj).filter((s) => !sessions.includes(s));
+            for (let s of toRemove) {
+
+                // Skip removal if your data has been mapped
+                if (subject in nameMap) {
+                    const oldSessionInfo = oldResults[subject]
+                    const newSubResults = results[nameMap[subject]]
+                    if (s in oldSessionInfo) newSubResults[s] = oldSessionInfo[s];
+                }
+
+                delete subObj[s]; // Delete extra sessions from results
+            }
+            if (!sessions.length && !Object.keys(subObj).length) delete results[subject]; // Delete subjects without sessions
+        }
+
+        for (let session of sessions) {
+            if (!(session in subObj))
+                subObj[session] = {
+                    source_data: { ...sourceDataObject },
+                    metadata: {
+                        NWBFile: { session_id: session },
+                        Subject: { subject_id: subject },
+                    },
+                };
+        }
+    }
+
+    return results
+
 }

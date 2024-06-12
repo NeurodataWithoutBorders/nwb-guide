@@ -4,19 +4,19 @@ import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { ManagedPage } from "./ManagedPage.js";
 import { onThrow } from "../../../../errors";
-import { merge, sanitize } from "../../utils";
+import { merge, sanitize } from "../../../../../utils/pages";
 import preprocessSourceDataSchema from "../../../../../../../schemas/source-data.schema";
 
 import { TimeAlignment } from "./alignment/TimeAlignment.js";
 
 import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
-import { header } from "../../../forms/utils";
+import { header } from "../../../../../utils/forms";
 import { Button } from "../../../Button.js";
 
 import globalIcon from "../../../../../assets/icons/global.svg?raw";
 
-import { run } from "../options/utils.js";
-import { getInfoFromId } from "./utils";
+import { run } from "../../../../../utils/requests";
+import { getInfoFromId } from "../../../../../utils/data";;
 import { Modal } from "../../../Modal";
 import Swal from "sweetalert2";
 

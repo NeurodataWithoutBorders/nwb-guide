@@ -8,7 +8,7 @@ import { electron } from "../../../../../utils/electron.js";
 import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../preview/NWBFilePreview.js";
 const { ipcRenderer } = electron;
 import { until } from "lit/directives/until.js";
-import { run } from "./utils.js";
+import { run } from "../../../../../utils/requests.js";
 import { InspectorList, InspectorLegend } from "../../../preview/inspector/InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
@@ -16,8 +16,8 @@ import { getMessageType } from "../../../../validation/index.js";
 
 import { Button } from "../../../Button";
 
-import { download } from "../../inspect/utils.js";
-import { createProgressPopup } from "../../../utils/progress.js";
+import { download } from "../../../../../utils/download.js";
+import { createProgressPopup } from "../../../../../utils/progress.js";
 import { resolve } from "../../../../promises";
 
 const filter = (list, toFilter) => {

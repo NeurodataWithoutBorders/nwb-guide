@@ -1,18 +1,18 @@
 
 import { get } from "dandi";
-import dandiUploadSchema, { regenerateDandisets } from "../../../../../../schemas/dandi-upload.schema";
+import dandiUploadSchema, { regenerateDandisets } from "../../../schemas/dandi-upload.schema";
 
-import { validateDANDIApiKey } from "../../../validation/dandi";
-import { Modal } from "../../Modal";
-import { header } from "../../forms/utils";
+import { validateDANDIApiKey } from "../core/validation/dandi";
+import { Modal } from "../core/components/Modal";
+import { header } from "./forms";
 
-import { JSONSchemaInput } from "../../JSONSchemaInput";
+import { JSONSchemaInput } from "../core/components/JSONSchemaInput";
 
-import { Button } from "../../Button.js";
-import { global } from "../../../progress/index.js";
-import { merge } from "../utils";
+import { Button } from "../core/components/Button.js";
+import { global } from "../core/progress/index.js";
+import { merge } from "./pages";
 
-import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
+import dandiGlobalSchema from "../../../schemas/json/dandi/global.json";
 
 export const isStaging = (id: string) => parseInt(id) >= 100000;
 

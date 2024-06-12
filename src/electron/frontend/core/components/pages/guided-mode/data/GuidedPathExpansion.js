@@ -3,18 +3,21 @@ import { Page } from "../../Page.js";
 
 // For Multi-Select Form
 import { JSONSchemaForm, getSchema } from "../../../JSONSchemaForm.js";
-import { run } from "../options/utils.js";
 import { onThrow } from "../../../../errors";
 
 import pathExpansionSchema from "../../../../../../../schemas/json/path-expansion.schema.json" assert { type: "json" };
-import { merge } from "../../utils";
 import { List } from "../../../List";
 import { fs } from "../../../../../utils/electron.js";
 import { Button } from "../../../Button.js";
 import { Modal } from "../../../Modal";
-import { header } from "../../../forms/utils";
 
 import autocompleteIcon from "../../../../../assets/icons/inspect.svg?raw";
+
+// Utils
+import { header } from "../../../../../utils/forms";
+import { merge } from "../../../../../utils/pages.js";
+import { run } from "../../../../../utils/requests.js";
+
 
 const propOrder = ["path", "subject_id", "session_id"];
 

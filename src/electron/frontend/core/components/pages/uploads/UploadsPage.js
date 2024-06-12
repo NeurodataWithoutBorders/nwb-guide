@@ -18,9 +18,9 @@ import dandiCreateSchema from '../../../../../../schemas/json/dandi/create.json'
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
-import { merge } from "../utils";
+import { merge } from "../../../../utils/pages.js";
 
-import { run } from "../guided-mode/options/utils.js";
+import { run } from "../../../../utils/requests.js";
 import { Modal } from "../../Modal";
 import { DandiResults } from "../../DandiResults.js";
 
@@ -31,7 +31,7 @@ import * as dandi from "dandi";
 
 import keyIcon from "../../../../assets/icons/key.svg?raw";
 
-import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate, getAPIKey } from "./utils";
+import { AWARD_VALIDATION_FAIL_MESSAGE, awardNumberValidator, isStaging, validate, getAPIKey } from "../../../../utils/upload";
 import { createFormModal } from "../../forms/GlobalFormModal";
 
 export function createDandiset(results = {}) {

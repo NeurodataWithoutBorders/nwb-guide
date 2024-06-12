@@ -12,7 +12,7 @@ import {
 import { fs, crypto } from "../../utils/electron.js";
 
 import { joinPath, runOnLoad } from "../globals";
-import { merge } from "../components/pages/utils.js";
+import { merge } from "../../utils/pages.js";
 import { updateAppProgress, updateFile } from "./update.js";
 import { updateURLParams } from "../../utils/url.js";
 

@@ -2,7 +2,7 @@ import { Dandiset, getMine } from 'dandi'
 
 import { global } from '../electron/frontend/core/progress'
 import upload from './json/dandi/upload.json' assert { type: "json" }
-import { isStaging } from '../electron/frontend/core/components/pages/uploads/utils'
+import { isStaging } from '../electron/frontend/utils/upload'
 import { baseUrl, onServerOpen } from '../electron/frontend/core/server/globals'
 import { isStorybook } from '../electron/frontend/core/globals'
 

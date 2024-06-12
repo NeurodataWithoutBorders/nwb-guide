@@ -1,11 +1,11 @@
 import { serverGlobals, resolve } from '../electron/frontend/core/server/globals'
 
-import { header, replaceRefsWithValue } from '../electron/frontend/core/components/forms/utils'
+import { header, replaceRefsWithValue } from '../electron/frontend/utils/forms'
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
-import { merge } from '../electron/frontend/core/components/pages/utils'
-import { drillSchemaProperties } from '../electron/frontend/core/components/pages/guided-mode/data/utils'
+import { merge } from '../electron/frontend/utils/pages'
+import { drillSchemaProperties } from '../electron/frontend/utils/data'
 import { getISODateInTimezone } from '../electron/frontend/utils/time'
 
 

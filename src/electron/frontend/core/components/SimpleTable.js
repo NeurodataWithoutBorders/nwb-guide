@@ -1,5 +1,5 @@
 import { LitElement, css, html, unsafeCSS } from "lit";
-import { header, tempPropertyValueKey } from "./forms/utils";
+import { header, tempPropertyValueKey } from "../../utils/forms";
 import { checkStatus } from "../validation";
 
 import { TableCell } from "./table/Cell";
@@ -14,7 +14,7 @@ import tippy from "tippy.js";
 import { sortTable, getEditable } from "./Table";
 import { NestedInputCell } from "./table/cells/input";
 import { getIgnore } from "./JSONSchemaForm";
-import { merge } from "./pages/utils";
+import { merge } from "../../utils/pages";
 
 var isMac = navigator.platform.toUpperCase().indexOf("MAC") >= 0;
 

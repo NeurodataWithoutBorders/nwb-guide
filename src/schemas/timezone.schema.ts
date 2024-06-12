@@ -1,6 +1,6 @@
 import { baseUrl, onServerOpen } from "../electron/frontend/core/server/globals";
 import { isStorybook } from '../electron/frontend/core/globals'
-import { header } from "../electron/frontend/core/components/forms/utils";
+import { header } from "../electron/frontend/utils/forms";
 
 const setReady: any = {}
 

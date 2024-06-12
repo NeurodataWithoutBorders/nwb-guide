@@ -1,6 +1,6 @@
 import { LitElement, html } from "lit";
 import { Handsontable, css } from "./hot";
-import { header } from "./forms/utils";
+import { header } from "../../utils/forms";
 import { errorHue, warningHue } from "./globals";
 import { checkStatus } from "../validation";
 import { emojiFontFamily } from "./globals";

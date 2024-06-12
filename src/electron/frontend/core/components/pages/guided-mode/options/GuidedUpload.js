@@ -2,7 +2,7 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
-import { merge } from "../../utils";
+import { merge } from "../../../../../utils/pages.js";
 import Swal from "sweetalert2";
 import dandiUploadSchema, { ready, regenerateDandisets } from "../../../../../../../schemas/dandi-upload.schema";
 import { createDandiset, uploadToDandi } from "../../uploads/UploadsPage.js";
@@ -12,7 +12,7 @@ import { Button } from "../../../Button.js";
 
 import keyIcon from "../../../../../assets/icons/key.svg?raw";
 
-import { validate } from "../../uploads/utils";
+import { validate } from "../../../../../utils/upload";
 import { global } from "../../../../progress/index.js";
 
 import dandiGlobalSchema from "../../../../../../../schemas/json/dandi/global.json";
