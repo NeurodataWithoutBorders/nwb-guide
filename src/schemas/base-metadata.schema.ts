@@ -6,7 +6,7 @@ import baseMetadataSchema from './json/base_metadata_schema.json' assert { type:
 
 import { merge } from '../electron/frontend/core/components/pages/utils'
 import { drillSchemaProperties } from '../electron/frontend/core/components/pages/guided-mode/data/utils'
-import { getISODateInTimezone } from './timezone.schema'
+import { getISODateInTimezone } from '../electron/frontend/utils/time'
 
 
 const UV_MATH_FORMAT = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`

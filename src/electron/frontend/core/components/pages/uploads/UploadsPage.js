@@ -14,7 +14,7 @@ import dandiUploadSchema, {
 import dandiStandaloneSchema from "../../../../../../schemas/json/dandi/standalone.json";
 const dandiSchema = merge(dandiUploadSchema, structuredClone(dandiStandaloneSchema), { arrays: "append" });
 
-import dandiCreateSchema from "../../../../../../schemas/dandi-create.schema";
+import dandiCreateSchema from '../../../../../../schemas/json/dandi/create.json' assert { type: "json" }
 
 import { Button } from "../../Button.js";
 import { global } from "../../../progress/index.js";
