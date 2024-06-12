@@ -219,6 +219,7 @@ export class UploadsPage extends Page {
                 icon: keyIcon,
                 label: "API Keys",
                 onClick: () => {
+                    document.body.append(this.#globalModal)
                     this.#globalModal.form.results = structuredClone(global.data.DANDI?.api_keys ?? {});
                     this.#globalModal.open = true;
                 },
