@@ -68,7 +68,7 @@ export async function validateOnChange(name, parent, path, value) {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    timezone: this.workflow?.timezone?.value,
+                    timezone: this.timezone,
                     parent: copy,
                     function_name: resolvedFunctionName,
                 }),

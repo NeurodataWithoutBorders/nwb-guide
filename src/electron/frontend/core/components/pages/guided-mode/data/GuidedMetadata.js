@@ -279,6 +279,9 @@ export class GuidedMetadataPage extends ManagedPage {
 
         delete results.__generated; // Ignore generated results. NOTE: See if this fails
 
+
+        const pageThis = this;
+
         // Create the form
         const form = new JSONSchemaForm({
             identifier: instanceId,
@@ -333,7 +336,10 @@ export class GuidedMetadataPage extends ManagedPage {
 
             onUpdate: () => (this.unsavedUpdates = "conversions"),
 
-            validateOnChange: (...args) => validateOnChange.call(this, ...args),
+            validateOnChange: function (...args){
+                this.timezone = pageThis.workflow?.timezone.value; // Set the timezone for the form
+                return validateOnChange.call(this, ...args)
+            },
             onlyRequired: false,
             onStatusChange: (state) => this.manager.updateState(`sub-${subject}/ses-${session}`, state),
 
