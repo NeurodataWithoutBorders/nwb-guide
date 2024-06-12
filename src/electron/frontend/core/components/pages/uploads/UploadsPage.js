@@ -256,7 +256,7 @@ export class UploadsPage extends Page {
                 regenerateDandisets().then(() => {
                     const input = this.form.getFormElement(["dandiset"]);
                     input.requestUpdate();
-                })
+                });
             },
             formProps: {
                 validateOnChange: async (name, parent) => {
