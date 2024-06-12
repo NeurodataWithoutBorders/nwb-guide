@@ -1,6 +1,7 @@
 
 const dandiAPITokenRegex = /^[a-f0-9]{40}$/;
 
+import { validateToken } from 'dandi'
 
 export const validateDANDIApiKey = async (apiKey: string, staging = false) => {
     if (apiKey) {
@@ -9,11 +10,8 @@ export const validateDANDIApiKey = async (apiKey: string, staging = false) => {
 
         const authFailedError = {type: 'error', message: `Authorization failed. Make sure you're providing an API key for the <a href='https://${staging ? 'gui-staging.' : ''}dandiarchive.org' target='_blank'>${staging ? 'staging' : 'main'} archive</a>.`}
 
-        return fetch(`https://api${staging ? '-staging' : ''}.dandiarchive.org/api/auth/token/`, {headers: {Authorization: `token ${apiKey}`}})
-        .then((res) => {
-            if (!res.ok) return [authFailedError]
-            return true
-        })
-        .catch(() => [authFailedError])
+        const isValid = validateToken({ token: apiKey, type: staging ? 'staging' : undefined }).catch(e => false)
+        if (!isValid) return [ authFailedError ]
+        return true
     }
 }
