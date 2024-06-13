@@ -276,8 +276,8 @@ export const resolveAsJSONSchema = (
 
                     if (resolved) resolvedProps[propName] = resolved;
                     else delete resolvedProps[propName]
-                } 
-                
+                }
+
                 // Find refs on any level of an object
                 else resolvedProps[propName] = resolveAsJSONSchema(internalCopy, [...path, propName], parent);
             }
