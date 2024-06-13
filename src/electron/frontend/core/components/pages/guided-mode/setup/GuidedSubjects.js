@@ -102,6 +102,7 @@ export class GuidedSubjectsPage extends Page {
     connectedCallback() {
         super.connectedCallback();
 
+        const pageThis = this;
         const schema = preprocessMetadataSchema(undefined, true).properties.Subject;
 
         const modal = (this.#globalModal = createGlobalFormModal.call(this, {
@@ -110,7 +111,8 @@ export class GuidedSubjectsPage extends Page {
             validateEmptyValues: null,
             schema,
             formProps: {
-                validateOnChange: (localPath, parent, path) => {
+                validateOnChange: function (localPath, parent, path) {
+                    this.timezone = pageThis.workflow?.timezone?.value;
                     return validateOnChange.call(this, localPath, parent, ["Subject", ...path]);
                 },
             },
