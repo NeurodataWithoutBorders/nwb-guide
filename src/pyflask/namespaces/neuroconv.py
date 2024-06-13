@@ -80,8 +80,6 @@ class Convert(Resource):
         log_url = f"{request.url_root}log"
         url = f"{request.url_root}neuroconv/announce/progress"
 
-        raise Exception(neuroconv_namespace.payload)
-
         return convert_all_to_nwb(
             url,
             **neuroconv_namespace.payload,
