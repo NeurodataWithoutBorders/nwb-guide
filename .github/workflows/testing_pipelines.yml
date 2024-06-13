@@ -17,9 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-# Fails randomly on daily tests
-#          - os: ubuntu-latest
-#            label: environments/environment-Linux.yml
+          - os: ubuntu-latest
+            label: environments/environment-Linux.yml
 
           - os: macos-latest  # Mac arm64 runner
             label: environments/environment-MAC-apple-silicon.yml
