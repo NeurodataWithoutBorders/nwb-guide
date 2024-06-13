@@ -5,7 +5,7 @@ import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
 import { header } from "../../utils/text";
-import { replaceRefsWithValue } from "../../utils/data";
+import { resolveAsJSONSchema } from "../../utils/data";
 import { resolve } from "../../utils/promises";
 import { merge } from "../../utils/data";
 import { resolveProperties } from "../../utils/data";
@@ -656,7 +656,7 @@ export class JSONSchemaForm extends LitElement {
 
     set schema(schema) {
         this.#schema = schema;
-        this.#schema = replaceRefsWithValue(schema);
+        this.#schema = resolveAsJSONSchema(schema);
     }
 
     get schema() {

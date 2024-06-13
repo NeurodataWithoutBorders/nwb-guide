@@ -241,7 +241,7 @@ export function mapSessions(callback = (value) => value, toIterate = {}) {
 }
 
 
-export const replaceRefsWithValue = (
+export const resolveAsJSONSchema = (
     schema: Schema,
     path: string[] = [],
     parent: { [x:string]: any } = structuredClone(schema)
@@ -251,7 +251,7 @@ export const replaceRefsWithValue = (
 
     if (isObject(schema)) {
 
-        const resolvedProps = "properties" in copy ? copy.properties : copy;
+        const resolvedProps = copy // "properties" in copy ? copy.properties : copy;
 
         for (let propName in resolvedProps) {
             const prop = resolvedProps[propName];
@@ -260,13 +260,15 @@ export const replaceRefsWithValue = (
                 const internalCopy = (resolvedProps[propName] = { ...prop });
                 const refValue = internalCopy["$ref"]
                 const allOfValue = internalCopy['allOf']
+
                 if (allOfValue) {
                     resolvedProps[propName]= allOfValue.reduce((acc, curr) => {
-                        const result = replaceRefsWithValue({ _temp: curr}, path, parent)
+                        const result = resolveAsJSONSchema({ _temp: curr}, path, parent)
                         const resolved = result._temp
                         return merge(resolved, acc)
                     }, {})
                 }
+
                 else if (refValue) {
 
                     const refPath = refValue.split('/').slice(1) // NOTE: Assume from base
@@ -274,12 +276,10 @@ export const replaceRefsWithValue = (
 
                     if (resolved) resolvedProps[propName] = resolved;
                     else delete resolvedProps[propName]
-                } else {
-                    for (let key in internalCopy) {
-                        const fullPath = [...path, propName, key];
-                        internalCopy[key] = replaceRefsWithValue(internalCopy[key], fullPath, parent);
-                    }
-                }
+                } 
+                
+                // Find refs on any level of an object
+                else resolvedProps[propName] = resolveAsJSONSchema(internalCopy, [...path, propName], parent);
             }
         }
 

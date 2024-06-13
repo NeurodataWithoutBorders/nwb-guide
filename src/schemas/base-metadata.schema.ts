@@ -2,7 +2,7 @@ import { serverGlobals } from '../electron/frontend/core/server/globals'
 import { resolve } from '../electron/frontend/utils/promises'
 
 import { header } from '../electron/frontend/utils/text'
-import { replaceRefsWithValue } from '../electron/frontend/utils/data'
+import { resolveAsJSONSchema } from '../electron/frontend/utils/data'
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
@@ -75,7 +75,7 @@ function updateEcephysTable(propName, schema, schemaToMerge) {
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
 
 
-    const copy = replaceRefsWithValue(structuredClone(schema))
+    const copy = resolveAsJSONSchema(structuredClone(schema))
 
     // NEUROCONV PATCH: Correct for incorrect array schema
     drillSchemaProperties(

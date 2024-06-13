@@ -506,12 +506,18 @@ describe('Data Manipulation Utilities', () => {
     });
   });
 
-  describe('replaceRefsWithValue', () => {
+  describe('resolveAsJSONSchema', () => {
     it('should replace $ref with the referenced value', () => {
       const schema = { properties: { key1: { $ref: '#/definitions/ref1' } }, definitions: { ref1: { type: 'string' } } };
-      const result = data.replaceRefsWithValue(schema);
+      const result = data.resolveAsJSONSchema(schema);
       expect(result).toEqual({ properties: { key1: { type: 'string' } }, definitions: { ref1: { type: 'string' } } });
     });
+
+    it('it should resolve allOf', () => {
+      const schema = {  properties: { key1: { allOf: [{ type: 'string' }, { minLength: 5 }] } } };
+      const result = data.resolveAsJSONSchema(schema,);
+      expect(result).toEqual({ properties: { key1: { type: 'string', minLength: 5 } } });
+    })
   });
 
 })
