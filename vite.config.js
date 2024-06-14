@@ -27,13 +27,6 @@ export default defineConfig({
                 "src/electron/frontend/utils/electron.ts",
                 "src/electron/frontend/utils/auto-update.ts",
 
-                // High-Level App Configuration
-                "src/electron/frontend/core/index.ts",
-                "src/electron/frontend/core/pages.js",
-                "src/electron/frontend/core/dependencies.js",
-                "src/electron/frontend/core/globals.js",
-                "src/electron/frontend/core/errors.ts",
-
                 // Server Communication
                 "src/electron/frontend/core/server",
                 "src/electron/frontend/utils/run.ts",
@@ -42,10 +35,32 @@ export default defineConfig({
                 // Pure Native Rendering Interaction
                 "src/electron/frontend/utils/table.ts",
 
+                // High-Level App Configuration
+                "src/electron/frontend/core/index.ts",
+                "src/electron/frontend/core/pages.js",
+                "src/electron/frontend/core/notifications.ts",
+                "src/electron/frontend/core/lotties.ts",
+                "src/electron/frontend/core/globals.js",
+                "src/electron/frontend/core/errors.ts",
+                
+
+                // Dashboard-Related Components
+                "src/electron/frontend/core/components/Dashboard.js",
+                "src/electron/frontend/core/components/Main.js",
+                "src/electron/frontend/core/components/Footer.js",
+                "src/electron/frontend/core/components/NavigationSidebar.js",
+                "src/electron/frontend/core/components/StatusBar.js",
+                "src/electron/frontend/core/components/sidebar.js",
+
+                // Just rendering
+                "src/electron/frontend/core/components/CodeBlock.js",
+
                 // Unclear how to test
                 "src/electron/frontend/utils/popups.ts",
                 "src/electron/frontend/utils/download.ts",
                 "src/electron/frontend/utils/upload.ts",
+                "src/electron/frontend/core/components/FileSystemSelector.js", // Uses Electron dialog
+
             ],
         },
     },

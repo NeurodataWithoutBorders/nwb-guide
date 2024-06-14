@@ -1,7 +1,13 @@
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
 export const getRandomIndex = (count: number) => Math.floor(count * Math.random());
 
-export const getRandomString = () => Math.random().toString(36).substring(7);
+// return random string always of len characters
+export const getRandomString = (len = 7) => {
+    let result = "";
+    for (let i = 0; i < len; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+    return result;
+}
 
 export const getRandomSample = (
     array: any[],
