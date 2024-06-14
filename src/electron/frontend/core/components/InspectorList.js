@@ -4,13 +4,12 @@ import { getMessageType, isErrorImportance } from "../validation";
 
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
-import { header } from '../../utils/text'
+import { header } from "../../utils/text";
 
 const sortAlphabeticallyWithNumberedStrings = (a, b) => {
     if (a === b) return 0;
-    return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
-}
-    
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+};
 
 const sortList = (items) => {
     return items
@@ -23,19 +22,19 @@ const sortList = (items) => {
             else if (lowA) return 1;
             else return -1;
         })
-        
+
         .sort((a, b) => {
             const aCritical = isErrorImportance.includes(a.importance);
             const bCritical = isErrorImportance.includes(b.importance);
             if (aCritical && bCritical) return 0;
             else if (aCritical) return -1;
             else return 1;
-        })
+        });
 };
 
 const aggregateMessages = (items) => {
     let messages = {};
-    console.log(items)
+    console.log(items);
     items.forEach((item) => {
         const copy = { ...item };
         delete copy.file_path;

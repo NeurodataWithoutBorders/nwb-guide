@@ -1438,10 +1438,9 @@ def _inspect_all(url, config):
     from nwbinspector.utils import calculate_number_of_cpu
     from tqdm_publisher import TQDMProgressSubscriber
 
-
     path = config.pop("path", None)
 
-    paths = [ path ] if path else config.pop("paths", [])
+    paths = [path] if path else config.pop("paths", [])
 
     nwbfile_paths = []
     for path in paths:
@@ -1450,7 +1449,7 @@ def _inspect_all(url, config):
             nwbfile_paths.append(posix_path)
         else:
             nwbfile_paths.extend(list(posix_path.rglob("*.nwb")))
-    
+
     request_id = config.pop("request_id", None)
 
     n_jobs = config.get("n_jobs", -2)  # Default to all but one CPU
@@ -1541,6 +1540,7 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None) -> 
             new_path.symlink_to(path, path.is_dir())
 
     return folder_path
+
 
 def _format_spikeglx_meta_file(bin_file_path: str) -> str:
     bin_file_path = Path(bin_file_path)

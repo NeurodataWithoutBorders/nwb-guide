@@ -280,9 +280,11 @@ export class FilesystemSelector extends LitElement {
                                         >`
                                   : ""}`}
 
-                              <div class="controls">
-                                  ${this.value ? html`<div @click=${() => this.#handleFiles()}>${unsafeSVG(restartSVG)}</div>` : ""}
-                              </div>
+                    <div class="controls">
+                        ${this.value
+                            ? html`<div @click=${() => this.#handleFiles()}>${unsafeSVG(restartSVG)}</div>`
+                            : ""}
+                    </div>
                 </button>
                 ${this.multiple && isArray && this.value.length > 1
                     ? new List({
@@ -293,7 +295,6 @@ export class FilesystemSelector extends LitElement {
                           },
                       })
                     : ""}
-
             </div>
             ${isMultipleTypes
                 ? html`<div id="button-div">

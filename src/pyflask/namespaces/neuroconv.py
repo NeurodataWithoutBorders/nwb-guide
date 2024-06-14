@@ -161,6 +161,7 @@ class Upload(Resource):
         else:
             return upload_multiple_filesystem_objects_to_dandi(**neuroconv_namespace.payload)
 
+
 @neuroconv_namespace.route("/announce/progress")
 class InspectNWBFolder(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})

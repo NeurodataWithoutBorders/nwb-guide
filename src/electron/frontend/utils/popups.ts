@@ -40,7 +40,7 @@ export const createProgressPopup = async (
         options.showCancelButton = true;
         options.customClass = { actions: "swal-conversion-actions" };
     }
-    
+
     await openProgressSwal(options, (result) => {
         if (!result.isConfirmed) cancelController.abort();
     });
