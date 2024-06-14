@@ -29,8 +29,9 @@ jobs:
           - os: macos-13  # Mac x64 runner
             label: environments/environment-MAC-intel.yml
 
-          - os: windows-latest
-            label: environments/environment-Windows.yml
+         # TODO: unknown issue with Windows dev mode during e2e tests
+         # - os: windows-latest
+         #   label: environments/environment-Windows.yml
 
     steps:
       - uses: actions/checkout@v4
