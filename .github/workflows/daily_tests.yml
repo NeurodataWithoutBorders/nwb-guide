@@ -42,14 +42,21 @@ jobs:
     if: |
       ${{
         always() && (
-        needs.DevTests.result == 'failure'
-        || needs.LiveServices.result == 'failure'
-        || needs.BuildTests.result == 'failure'
-        || needs.ExampleDataCache.result == 'failure'
-        || needs.ExampleDataTests.result == 'failure'
+          needs.DevTests.result == 'failure'
+          || needs.LiveServices.result == 'failure'
+          || needs.BuildTests.result == 'failure'
+          || needs.ExampleDataCache.result == 'failure'
+          || needs.ExampleDataTests.result == 'failure'
         )
       }}
     steps:
+      - name: Printout which failed
+        run: |
+          echo "DevTests: ${{ needs.DevTests.result }}"
+          echo "LiveServices: ${{ needs.LiveServices.result }}"
+          echo "BuildTests: ${{ needs.BuildTests.result }}"
+          echo "ExampleDataCache: ${{ needs.ExampleDataCache.result }}"
+          echo "ExampleDataTests: ${{ needs.ExampleDataTests.result }}"
       - uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
