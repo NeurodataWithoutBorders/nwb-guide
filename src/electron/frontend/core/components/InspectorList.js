@@ -66,11 +66,6 @@ export class InspectorList extends List {
             return aggregate;
         });
 
-        aggregatedItems.forEach((item, i) => {
-            if (i === 0) item.importance = "CRITICAL";  
-        })
-
-
         super({
             editable: false,
             unordered: true,
