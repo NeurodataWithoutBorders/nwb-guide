@@ -134,18 +134,29 @@ export class GuidedInspectorPage extends Page {
         return html`
             ${until(
                 (async () => {
-                    if (fileArr.length <= 1) {
-                        this.report = inspector;
+
+                    this.report = inspector;
+
+                    const oneFile = fileArr.length <= 1;
+
+                    const willRun = !this.report
+                    const swalOpts = willRun ? await createProgressPopup({ title: oneFile ? title : `${title}s` }) : {};
+
+                    const { close: closeProgressPopup } = swalOpts;
+
+                    if (oneFile) {
 
                         if (!this.report) {
                             const result = await run(
                                 "neuroconv/inspect",
-                                { path: fileArr[0].info.file, ...options },
-                                { title }
+                                { path: fileArr[0].info.file, ...options, request_id: swalOpts.id },
+                                swalOpts
                             ).catch((error) => {
                                 this.notify(error.message, "error");
                                 return null;
-                            });
+                            })
+                            .finally(() => closeProgressPopup());
+
 
                             if (!result) return "Failed to generate inspector report.";
 
@@ -170,11 +181,7 @@ export class GuidedInspectorPage extends Page {
 
                     const path = getSharedPath(fileArr.map(({ info }) => info.file));
 
-                    this.report = inspector;
                     if (!this.report) {
-                        const swalOpts = await createProgressPopup({ title: `${title}s` });
-
-                        const { close: closeProgressPopup } = swalOpts;
 
                         const result = await run(
                             "neuroconv/inspect_folder",
