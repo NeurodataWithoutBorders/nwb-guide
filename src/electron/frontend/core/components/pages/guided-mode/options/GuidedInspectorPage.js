@@ -184,7 +184,7 @@ export class GuidedInspectorPage extends Page {
                     if (!this.report) {
 
                         const result = await run(
-                            "neuroconv/inspect_folder",
+                            "neuroconv/inspect",
                             { path, ...options, request_id: swalOpts.id },
                             swalOpts
                         )
