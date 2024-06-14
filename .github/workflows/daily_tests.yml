@@ -39,10 +39,7 @@ jobs:
   NotifyOnAnyFailure:
     runs-on: ubuntu-latest
     needs: [DevTests, LiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
-    if: |
-      ${{
-        always() && (needs.DevTests.result == 'failure' || needs.LiveServices.result == 'failure' || needs.BuildTests.result == 'failure' || needs.ExampleDataCache.result == 'failure' || needs.ExampleDataTests.result == 'failure')
-      }}
+    if: always() && (${{ needs.DevTests.result }} == 'failure' || ${{ needs.LiveServices.result }} == 'failure' || ${{ needs.BuildTests.result }} == 'failure' || ${{ needs.ExampleDataCache.result }} == 'failure' || ${{ needs.ExampleDataTests.result }} == 'failure')
     steps:
       - name: Printout which failed
         run: |
@@ -51,6 +48,10 @@ jobs:
           echo "BuildTests: ${{ needs.BuildTests.result }}"
           echo "ExampleDataCache: ${{ needs.ExampleDataCache.result }}"
           echo "ExampleDataTests: ${{ needs.ExampleDataTests.result }}"
+      - name: debugging
+        run: export test=(${{ needs.DevTests.result }} == 'failure' || ${{ needs.LiveServices.result }} == 'failure' || ${{ needs.BuildTests.result }} == 'failure' || ${{ needs.ExampleDataCache.result }} == 'failure' || ${{ needs.ExampleDataTests.result }} == 'failure')
+      - name: debugging print
+        run: echo $test
       #- name: Printout logic trigger
       #  run: ${{ needs.DevTests.result }} == 'failure' || ${{ needs.LiveServices.result }} == 'failure' || ${{ needs.BuildTests.result }} == 'failure' || ${{ needs.ExampleDataCache.result }} == 'failure' || ${{ needs.ExampleDataTests.result }} == 'failure'
       - uses: dawidd6/action-send-mail@v3

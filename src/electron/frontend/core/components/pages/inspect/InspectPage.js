@@ -39,7 +39,7 @@ export class InspectPage extends Page {
             }
         );
 
-        console.log(result)
+        console.log(result);
 
         closeProgressPopup();
 

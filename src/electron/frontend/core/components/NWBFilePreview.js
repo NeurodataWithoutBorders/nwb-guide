@@ -159,11 +159,7 @@ export class NWBFilePreview extends LitElement {
                                             { path: fileArr[0].info.file, ...options },
                                             { title }
                                         ) // Inspect the first file
-                                      : await run(
-                                            "neuroconv/inspect",
-                                            { path, ...options },
-                                            { title: title + "s" }
-                                        ); // Inspect the folder
+                                      : await run("neuroconv/inspect", { path, ...options }, { title: title + "s" }); // Inspect the folder
 
                                   const result = onlyFirstFile
                                       ? {
