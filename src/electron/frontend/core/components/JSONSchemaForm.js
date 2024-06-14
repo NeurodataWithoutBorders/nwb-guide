@@ -1459,6 +1459,14 @@ export class JSONSchemaForm extends LitElement {
 
         this.#resetLoadState();
 
+        // this.updateComplete.then(() => {
+        //     this.#toggleRendered(); // Toggle internal render state
+
+        //     // Promise.all([...Object.values(this.forms), ...Object.values(this.tables)]).map(o => o.updateComplete).then(() => {
+        //     //     this.#toggleRendered(); // Toggle internal render state
+        //     // })
+        // })
+
         const schema = this.schema ?? {};
 
         this.resolved = structuredClone(this.results); // Track resolved values as a copy of the user-specified results

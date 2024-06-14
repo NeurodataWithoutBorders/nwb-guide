@@ -450,6 +450,10 @@ export class BasicTable extends LitElement {
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
+        const schemaOrder = this.#itemSchema.order ?? []
+        const order = this.keyColumn ? [this.keyColumn, ...schemaOrder] : schemaOrder;
+
+
         // Sort Columns by Key Column and Requirement
         const keys =
             (this.#keys =
@@ -459,8 +463,7 @@ export class BasicTable extends LitElement {
                         ...this.#itemSchema,
                         properties: entries,
                     },
-                    this.keyColumn,
-                    this.#itemSchema.order
+                    order
                 ));
 
         // Try to guess the key column if unspecified

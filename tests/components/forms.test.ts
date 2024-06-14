@@ -19,6 +19,7 @@ async function mountComponent(props) {
 
     document.body.append(form)
     await form.rendered
+    // await form.updateComplete;
 
     return form;
 }
@@ -163,10 +164,10 @@ describe('JSONSchemaForm', () => {
 
         const row = users.getRow(0)
         const newData = { name: 'John Doe', age: 30 }
-        await Promise.all(Object.entries(newData).map(([key, value]) => {
+        Object.entries(newData).map(([key, value]) => {
             const cell = row.find(cell => cell.simpleTableInfo.col === key)
             return cell.setInput(value)
-        }))
+        })
 
         await sleep(100) // Wait for updates to register on the table
 
