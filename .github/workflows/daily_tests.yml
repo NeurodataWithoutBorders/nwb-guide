@@ -41,9 +41,9 @@ jobs:
     needs: [DevTests, LiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
     if: |
       ${{ needs.DevTests.result }} == 'failure' ||
-      ${{ needs.LiveServices.result }} == 'failure' || 
-      ${{ needs.BuildTests.result }} == 'failure' || 
-      ${{ needs.ExampleDataCache.result }} == 'failure' || 
+      ${{ needs.LiveServices.result }} == 'failure' ||
+      ${{ needs.BuildTests.result }} == 'failure' ||
+      ${{ needs.ExampleDataCache.result }} == 'failure' ||
       ${{ needs.ExampleDataTests.result }} == 'failure'
     steps:
       - name: Printout which failed
