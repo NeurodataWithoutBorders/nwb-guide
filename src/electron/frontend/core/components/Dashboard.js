@@ -1,5 +1,4 @@
 import { LitElement, html } from "lit";
-import useGlobalStyles from "./utils/useGlobalStyles.js";
 
 import { Main, checkIfPageIsSkipped } from "./Main.js";
 import { Sidebar } from "./sidebar.js";
@@ -32,36 +31,14 @@ import "../../../../../node_modules/fomantic-ui/dist/components/accordion.min.cs
 import "../../../../../node_modules/@sweetalert2/theme-bulma/bulma.css";
 // import "../../node_modules/intro.js/minified/introjs.min.css"
 import "../../assets/css/guided.css";
-import { isElectron } from "../../utils/electron.js";
+import { isElectron } from "../../utils/electron";
 import { isStorybook, reloadPageToHome } from "../globals.js";
 import { getCurrentProjectName, updateAppProgress } from "../progress/index.js";
 
 // import "https://jsuites.net/v4/jsuites.js"
 // import "https://bossanova.uk/jspreadsheet/v4/jexcel.js"
 
-const componentCSS = `
-    :host {
-        display: flex;
-        height: 100%;
-        width: 100%;
-    }
-
-    nwb-main {
-        background: #fff;
-        border-top: 1px solid #c3c3c3;
-    }
-`;
-
 export class Dashboard extends LitElement {
-    static get styles() {
-        const style = useGlobalStyles(
-            componentCSS,
-            (sheet) => sheet.href && sheet.href.includes("bootstrap"),
-            this.shadowRoot
-        );
-        return style;
-    }
-
     static get properties() {
         return {
             renderNameInSidebar: { type: Boolean, reflect: true },

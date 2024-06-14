@@ -4,21 +4,21 @@ import { Page } from "../../Page.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import folderOpenSVG from "../../../../../assets/icons/folder_open.svg?raw";
 
-import { electron } from "../../../../../utils/electron.js";
-import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../preview/NWBFilePreview.js";
+import { electron } from "../../../../../utils/electron";
+import { getSharedPath, removeFilePaths, truncateFilePaths } from "../../../NWBFilePreview.js";
 const { ipcRenderer } = electron;
 import { until } from "lit/directives/until.js";
-import { run } from "./utils.js";
-import { InspectorList, InspectorLegend } from "../../../preview/inspector/InspectorList.js";
+import { run } from "../../../../../utils/run";
+import { InspectorList, InspectorLegend } from "../../../InspectorList.js";
 import { getStubArray } from "./GuidedStubPreview.js";
 import { InstanceManager } from "../../../InstanceManager.js";
 import { getMessageType } from "../../../../validation/index.js";
 
 import { Button } from "../../../Button";
 
-import { download } from "../../inspect/utils.js";
-import { createProgressPopup } from "../../../utils/progress.js";
-import { resolve } from "../../../../promises";
+import { download } from "../../../../../utils/download";
+import { createProgressPopup } from "../../../../../utils/popups";
+import { resolve } from "../../../../../utils/promises";
 
 const filter = (list, toFilter) => {
     return list.filter((item) => {

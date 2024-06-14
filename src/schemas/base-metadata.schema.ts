@@ -1,12 +1,14 @@
-import { serverGlobals, resolve } from '../electron/frontend/core/server/globals'
+import { serverGlobals } from '../electron/frontend/core/server/globals'
+import { resolve } from '../electron/frontend/utils/promises'
 
-import { header, replaceRefsWithValue } from '../electron/frontend/core/components/forms/utils'
+import { header } from '../electron/frontend/utils/text'
+import { resolveAsJSONSchema } from '../electron/frontend/utils/data'
 
 import baseMetadataSchema from './json/base_metadata_schema.json' assert { type: "json" }
 
-import { merge } from '../electron/frontend/core/components/pages/utils'
-import { drillSchemaProperties } from '../electron/frontend/core/components/pages/guided-mode/data/utils'
-import { getISODateInTimezone } from './timezone.schema'
+import { merge } from '../electron/frontend/utils/data'
+import { drillSchemaProperties } from '../electron/frontend/utils/data'
+import { getISODateInTimezone } from '../electron/frontend/utils/time'
 
 
 const UV_MATH_FORMAT = `&micro;V`; //`<math xmlns="http://www.w3.org/1998/Math/MathML"><mo>&micro;</mo><mi>V</mi></math>`
@@ -73,7 +75,7 @@ function updateEcephysTable(propName, schema, schemaToMerge) {
 export const preprocessMetadataSchema = (schema: any = baseMetadataSchema, global = false) => {
 
 
-    const copy = replaceRefsWithValue(structuredClone(schema))
+    const copy = resolveAsJSONSchema(structuredClone(schema))
 
     // NEUROCONV PATCH: Correct for incorrect array schema
     drillSchemaProperties(

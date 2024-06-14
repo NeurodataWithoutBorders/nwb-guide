@@ -1,15 +1,16 @@
 import { LitElement, html } from "lit";
-import { run } from "./guided-mode/options/utils.js";
+import { run } from "../../../utils/run";
 import { get, save } from "../../progress/index.js";
 
 import { dismissNotification, notify } from "../../dependencies.js";
 import { isStorybook } from "../../globals.js";
 
-import { randomizeElements, mapSessions, merge } from "./utils";
+import { mapSessions, merge } from "../../../utils/data";
+import { getRandomSample } from "../../../utils/random";
 
-import { resolveMetadata } from "./guided-mode/data/utils.js";
+import { resolveMetadata } from "../../../utils/data";
 import Swal from "sweetalert2";
-import { createProgressPopup } from "../utils/progress.js";
+import { createProgressPopup } from "../../../utils/popups";
 
 export class Page extends LitElement {
     // static get styles() {
@@ -153,7 +154,7 @@ export class Page extends LitElement {
 
         // Filter the sessions to run
         if (typeof original === "number")
-            toRun = randomizeElements(toRun, original); // Grab a random set of sessions
+            toRun = getRandomSample(toRun, original); // Grab a random set of sessions
         else if (typeof original === "string") toRun = toRun.filter(({ subject }) => subject === original);
         else if (typeof original === "function") toRun = toRun.filter(original);
 

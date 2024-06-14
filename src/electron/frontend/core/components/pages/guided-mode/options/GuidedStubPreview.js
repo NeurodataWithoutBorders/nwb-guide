@@ -4,8 +4,8 @@ import { Page } from "../../Page.js";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import folderOpenSVG from "../../../../../assets/icons/folder_open.svg?raw";
 
-import { electron } from "../../../../../utils/electron.js";
-import { NWBFilePreview, getSharedPath } from "../../../preview/NWBFilePreview.js";
+import { electron } from "../../../../../utils/electron";
+import { NWBFilePreview, getSharedPath } from "../../../NWBFilePreview.js";
 const { ipcRenderer } = electron;
 
 export const getStubArray = (stubs) =>

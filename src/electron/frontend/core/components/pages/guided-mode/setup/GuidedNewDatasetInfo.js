@@ -6,9 +6,10 @@ import { validateOnChange } from "../../../../validation/index.js";
 
 import projectGeneralSchema from "../../../../../../../schemas/json/project/general.json" assert { type: "json" };
 import projectGlobalSchema from "../../../../../../../schemas/json/project/globals.json" assert { type: "json" };
-import { merge } from "../../utils";
 import { onThrow } from "../../../../errors";
-import { header } from "../../../forms/utils";
+
+import { merge } from "../../../../../utils/data";
+import { header } from "../../../../../utils/text";
 
 const projectMetadataSchema = merge(projectGlobalSchema, projectGeneralSchema);
 

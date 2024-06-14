@@ -1,12 +1,13 @@
 import { LitElement, css, html } from "lit";
-import { InspectorList } from "./inspector/InspectorList";
+import { InspectorList } from "./InspectorList";
 import { Neurosift, getURLFromFilePath } from "./Neurosift";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { run } from "../pages/guided-mode/options/utils";
+import { run } from "../../utils/run";
+
 import { until } from "lit/directives/until.js";
-import { InstanceManager } from "../InstanceManager";
-import { path } from "../../../utils/electron.js";
-import { FullScreenToggle } from "../FullScreenToggle";
+import { InstanceManager } from "./InstanceManager";
+import { path } from "../../utils/electron";
+import { FullScreenToggle } from "./FullScreenToggle";
 
 export function getSharedPath(array) {
     array = array.map((str) => str.replace(/\\/g, "/")); // Convert to Mac-style path

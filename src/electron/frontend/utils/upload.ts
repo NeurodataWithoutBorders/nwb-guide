@@ -1,30 +1,38 @@
 
 import { get } from "dandi";
-import dandiUploadSchema, { regenerateDandisets } from "../../../../../../schemas/dandi-upload.schema";
+import dandiUploadSchema, { regenerateDandisets } from "../../../schemas/dandi-upload.schema";
 
-import { validateDANDIApiKey } from "../../../validation/dandi";
-import { Modal } from "../../Modal";
-import { header } from "../../forms/utils";
+import { validateDANDIApiKey } from "../core/validation/dandi";
+import { Modal } from "../core/components/Modal";
+import { header } from "./text";
 
-import { JSONSchemaInput } from "../../JSONSchemaInput";
+import { JSONSchemaInput } from "../core/components/JSONSchemaInput";
 
-import { Button } from "../../Button.js";
-import { global } from "../../../progress/index.js";
-import { merge } from "../utils";
+import { Page } from '../core/components/pages/Page.js';
+import { Button } from "../core/components/Button.js";
+import { global } from "../core/progress/index.js";
+import { merge } from "./data";
 
-import dandiGlobalSchema from "../../../../../../schemas/json/dandi/global.json";
+import { NotyfNotification } from "notyf";
+
+import dandiGlobalSchema from "../../../schemas/json/dandi/global.json";
+import { isNumericString } from "./typecheck";
 
 export const isStaging = (id: string) => parseInt(id) >= 100000;
 
+type NotificationType = {
+    type: string;
+    message: string;
+}
 
-function isNumeric(str: string) {
-    if (typeof str != "string") return false // we only process strings!
-    return !isNaN(str) && // use type coercion to parse the _entirety_ of the string (`parseFloat` alone does not do this)...
-           !isNaN(parseFloat(str)) // ...and ensure strings of whitespace fail
-  }
+type Notifications = NotificationType[];
 
 
-  export async function validate (name: string, parent: any) {
+export async function validate(
+    this: Page,
+    name: string,
+    parent: any
+): Promise<Notifications | boolean> {
 
     const value = parent[name]
 
@@ -36,7 +44,7 @@ function isNumeric(str: string) {
     }
 
     if (name === 'dandiset' && value) {
-        if (isNumeric(value)){
+        if (isNumericString(value)) {
 
             if (value.length !== 6) return [{
                 type: 'error',
@@ -50,7 +58,7 @@ function isNumeric(str: string) {
             const dandiset = await get(value, {
                 type,
                 token
-             })
+            })
 
             if (dandiset.detail) {
                 if (dandiset.detail.includes('Not found')) return [{
@@ -80,25 +88,24 @@ function isNumeric(str: string) {
             }]
         }
     }
+
+    return true
 }
 
-export const willCreate = (value: string) => !isNumeric(value)
+export const willCreate = (value: string) => !isNumericString(value)
 
 // Regular expression to validate an NIH award number.
 // Based on https://era.nih.gov/files/Deciphering_NIH_Application.pdf
 // and https://era.nih.gov/erahelp/commons/Commons/understandGrantNums.htm
 const NIH_AWARD_REGEX = /^\d \w+ \w{2} \d{6}-\d{2}([A|S|X|P]\d)?$/;
 
-export function awardNumberValidator(awardNumber: string): boolean {
-  return NIH_AWARD_REGEX.test(awardNumber);
-}
+export const awardNumberValidator = (awardNumber: string) => NIH_AWARD_REGEX.test(awardNumber);
 
 export const AWARD_VALIDATION_FAIL_MESSAGE = 'Award number must be properly space-delimited.\n\nExample (exclude quotes):\n"1 R01 CA 123456-01A1"';
 
-
 // this:
 export async function getAPIKey(
-    // this: Page,
+    this: Page,
     staging = false
 ) {
 
@@ -108,9 +115,10 @@ export async function getAPIKey(
 
     const errors = await validateDANDIApiKey(api_key, staging);
 
-    const isInvalid = !errors || errors.length;
+    const isInvalid = Array.isArray(errors) ? errors.length : !errors;
 
     if (isInvalid) {
+
         const modal = new Modal({
             header: `${api_key ? "Update" : "Provide"} your ${header(whichAPIKey)}`,
             open: true,
@@ -130,9 +138,9 @@ export async function getAPIKey(
 
         modal.append(container);
 
-        let notification;
+        let notification: NotyfNotification;
 
-        const notify = (message, type) => {
+        const notify = (message: string, type: string) => {
             if (notification) this.dismiss(notification);
             return (notification = this.notify(message, type));
         };

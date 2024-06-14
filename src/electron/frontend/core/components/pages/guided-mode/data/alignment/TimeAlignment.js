@@ -1,6 +1,6 @@
 import { LitElement, css } from "lit";
 import { JSONSchemaInput } from "../../../../JSONSchemaInput";
-import { InspectorListItem } from "../../../../preview/inspector/InspectorList";
+import { InspectorListItem } from "../../../../InspectorList";
 
 const options = {
     start: {

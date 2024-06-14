@@ -1,4 +1,4 @@
-import { isElectron, electron, app } from '../../utils/electron.js'
+import { isElectron, electron, app } from '../../utils/electron'
 const { ipcRenderer } = electron;
 
 import { isTestEnvironment } from '../globals.js'

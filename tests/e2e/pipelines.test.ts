@@ -10,7 +10,7 @@ import examplePipelines from "../../src/example_pipelines.yml";
 import paths from "../../src/paths.config.json" assert { type: "json" };
 
 import { evaluate, initTests, takeScreenshot } from './utils'
-import { header } from '../../src/electron/frontend/core/components/forms/utils'
+import { header } from '../../src/electron/frontend/utils/text'
 import { sleep } from '../puppeteer';
 
 

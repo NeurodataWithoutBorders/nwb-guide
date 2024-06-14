@@ -1,5 +1,5 @@
 import { LitElement, css } from "lit";
-import { getTimezoneOffset, formatTimezoneOffset } from "../../../../schemas/timezone.schema";
+import { getTimezoneOffset, formatTimezoneOffset } from "../../utils/time";
 
 // Function to format the GMT offset
 export function extractISOString(date = new Date(), { offset = false, timezone = undefined } = {}) {

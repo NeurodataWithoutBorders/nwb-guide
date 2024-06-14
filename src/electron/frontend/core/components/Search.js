@@ -5,6 +5,7 @@ import searchSVG from "../../assets/icons/search.svg?raw";
 
 import tippy from "tippy.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { isObject } from "../../utils/typecheck";
 
 const ALTERNATIVE_MODES = ["input", "append"];
 
@@ -45,9 +46,7 @@ export class Search extends LitElement {
 
     #value;
 
-    #isObject(value = this.#value) {
-        return value && typeof value === "object";
-    }
+    #isObject = (value = this.#value) => isObject(value);
 
     #getOption = ({ label, value } = {}) => {
         return this.options.find((item) => {

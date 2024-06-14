@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit";
-import { List } from "../../List";
-import { getMessageType, isErrorImportance } from "../../../validation";
+import { List } from "./List";
+import { getMessageType, isErrorImportance } from "../validation";
 
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
