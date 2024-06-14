@@ -372,9 +372,9 @@ describe('Randomization Utilities', () => {
     });
 
     it('should return a string of expected length', () => {
-      const result = random.getRandomString();
-      expect(result.length).toBeGreaterThanOrEqual(5); // Length might vary slightly due to the nature of random
-      expect(result.length).toBeLessThanOrEqual(11); // Usually the length is around 7-10 characters
+      const len = 10;
+      const result = random.getRandomString(len);
+      expect(result.length).toEqual(len); // Length is always the specified length
     });
 
     it('should return a different string each time it is called', () => {

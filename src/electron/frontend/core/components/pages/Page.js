@@ -2,7 +2,7 @@ import { LitElement, html } from "lit";
 import { run } from "../../../utils/run";
 import { get, save } from "../../progress/index.js";
 
-import { dismissNotification, notify } from "../../dependencies.js";
+import { dismissNotification, notify } from "../../notifications";
 import { isStorybook } from "../../globals.js";
 
 import { mapSessions, merge } from "../../../utils/data";

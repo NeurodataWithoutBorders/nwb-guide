@@ -5,7 +5,7 @@ import { isTestEnvironment } from '../globals.js'
 
 import {
   notyf,
-} from '../dependencies.js'
+} from '../notifications'
 
 import Swal from 'sweetalert2'
 

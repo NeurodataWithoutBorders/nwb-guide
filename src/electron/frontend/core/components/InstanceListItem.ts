@@ -7,7 +7,6 @@ export class InstanceListItem extends LitElement {
     declare label: string
     declare status: string
     declare selected: boolean
-    declare onRemoved?: Function
 
     static get styles() {
         return css`
@@ -120,7 +119,7 @@ export class InstanceListItem extends LitElement {
         }
     }
 
-    constructor({ label, status, selected, onRemoved, id, ...metadata } = {
+    constructor({ label, status, selected, id, ...metadata } = {
         label: "",
         status: "",
         selected: false
@@ -131,7 +130,6 @@ export class InstanceListItem extends LitElement {
         this.status = status;
         this.selected = selected;
         this.metadata = metadata
-        if (this.onRemoved) this.onRemoved = onRemoved;
     }
 
     #onClick () {
@@ -154,18 +152,6 @@ export class InstanceListItem extends LitElement {
                         >${this.label}
                         <div class="indicator"></div>
                     </span>
-                    ${this.onRemoved
-                        ? html`<nwb-button
-                              size="small"
-                              primary
-                              color="gray"
-                              @click=${this.onRemoved}
-                              .buttonStyles=${{
-                                  padding: "7px",
-                              }}
-                              >x</nwb-button
-                          >`
-                        : ""}
                 </li>
             `
     }

@@ -1,24 +1,4 @@
 import { Notyf } from "notyf";
-import checkChromatic from "chromatic/isChromatic";
-import lottie from "lottie-web";
-
-// ---------- Lottie Helper ----------
-const isChromatic = checkChromatic();
-
-export const startLottie = (lottieElement, animationData) => {
-    lottieElement.innerHTML = "";
-    const thisLottie = lottie.loadAnimation({
-        container: lottieElement,
-        animationData,
-        renderer: "svg",
-        loop: !isChromatic,
-        autoplay: !isChromatic,
-    });
-
-    if (isChromatic) thisLottie.goToAndStop(thisLottie.getDuration(true) - 1, true); // Go to last frame
-
-    return thisLottie;
-};
 
 const longDuration = 20000;
 
