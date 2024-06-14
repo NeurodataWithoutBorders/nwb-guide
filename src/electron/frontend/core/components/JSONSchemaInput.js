@@ -19,6 +19,7 @@ import { OptionalSection } from "./OptionalSection";
 import { InspectorListItem } from "./InspectorList.js";
 import { renderDateTime, resolveDateTime } from "./DateTimeSelector";
 import { isObject } from "../../utils/typecheck";
+import { resolve } from "../../utils/promises";
 
 const isDevelopment = !!import.meta.env;
 
@@ -583,7 +584,7 @@ export class JSONSchemaInput extends LitElement {
     // onUpdate = () => {}
     // onValidate = () => {}
 
-    updateData(value, forceValidate = false) {
+    async updateData(value, forceValidate = false) {
         if (!forceValidate) {
             // Update the actual input element
             const inputElement = this.getElement();
@@ -603,9 +604,9 @@ export class JSONSchemaInput extends LitElement {
         const name = path.splice(-1)[0];
 
         this.#updateData(fullPath, value);
-        this.#triggerValidation(name, path); // NOTE: Is asynchronous
+        const possiblePromise = this.#triggerValidation(name, path);
 
-        return true;
+        return resolve(possiblePromise, () => true);
     }
 
     getElement = () => this.shadowRoot.querySelector(".schema-input");
@@ -641,7 +642,7 @@ export class JSONSchemaInput extends LitElement {
         if (hooks.willTimeout !== false) this.#activateTimeoutValidation(name, path, hooks);
     };
 
-    #triggerValidation = async (name, path) => {
+    #triggerValidation = (name, path) => {
         this.#clearTimeoutValidation();
         return this.onValidate
             ? this.onValidate()

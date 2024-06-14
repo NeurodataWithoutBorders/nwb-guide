@@ -2,7 +2,7 @@ import { html } from "lit";
 import { Page } from "../Page.js";
 import { ProgressCard } from "./ProgressCard.js";
 
-import { startLottie } from "../../../dependencies.js";
+import { startLottie } from "../../../lotties";
 import * as progress from "../../../progress/index.js";
 import { newDataset } from "../../../../assets/lotties/index.js";
 

@@ -2,7 +2,7 @@ import { html } from "lit";
 import { docu_lottie } from "../../../../assets/lotties/documentation-lotties.js";
 import { Page } from "../Page.js";
 
-import { startLottie } from "../../../dependencies.js";
+import { startLottie } from "../../../lotties";
 
 import { Button } from "../../Button.js";
 

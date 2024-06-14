@@ -12,7 +12,7 @@ import { Button } from "../../Button.js";
 import { global, remove, save } from "../../../progress/index.js";
 import { merge, setUndefinedIfNotDeclared } from "../../../../utils/data";
 
-import { notyf } from "../../../dependencies.js";
+import { notyf } from "../../../notifications";
 import { homeDirectory, testDataFolderPath } from "../../../globals.js";
 
 import { SERVER_FILE_PATH, electron, path, port, fs } from "../../../../utils/electron";
