@@ -1,6 +1,6 @@
 import { LitElement, css, html } from "lit";
 import "./Button";
-import { notify } from "../dependencies";
+import { notify } from "../notifications";
 import { Accordion } from "./Accordion";
 import { InstanceListItem } from "./InstanceListItem";
 import { checkStatus } from "../validation";
@@ -142,7 +142,6 @@ export class InstanceManager extends LitElement {
         this.header = props.header;
         this.instanceType = props.instanceType ?? "Instance";
         if (props.onAdded) this.onAdded = props.onAdded;
-        if (props.onRemoved) this.onRemoved = props.onRemoved;
         if (props.onDisplay) this.onDisplay = props.onDisplay;
         this.controls = props.controls ?? [];
     }
@@ -157,8 +156,12 @@ export class InstanceManager extends LitElement {
         } else return content;
     };
 
+    getInstance(id) {
+        return this.#items.find((item) => item.id === id);
+    }
+
     updateState = (id, state) => {
-        const item = this.#items.find((i) => i.id === id);
+        const item = this.getInstance(id);
 
         item.status = state;
 
@@ -178,7 +181,6 @@ export class InstanceManager extends LitElement {
     };
 
     // onAdded = () => {}
-    // onRemoved = () => {}
 
     toggleInput = (force) => {
         const newInfoDiv = this.shadowRoot.querySelector("#new-info");
@@ -248,34 +250,6 @@ export class InstanceManager extends LitElement {
     #items = [];
     #info = {};
 
-    #onRemoved(ev) {
-        const parent = ev.target.parentNode;
-        const name = parent.getAttribute("data-instance");
-        const ogPath = name.split("/");
-        const path = [...ogPath];
-        let target = toRender;
-        const key = path.pop();
-        target = path.reduce((acc, cur) => acc[cur], target);
-        this.onRemoved(target[key], ogPath);
-        delete target[key];
-
-        if (parent.hasAttribute("selected")) {
-            const previous = parent.previousElementSibling?.getAttribute("data-instance");
-            if (previous) this.#selected = previous;
-            else {
-                const next = parent.nextElementSibling?.getAttribute("data-instance");
-                if (next) this.#selected = next;
-                else this.#selected = undefined;
-            }
-        }
-
-        // parent.remove()
-        // const instance = this.shadowRoot.querySelector(`div[data-instance="${name}"]`)
-        // instance.remove()
-
-        this.requestUpdate();
-    }
-
     #hideAll(chosenInstanceElement) {
         Array.from(this.shadowRoot.querySelectorAll("div[data-instance]")).forEach((instanceElement) => {
             if (instanceElement !== chosenInstanceElement) instanceElement.hidden = true;
@@ -332,7 +306,6 @@ export class InstanceManager extends LitElement {
                     id: key,
                     label: key.split("/").pop(),
                     selected: key === this.#selected,
-                    onRemoved: this.#onRemoved.bind(this),
                     ...info,
                 };
 

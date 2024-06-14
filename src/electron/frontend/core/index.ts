@@ -9,7 +9,7 @@ import { Dashboard } from './components/Dashboard.js'
 import {
   notyf,
   notify
-} from './dependencies.js'
+} from './notifications'
 
 import Swal from 'sweetalert2'
 import { loadServerEvents, pythonServerOpened } from "./server/index.js";
