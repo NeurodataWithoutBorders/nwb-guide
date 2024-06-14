@@ -54,11 +54,16 @@ export default defineConfig({
                 // Just rendering
                 "src/electron/frontend/core/components/CodeBlock.js",
 
+                // Depends on server communication
+                "src/electron/frontend/core/components/NWBFilePreview.js",
+
                 // Unclear how to test
                 "src/electron/frontend/utils/popups.ts",
                 "src/electron/frontend/utils/download.ts",
                 "src/electron/frontend/utils/upload.ts",
                 "src/electron/frontend/core/components/FileSystemSelector.js", // Uses Electron dialog
+                "src/electron/frontend/core/components/DandiResults.js", // Needs DANDI API Key and network access (unless possibly with a static mocked response)
+
             ],
         },
     },
