@@ -49,7 +49,7 @@ jobs:
           echo "ExampleDataCache: ${{ needs.ExampleDataCache.result }}"
           echo "ExampleDataTests: ${{ needs.ExampleDataTests.result }}"
       - name: debugging
-        run: export test=(${{ needs.DevTests.result }} == 'failure' || ${{ needs.LiveServices.result }} == 'failure' || ${{ needs.BuildTests.result }} == 'failure' || ${{ needs.ExampleDataCache.result }} == 'failure' || ${{ needs.ExampleDataTests.result }} == 'failure') 
+        run: export test=(${{ needs.DevTests.result }} == 'failure' || ${{ needs.LiveServices.result }} == 'failure' || ${{ needs.BuildTests.result }} == 'failure' || ${{ needs.ExampleDataCache.result }} == 'failure' || ${{ needs.ExampleDataTests.result }} == 'failure')
       - name: debugging print
         run: echo $test
       #- name: Printout logic trigger
