@@ -51,8 +51,8 @@ jobs:
           echo "BuildTests: ${{ needs.BuildTests.result }}"
           echo "ExampleDataCache: ${{ needs.ExampleDataCache.result }}"
           echo "ExampleDataTests: ${{ needs.ExampleDataTests.result }}"
-      - name: Printout logic trigger
-        run: ${{ needs.DevTests.result }} == 'failure' || ${{ needs.LiveServices.result }} == 'failure' || ${{ needs.BuildTests.result }} == 'failure' || ${{ needs.ExampleDataCache.result }} == 'failure' || ${{ needs.ExampleDataTests.result }} == 'failure'
+      #- name: Printout logic trigger
+      #  run: ${{ needs.DevTests.result }} == 'failure' || ${{ needs.LiveServices.result }} == 'failure' || ${{ needs.BuildTests.result }} == 'failure' || ${{ needs.ExampleDataCache.result }} == 'failure' || ${{ needs.ExampleDataTests.result }} == 'failure'
       - uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
