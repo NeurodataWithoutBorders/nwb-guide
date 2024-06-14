@@ -30,8 +30,8 @@ jobs:
             label: environments/environment-MAC-intel.yml
 
          # TODO: unknown issue with Windows dev mode during e2e tests
-         # - os: windows-latest
-         #   label: environments/environment-Windows.yml
+          - os: windows-latest
+            label: environments/environment-Windows.yml
 
     steps:
       - uses: actions/checkout@v4
