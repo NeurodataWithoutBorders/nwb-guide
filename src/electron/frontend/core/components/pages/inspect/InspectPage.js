@@ -39,7 +39,9 @@ export class InspectPage extends Page {
             }
         );
 
-        await closeProgressPopup();
+        console.log(result)
+
+        closeProgressPopup();
 
         if (typeof result === "string") return result;
 

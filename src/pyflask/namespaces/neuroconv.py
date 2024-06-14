@@ -11,9 +11,7 @@ from manageNeuroconv import (
     get_interface_alignment,
     get_metadata_schema,
     get_source_schema,
-    inspect_multiple_filesystem_objects,
-    inspect_nwb_file,
-    inspect_nwb_folder,
+    inspect_all,
     listen_to_neuroconv_progress_events,
     locate_data,
     progress_handler,
@@ -163,22 +161,6 @@ class Upload(Resource):
         else:
             return upload_multiple_filesystem_objects_to_dandi(**neuroconv_namespace.payload)
 
-
-@neuroconv_namespace.route("/inspect_file")
-class InspectNWBFile(Resource):
-    @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def post(self):
-        return inspect_nwb_file(neuroconv_namespace.payload)
-
-
-@neuroconv_namespace.route("/inspect_folder")
-class InspectNWBFolder(Resource):
-    @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
-    def post(self):
-        url = f"{request.url_root}neuroconv/announce/progress"
-        return inspect_nwb_folder(url, neuroconv_namespace.payload)
-
-
 @neuroconv_namespace.route("/announce/progress")
 class InspectNWBFolder(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
@@ -192,23 +174,8 @@ class InspectNWBFolder(Resource):
 class InspectNWBFolder(Resource):
     @neuroconv_namespace.doc(responses={200: "Success", 400: "Bad Request", 500: "Internal server error"})
     def post(self):
-        from os.path import isfile
-
         url = f"{request.url_root}neuroconv/announce/progress"
-
-        paths = neuroconv_namespace.payload["paths"]
-
-        kwargs = {**neuroconv_namespace.payload}
-        del kwargs["paths"]
-
-        if len(paths) == 1:
-            if isfile(paths[0]):
-                return inspect_nwb_file({"nwbfile_path": paths[0], **kwargs})
-            else:
-                return inspect_nwb_folder(url, {"path": paths[0], **kwargs})
-
-        else:
-            return inspect_multiple_filesystem_objects(url, paths, **kwargs)
+        return inspect_all(url, neuroconv_namespace.payload)
 
 
 @neuroconv_namespace.route("/html")

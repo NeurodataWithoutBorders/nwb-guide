@@ -53,6 +53,7 @@ const componentCSS = css`
     }
 
     button {
+        position: relative;
         background: WhiteSmoke;
         border: 1px solid #c3c3c3;
         border-radius: 4px;
@@ -78,7 +79,13 @@ const componentCSS = css`
         right: 0;
         bottom: 0;
         cursor: pointer;
-        padding: 0px 5px;
+        padding: 2px 5px;
+    }
+
+    nwb-list {
+        display: block;
+        width: 100%;
+        margin-top: 10px;
     }
 `;
 
@@ -272,6 +279,10 @@ export class FilesystemSelector extends LitElement {
                                             >Multiple directory support only available using drag-and-drop.</small
                                         >`
                                   : ""}`}
+
+                              <div class="controls">
+                                  ${this.value ? html`<div @click=${() => this.#handleFiles()}>${unsafeSVG(restartSVG)}</div>` : ""}
+                              </div>
                 </button>
                 ${this.multiple && isArray && this.value.length > 1
                     ? new List({
@@ -283,9 +294,6 @@ export class FilesystemSelector extends LitElement {
                       })
                     : ""}
 
-                <div class="controls">
-                    ${this.value ? html`<div @click=${() => this.#handleFiles()}>${unsafeSVG(restartSVG)}</div>` : ""}
-                </div>
             </div>
             ${isMultipleTypes
                 ? html`<div id="button-div">

@@ -1391,32 +1391,6 @@ def generate_dataset(input_path: str, output_path: str) -> dict:
     return {"output_path": str(output_path)}
 
 
-def inspect_nwb_file(payload) -> dict:
-    from nwbinspector import inspect_nwbfile, load_config
-    from nwbinspector.inspector_tools import format_messages, get_report_header
-    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
-
-    messages = list(
-        inspect_nwbfile(
-            ignore=[
-                "check_description",
-                "check_data_orientation",
-            ],  # TODO: remove when metadata control is exposed
-            config=load_config(filepath_or_keyword="dandi"),
-            **payload,
-        )
-    )
-
-    if payload.get("format") == "text":
-        return "\n".join(format_messages(messages=messages))
-
-    header = get_report_header()
-    header["NWBInspector_version"] = str(header["NWBInspector_version"])
-    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
-
-    return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
-
-
 def _inspect_file_per_job(
     nwbfile_path: str,
     url,
@@ -1457,18 +1431,26 @@ def _inspect_file_per_job(
         return messages
 
 
-def inspect_all(url, config):
+def _inspect_all(url, config):
 
     from concurrent.futures import ProcessPoolExecutor, as_completed
 
     from nwbinspector.utils import calculate_number_of_cpu
     from tqdm_publisher import TQDMProgressSubscriber
 
-    path = config["path"]
-    config.pop("path")
 
-    nwbfile_paths = list(Path(path).rglob("*.nwb"))
+    path = config.pop("path", None)
 
+    paths = [ path ] if path else config.pop("paths", [])
+
+    nwbfile_paths = []
+    for path in paths:
+        posix_path = Path(path)
+        if posix_path.is_file():
+            nwbfile_paths.append(posix_path)
+        else:
+            nwbfile_paths.extend(list(posix_path.rglob("*.nwb")))
+    
     request_id = config.pop("request_id", None)
 
     n_jobs = config.get("n_jobs", -2)  # Default to all but one CPU
@@ -1518,18 +1500,18 @@ def inspect_all(url, config):
     return messages
 
 
-def inspect_nwb_folder(url, payload) -> dict:
+def inspect_all(url, payload) -> dict:
     from pickle import PicklingError
 
     from nwbinspector.inspector_tools import format_messages, get_report_header
     from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
 
     try:
-        messages = inspect_all(url, payload)
+        messages = _inspect_all(url, payload)
     except PicklingError as exception:
         if "attribute lookup auto_parse_some_output on nwbinspector.register_checks failed" in str(exception):
             del payload["n_jobs"]
-            messages = inspect_all(url, payload)
+            messages = _inspect_all(url, payload)
         else:
             raise exception
     except Exception as exception:
@@ -1559,14 +1541,6 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None) -> 
             new_path.symlink_to(path, path.is_dir())
 
     return folder_path
-
-
-def inspect_multiple_filesystem_objects(url, paths, **kwargs) -> dict:
-    tmp_folder_path = _aggregate_symlinks_in_new_directory(paths, "inspect")
-    result = inspect_nwb_folder(url, {"path": tmp_folder_path, **kwargs})
-    rmtree(tmp_folder_path)
-    return result
-
 
 def _format_spikeglx_meta_file(bin_file_path: str) -> str:
     bin_file_path = Path(bin_file_path)

@@ -139,8 +139,8 @@ export class GuidedInspectorPage extends Page {
 
                         if (!this.report) {
                             const result = await run(
-                                "neuroconv/inspect_file",
-                                { nwbfile_path: fileArr[0].info.file, ...options },
+                                "neuroconv/inspect",
+                                { path: fileArr[0].info.file, ...options },
                                 { title }
                             ).catch((error) => {
                                 this.notify(error.message, "error");
