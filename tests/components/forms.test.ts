@@ -172,7 +172,7 @@ describe('JSONSchemaForm', () => {
 
         expect(form.resolved.users).toEqual([{ name: 'John Doe', age: 30 }]);
     })
-    
+
     it('validates form correctly', async () => {
         const schema = {
             properties: {
@@ -373,4 +373,3 @@ describe('JSONSchemaForm', () => {
 
 
 });
-

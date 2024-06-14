@@ -606,7 +606,7 @@ export class JSONSchemaInput extends LitElement {
         this.#updateData(fullPath, value);
         const possiblePromise = this.#triggerValidation(name, path);
 
-        return resolve(possiblePromise, () => true)
+        return resolve(possiblePromise, () => true);
     }
 
     getElement = () => this.shadowRoot.querySelector(".schema-input");

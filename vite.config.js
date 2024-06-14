@@ -42,7 +42,6 @@ export default defineConfig({
                 "src/electron/frontend/core/lotties.ts",
                 "src/electron/frontend/core/globals.js",
                 "src/electron/frontend/core/errors.ts",
-                
 
                 // Dashboard-Related Components
                 "src/electron/frontend/core/components/Dashboard.js",
@@ -60,7 +59,6 @@ export default defineConfig({
                 "src/electron/frontend/utils/download.ts",
                 "src/electron/frontend/utils/upload.ts",
                 "src/electron/frontend/core/components/FileSystemSelector.js", // Uses Electron dialog
-
             ],
         },
     },

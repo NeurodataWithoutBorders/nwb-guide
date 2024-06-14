@@ -6,7 +6,7 @@ const createInstance = () => {
 }
 
 const singleInstance = {
-      instance1: createInstance 
+      instance1: createInstance
 }
 
 const multipleInstances = {
@@ -33,32 +33,32 @@ describe('InstanceManager', () => {
         await element.updateComplete;
         return element
     }
-  
-  
+
+
     it('renders', async () => {
       const element = await mountComponent({ instances: singleInstance });
       expect(element.shadowRoot.querySelector('#content')).to.exist;
       expect(element.shadowRoot.querySelector('#instance-sidebar')).to.exist;
       element.remove()
     });
-  
+
     it('toggles input visibility', async () => {
         const element = await mountComponent({
             instances: multipleInstances,
             onAdded: () => ({ value: createInstance })
         });
-        
+
       const button = element.shadowRoot.querySelector('#add-new-button');
       const newInfoContainer = element.shadowRoot.querySelector('#new-info');
       const input = newInfoContainer.querySelector('input');
       const submitButton = newInfoContainer.querySelector('nwb-button');
 
       expect(newInfoContainer.hidden).to.be.true;
-  
+
       button.click();
       await element.updateComplete;
       expect(newInfoContainer.hidden).to.be.false;
-  
+
       input.value = 'newInstance';
       submitButton.click();
       await element.updateComplete;
@@ -70,7 +70,7 @@ describe('InstanceManager', () => {
 
       element.remove()
     });
-  
+
     it('updates state correctly', async () => {
       const element = await mountComponent({
           instances: multipleInstances,
@@ -80,11 +80,11 @@ describe('InstanceManager', () => {
       await element.updateComplete;
 
       const instance = element.getInstance('instance1')
-  
+
       expect(instance.status).to.equal('inactive');
       element.remove()
     });
-  
+
     it('selects instance on click', async () => {
       const element = await mountComponent({
         instances: multipleInstances
@@ -97,20 +97,20 @@ describe('InstanceManager', () => {
 
       expect(element.shadowRoot.querySelector(`[data-instance=${instance1.id}]`).getAttribute('hidden')).to.be.null;
       expect(element.shadowRoot.querySelector(`[data-instance=${instance2.id}]`).getAttribute('hidden')).to.exist;
-        
+
       //   instance2.getAttribute('selected')).to.exist;
       // expect(instance1.getAttribute('selected')).to.be.null;
 
       element.remove()
     });
-  
+
     it('renders accordion for categories', async () => {
         const element = await mountComponent({
             instances: categorizedInstances
         });
 
         await element.updateComplete;
-  
+
         const accordion1 = element.shadowRoot.querySelector('nwb-accordion[name="category1"]');
         const accordion2 = element.shadowRoot.querySelector('nwb-accordion[name="instance1"]');
         expect(accordion1).to.exist;
