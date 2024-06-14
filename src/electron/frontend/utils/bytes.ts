@@ -7,7 +7,7 @@ export function humanReadableBytes(size: number | string) {
     let index = 0;
 
     // Convert the size to a floating point number
-    size = parseFloat(size);
+    size = typeof size === 'string' ? parseFloat(size) : size;
 
     // Loop until the size is less than 1024 and increment the unit
     while (size >= 1000 && index < units.length - 1) {

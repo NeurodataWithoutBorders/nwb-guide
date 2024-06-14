@@ -1,4 +1,4 @@
-import { os, path, crypto, isElectron, isTestEnvironment } from "../utils/electron.js";
+import { os, path, crypto, isElectron, isTestEnvironment } from "../utils/electron";
 
 import paths from "../../../paths.config.json" assert { type: "json" };
 

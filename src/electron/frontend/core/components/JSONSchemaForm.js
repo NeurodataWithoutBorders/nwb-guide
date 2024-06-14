@@ -4,17 +4,19 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { Accordion } from "./Accordion";
 
 import { checkStatus } from "../validation";
-import { header, replaceRefsWithValue } from "./forms/utils";
-import { resolve } from "../promises";
-import { merge } from "./pages/utils";
-import { resolveProperties } from "./pages/guided-mode/data/utils";
+import { header } from "../../utils/text";
+import { resolveAsJSONSchema } from "../../utils/data";
+import { resolve } from "../../utils/promises";
+import { merge } from "../../utils/data";
+import { resolveProperties } from "../../utils/data";
 
 import { JSONSchemaInput, getEditableItems } from "./JSONSchemaInput";
-import { InspectorListItem } from "./preview/inspector/InspectorList";
+import { InspectorListItem } from "./InspectorList";
 
 import { Validator } from "jsonschema";
 import { successHue, warningHue, errorHue } from "./globals";
 import { Button } from "./Button";
+import { isObject } from "../../utils/typecheck";
 
 const encode = (str) => {
     try {
@@ -69,11 +71,7 @@ const additionalPropPattern = "additional";
 
 const templateNaNMessage = `<br/><small>Type <b>NaN</b> to represent an unknown value.</small>`;
 
-var validator = new Validator();
-
-const isObject = (item) => {
-    return item && typeof item === "object" && !Array.isArray(item);
-};
+const validator = new Validator();
 
 export const getIgnore = (o, path) => {
     if (typeof path === "string") path = path.split(".");
@@ -658,7 +656,7 @@ export class JSONSchemaForm extends LitElement {
 
     set schema(schema) {
         this.#schema = schema;
-        this.#schema = replaceRefsWithValue(schema);
+        this.#schema = resolveAsJSONSchema(schema);
     }
 
     get schema() {

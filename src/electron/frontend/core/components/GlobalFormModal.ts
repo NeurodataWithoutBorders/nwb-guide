@@ -1,11 +1,11 @@
-import { Modal } from "../Modal"
-import { Page } from "../pages/Page.js"
-import { Button } from "../Button.js"
-import { JSONSchemaForm } from "../JSONSchemaForm.js"
+import { Modal } from "./Modal"
+import { Page } from "./pages/Page.js"
+import { Button } from "./Button.js"
+import { JSONSchemaForm } from "./JSONSchemaForm.js"
 
-import { onThrow } from "../../errors";
-import { merge } from "../pages/utils.js";
-import { save } from "../../progress/index.js";
+import { onThrow } from "../errors";
+import { merge } from "../../utils/data";
+import { save } from "../progress/index.js";
 
 type SingleIgnorePropsLevel = {
     [x:string]: true,

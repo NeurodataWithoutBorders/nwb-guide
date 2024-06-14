@@ -5,7 +5,7 @@ import {
     successHue,
     warningHue,
     issueHue
-} from "../globals";
+} from "./globals";
 
 export type StatusIndicatorProps = {
     label: string | any,

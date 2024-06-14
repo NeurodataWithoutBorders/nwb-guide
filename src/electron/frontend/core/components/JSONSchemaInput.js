@@ -3,20 +3,22 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { FilesystemSelector } from "./FileSystemSelector";
 
 import { BasicTable } from "./BasicTable";
-import { header, tempPropertyKey, tempPropertyValueKey } from "./forms/utils";
+import { header } from "../../utils/text";
+import { tempPropertyKey, tempPropertyValueKey } from "./globals.js";
 
 import { Button } from "./Button";
 import { List } from "./List";
 import { Modal } from "./Modal";
 
-import { capitalize } from "./forms/utils";
+import { capitalize } from "../../utils/text";
 import { JSONSchemaForm, getIgnore } from "./JSONSchemaForm";
 import { Search } from "./Search";
 import tippy from "tippy.js";
-import { merge } from "./pages/utils";
+import { merge } from "../../utils/data";
 import { OptionalSection } from "./OptionalSection";
-import { InspectorListItem } from "./preview/inspector/InspectorList";
+import { InspectorListItem } from "./InspectorList.js";
 import { renderDateTime, resolveDateTime } from "./DateTimeSelector";
+import { isObject } from "../../utils/typecheck";
 
 const isDevelopment = !!import.meta.env;
 
@@ -276,8 +278,7 @@ export function createTable(fullPath, { onUpdate, onThrow, overrides = {} }) {
 }
 
 // Schema or value indicates editable object
-export const isEditableObject = (schema, value) =>
-    schema.type === "object" || (value && typeof value === "object" && !Array.isArray(value));
+export const isEditableObject = (schema, value) => schema.type === "object" || isObject(value);
 
 export const isAdditionalProperties = (pattern) => pattern === "additional";
 export const isPatternProperties = (pattern) => pattern && !isAdditionalProperties(pattern);

@@ -1,6 +1,6 @@
-import { updateURLParams } from "../../utils/url.js";
+import { updateURLParams } from "../../utils/url";
 import { guidedProgressFilePath } from "../globals.js";
-import { fs } from "../../utils/electron.js";
+import { fs } from "../../utils/electron";
 import { joinPath } from "../globals";
 import { get, hasEntry } from "./index.js";
 

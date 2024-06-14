@@ -4,11 +4,11 @@ import getSubjectSchema from "../../../../../../../schemas/subject.schema";
 import { validateOnChange } from "../../../../validation/index.js";
 import { Table } from "../../../Table.js";
 
-import { updateResultsFromSubjects } from "./utils";
+import { updateResultsFromSubjects } from "../../../../../utils/data";
 import { preprocessMetadataSchema } from "../../../../../../../schemas/base-metadata.schema";
 import { Button } from "../../../Button.js";
-import { createGlobalFormModal } from "../../../forms/GlobalFormModal";
-import { header } from "../../../forms/utils";
+import { createGlobalFormModal } from "../../../GlobalFormModal";
+import { header } from "../../../../../utils/text";
 
 import globalIcon from "../../../../../assets/icons/global.svg?raw";
 

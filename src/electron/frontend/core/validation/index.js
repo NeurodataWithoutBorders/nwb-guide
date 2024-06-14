@@ -1,4 +1,4 @@
-import { resolveAll } from "../promises";
+import { resolveAll } from "../../utils/promises";
 import { baseUrl } from "../server/globals";
 import validationSchema from "./validation";
 

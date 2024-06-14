@@ -9,7 +9,7 @@ export default function preprocessSourceDataSchema (schema) {
     }, {})
 
     // Abstract across different interfaces
-    Object.entries(schema.properties ?? {}).forEach(([key, schema]: [string, any]) => {
+    Object.entries(schema.properties ?? {}).forEach(([ key, schema ]: [string, any]) => {
 
             const info = interfaces[key] ?? {}
 

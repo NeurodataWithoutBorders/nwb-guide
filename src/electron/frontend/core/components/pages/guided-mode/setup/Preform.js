@@ -2,7 +2,6 @@ import { html } from "lit";
 import { JSONSchemaForm } from "../../../JSONSchemaForm.js";
 import { Page } from "../../Page.js";
 import { onThrow } from "../../../../errors";
-import { merge } from "../../utils.js";
 import timezoneSchema from "../../../../../../../schemas/timezone.schema";
 
 // ------------------------------------------------------------------------------

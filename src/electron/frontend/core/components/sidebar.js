@@ -1,18 +1,7 @@
 import { LitElement, html } from "lit";
-import useGlobalStyles from "./utils/useGlobalStyles.js";
-import { header } from "./forms/utils";
-
-const componentCSS = ``; // These are not active until the component is using shadow DOM
+import { header } from "../../utils/text";
 
 export class Sidebar extends LitElement {
-    static get styles() {
-        return useGlobalStyles(
-            componentCSS,
-            (sheet) => sheet.href && sheet.href.includes("bootstrap"),
-            this.shadowRoot
-        );
-    }
-
     static get properties() {
         return {
             pages: { type: Object, reflect: false },

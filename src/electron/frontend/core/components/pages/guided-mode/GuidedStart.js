@@ -2,7 +2,7 @@ import { html } from "lit";
 import { Page } from "../Page.js";
 import "./GuidedFooter";
 import { InfoBox } from "../../InfoBox.js";
-import { InspectorListItem } from "../../preview/inspector/InspectorList.js";
+import { InspectorListItem } from "../../inspector/InspectorList.js";
 import { sections } from "../globals";
 
 export class GuidedStartPage extends Page {

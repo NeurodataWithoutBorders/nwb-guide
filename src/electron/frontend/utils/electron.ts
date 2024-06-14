@@ -1,5 +1,5 @@
-import { registerUpdate, registerUpdateProgress } from "./auto-update.js";
-import { updateURLParams } from "./url.js";
+import { registerUpdate, registerUpdateProgress } from "./auto-update";
+import { updateURLParams } from "./url";
 
 export const isTestEnvironment = globalThis?.process?.env?.VITEST;
 

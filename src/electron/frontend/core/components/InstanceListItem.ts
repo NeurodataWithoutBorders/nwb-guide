@@ -1,6 +1,6 @@
 import { LitElement, css, html, unsafeCSS } from "lit";
 
-import { errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol, emojiFontFamily } from "../globals";
+import { errorHue, errorSymbol, successHue, successSymbol, warningHue, warningSymbol, emojiFontFamily } from "./globals";
 
 export class InstanceListItem extends LitElement {
 

@@ -1,14 +1,13 @@
 import { describe, expect, test } from 'vitest'
-import { createResults } from '../src/electron/frontend/core/components/pages/guided-mode/data/utils'
-import { mapSessions } from '../src/electron/frontend/core/components/pages/utils'
+import { createResultsForSession } from '../src/electron/frontend/utils/data'
+import { mapSessions } from '../src/electron/frontend/utils/data'
 
 import baseMetadataSchema from '../src/schemas/base-metadata.schema'
 
 import { createMockGlobalState } from './utils'
 
 import { Validator } from 'jsonschema'
-import { textToArray } from '../src/electron/frontend/core/components/forms/utils'
-import { updateResultsFromSubjects } from '../src/electron/frontend/core/components/pages/guided-mode/setup/utils'
+import { updateResultsFromSubjects } from '../src/electron/frontend/utils/data'
 import { JSONSchemaForm } from '../src/electron/frontend/core/components/JSONSchemaForm'
 
 import { validateOnChange } from "../src/electron/frontend/core/validation/index.js";
@@ -30,17 +29,10 @@ describe('metadata is specified correctly', () => {
         // Allow mouse (full list populated from server)
         baseMetadataSchema.properties.Subject.properties.species.enum = ['Mus musculus']
 
-        const result = mapSessions(info => createResults(info, globalState), globalState.results)
+        const result = mapSessions(info => createResultsForSession(info, globalState), globalState.results)
         const res = validator.validate(result[0], baseMetadataSchema) // Check first session with JSON Schema
         expect(res.errors).toEqual([])
     })
-})
-
-test('empty rows are not kept for strings converted to arrays', () => {
-    expect(textToArray(' v1\n v2 ')).toEqual(['v1', 'v2'])
-    expect(textToArray(' v1\n\n   v2 ')).toEqual(['v1', 'v2'])
-    expect(textToArray(' v1\n \n   v2 ')).toEqual(['v1', 'v2'])
-    expect(textToArray(' v1\n v3\n   v2 ')).toEqual(['v1', 'v3', 'v2'])
 })
 
 test('removing all existing sessions will maintain the related subject entry on the results object', () => {

@@ -1,26 +1,14 @@
-import { isElectron, app, port } from '../../utils/electron.js'
+import { isElectron, app, port } from '../../utils/electron'
 
 import serverSVG from "../../assets/icons/server.svg?raw";
 import webAssetSVG from "../../assets/icons/web_asset.svg?raw";
 import wifiSVG from "../../assets/icons/wifi.svg?raw";
 
+import { StatusBar } from "../components/StatusBar.js";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+
 // Base Request URL for Python Server
 export const baseUrl = `http://127.0.0.1:${port}`;
-
-const isPromise = (object) => object && typeof object === 'object' && typeof object.then === 'function'
-
-export const resolve = (object, callback) => {
-  if (isPromise(object)) {
-    return new Promise(resolvePromise => {
-        object.then((res) => resolvePromise((callback) ? callback(res) : res))
-    })
-  } else return (callback) ? callback(object) : object
-}
-
-// -------------------------------------------------
-
-import { StatusBar } from "../components/status/StatusBar.js";
-import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 
 const appVersion = app?.getVersion();
 
