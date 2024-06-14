@@ -450,9 +450,8 @@ export class BasicTable extends LitElement {
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
-        const schemaOrder = this.#itemSchema.order ?? []
+        const schemaOrder = this.#itemSchema.order ?? [];
         const order = this.keyColumn ? [this.keyColumn, ...schemaOrder] : schemaOrder;
-
 
         // Sort Columns by Key Column and Requirement
         const keys =

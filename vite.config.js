@@ -63,7 +63,6 @@ export default defineConfig({
                 "src/electron/frontend/utils/upload.ts",
                 "src/electron/frontend/core/components/FileSystemSelector.js", // Uses Electron dialog
                 "src/electron/frontend/core/components/DandiResults.js", // Needs DANDI API Key and network access (unless possibly with a static mocked response)
-
             ],
         },
     },

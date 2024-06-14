@@ -65,7 +65,7 @@ describe('Table component', () => {
     const element = await createComponent({ schema, keyColumn: 'name' });
 
     const key = 'John Doe';
-    const row = { age: 30, aliases: ['Johny', 'Doe'] } 
+    const row = { age: 30, aliases: ['Johny', 'Doe'] }
     const data = { [key]: row };
     element.data = data;
     await element.updated();
