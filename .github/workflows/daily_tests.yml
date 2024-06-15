@@ -41,13 +41,13 @@ jobs:
     needs: [DevTests, LiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
     steps:
       - name: SetEnvironmentVariable
-        run: echo "any_failures=${{ (needs.DevTests.result == 'failure') || (needs.LiveServices.result  == 'failure') || (needs.BuildTests.result == 'failure') || (needs.ExampleDataCache.result == 'failure') || (needs.ExampleDataTests.result == 'failure') }}" >> "$GITHUB_ENV"
+        run: echo "ANY_FAILURES=${{ (needs.DevTests.result == 'failure') || (needs.LiveServices.result  == 'failure') || (needs.BuildTests.result == 'failure') || (needs.ExampleDataCache.result == 'failure') || (needs.ExampleDataTests.result == 'failure') }}" >> "$GITHUB_ENV"
 
   NotifyOnAnyFailure:
     runs-on: ubuntu-latest
     needs: [DevTests, LiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
     # If condition needs 'always' to trigger at all
-    if: always() && any_failures
+    if: always() && env.ANY_FAILURES
     steps:
       - name: Printout which failed
         run: |
