@@ -39,7 +39,17 @@ jobs:
   NotifyOnAnyFailure:
     runs-on: ubuntu-latest
     needs: [DevTests, LiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
-    if: always() && (${{ needs.DevTests.result }} == 'failure' || ${{ needs.LiveServices.result }} == 'failure' || ${{ needs.BuildTests.result }} == 'failure' || ${{ needs.ExampleDataCache.result }} == 'failure' || ${{ needs.ExampleDataTests.result }} == 'failure')
+    # If condition needs always to trigger at all
+    if: (
+        always() && 
+        ${{
+          (needs.DevTests.result == 'failure')
+          || (needs.LiveServices.result  == 'failure')
+          || (needs.BuildTests.result == 'failure')
+          || (needs.ExampleDataCache.result == 'failure')
+          || (needs.ExampleDataTests.result == 'failure') 
+        }}
+      )
     steps:
       - name: Printout which failed
         run: |
@@ -49,7 +59,7 @@ jobs:
           echo "ExampleDataCache: ${{ needs.ExampleDataCache.result }}"
           echo "ExampleDataTests: ${{ needs.ExampleDataTests.result }}"
       - name: debugging
-        run: export test=${{ needs.DevTests.result == 'failure' || needs.LiveServices.result  == 'failure' || needs.BuildTests.result == 'failure' || needs.ExampleDataCache.result == 'failure' || needs.ExampleDataTests.result == 'failure' }}
+        run: export test=${{ (needs.DevTests.result == 'failure') || (needs.LiveServices.result  == 'failure') || (needs.BuildTests.result == 'failure') || (needs.ExampleDataCache.result == 'failure') || (needs.ExampleDataTests.result == 'failure') }}
       - name: debugging print
         run: echo $test
       #- name: Printout logic trigger
