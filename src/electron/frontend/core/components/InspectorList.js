@@ -4,29 +4,43 @@ import { getMessageType, isErrorImportance } from "../validation";
 
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+import { header } from "../../utils/text";
+
+const sortAlphabeticallyWithNumberedStrings = (a, b) => {
+    if (a === b) return 0;
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+};
+
 const sortList = (items) => {
     return items
-        .sort((a, b) => {
-            const aCritical = isErrorImportance.includes(a.importance);
-            const bCritical = isErrorImportance.includes(a.importance);
-            if (aCritical && bCritical) return 0;
-            else if (aCritical) return -1;
-            else return 1;
-        })
+        .sort((a, b) => sortAlphabeticallyWithNumberedStrings(a.object_name, b.object_name))
+        .sort((a, b) => sortAlphabeticallyWithNumberedStrings(a.object_type, b.object_type))
         .sort((a, b) => {
             const lowA = a.severity == "LOW";
             const lowB = b.severity === "LOW";
             if (lowA && lowB) return 0;
             else if (lowA) return 1;
             else return -1;
+        })
+
+        .sort((a, b) => {
+            const aCritical = isErrorImportance.includes(a.importance);
+            const bCritical = isErrorImportance.includes(b.importance);
+            if (aCritical && bCritical) return 0;
+            else if (aCritical) return -1;
+            else return 1;
         });
 };
 
 const aggregateMessages = (items) => {
     let messages = {};
+    console.log(items);
     items.forEach((item) => {
-        if (!messages[item.message]) messages[item.message] = [];
-        messages[item.message].push(item);
+        const copy = { ...item };
+        delete copy.file_path;
+        const encoded = JSON.stringify(copy);
+        if (!messages[encoded]) messages[encoded] = [];
+        messages[encoded].push(item);
     });
     return messages;
 };
@@ -55,7 +69,7 @@ export class InspectorList extends List {
             editable: false,
             unordered: true,
             ...props,
-            items: sortList(aggregatedItems).map((itemProps) => {
+            items: sortList(aggregatedItems).map((itemProps, i) => {
                 const item = new InspectorListItem(itemProps);
                 item.style.flexGrow = "1";
                 return { content: item };
@@ -94,7 +108,7 @@ export class InspectorListItem extends LitElement {
                 font-size: 10px;
             }
 
-            #objectType {
+            #header {
                 font-size: 10px;
             }
 
@@ -114,6 +128,10 @@ export class InspectorListItem extends LitElement {
                 background: #fff3cd;
                 border: 1px solid #ffeeba;
                 border-radius: 4px;
+            }
+
+            small {
+                font-size: 10px;
             }
         `;
     }
@@ -142,13 +160,14 @@ export class InspectorListItem extends LitElement {
         const isString = typeof this.message === "string";
         if (isString) this.setAttribute("title", this.message);
 
-        const hasObjectType = "object_type" in this;
-        const hasMetadata = hasObjectType && "object_name" in this;
+        const hasMetadata = "object_type" in this && "object_name" in this;
 
         const message = isString ? unsafeHTML(this.message) : this.message;
 
+        const headerText = this.object_name ? `${this.object_type} — ${header(this.object_name)}` : this.object_type;
+
         return html`
-            ${hasMetadata ? html`<span id="objectType">${hasObjectType ? `${this.object_type}` : ""} </span>` : ""}
+            ${hasMetadata ? html`<span id="header">${headerText}</span>` : ""}
             ${hasMetadata ? html`<span id="message">${message}</span>` : html`<p>${message}</p>`}
             ${this.file_path
                 ? html`<span id="filepath"
