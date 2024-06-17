@@ -968,14 +968,17 @@ export class SimpleTable extends LitElement {
         for (let key in this.ignore) delete entries[key];
         for (let key in this.ignore["*"] ?? {}) delete entries[key];
 
+        const schemaOrder = this.#itemSchema.order ?? [];
+        const order = this.keyColumn ? [this.keyColumn, ...schemaOrder] : schemaOrder;
+        if (!this.keyColumn && !order.includes("name")) order.unshift("name");
+
         // Sort Columns by Key Column and Requirement
         this.colHeaders = sortTable(
             {
                 ...this.#itemSchema,
                 properties: entries,
             },
-            this.keyColumn,
-            this.#itemSchema.order ?? ["name"] // Specify the order of the columns
+            order // Specify the order of the columns
         );
 
         // Try to guess the key column if unspecified

@@ -33,6 +33,7 @@ export const createProgressPopup = async (
     options: SweetAlertOptions,
     tqdmCallback: (update: any) => void
 ) => {
+
     const cancelController = new AbortController();
 
     if (!("showCancelButton" in options)) {
@@ -40,7 +41,7 @@ export const createProgressPopup = async (
         options.customClass = { actions: "swal-conversion-actions" };
     }
 
-    const popup = await openProgressSwal(options, (result) => {
+    await openProgressSwal(options, (result) => {
         if (!result.isConfirmed) cancelController.abort();
     });
 
@@ -62,6 +63,7 @@ export const createProgressPopup = async (
         width: "100%",
         gap: "5px",
     });
+
     element.append(container);
 
     const bars: Record<string | symbol, ProgressBar> = {};
@@ -84,7 +86,7 @@ export const createProgressPopup = async (
 
     elements.bars = bars;
 
-    const commonReturnValue = { swal: popup, fetch: { signal: cancelController.signal }, elements, ...options };
+    const commonReturnValue = { swal: false, fetch: { signal: cancelController.signal }, elements, ...options };
 
     // Provide a default callback
     let lastUpdate: number;
