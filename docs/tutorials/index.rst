@@ -24,12 +24,14 @@ In these tutorials, you'll follow along on a :doc:`local installation of the GUI
 Before you begin these tutorials, **you'll need to generate the tutorial dataset** using the instructions on the Dataset page.
 
 
+.. toctree::
+   :hidden:
 
+   self
 
 .. toctree::
    :maxdepth: 2
 
-   index
    dataset
    single_session
    multiple_sessions
