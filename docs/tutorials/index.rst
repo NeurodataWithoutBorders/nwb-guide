@@ -6,6 +6,9 @@ to the Neurodata Without Borders (NWB) format and uploading to the DANDI Archive
 In these tutorials, you'll follow along on a :doc:`local installation of the GUIDE </installation>` as we detail the conversion process from initial setup to final upload.
 
 .. note::
+    Watch a video walkthrough of these tutorials `here <https://www.youtube.com/watch?v=EhhdDVuHAZ0>`_.
+
+.. note::
     This tutorial focuses on uploading to the DANDI Development server.
 
     **When working with real data, you'll want to publish to the Main Archive**. In this case, follow the same steps outlined here—except replace the Development server with the Main Archive.
@@ -26,6 +29,7 @@ Before you begin these tutorials, **you'll need to generate the tutorial dataset
 .. toctree::
    :maxdepth: 2
 
+   index
    dataset
    single_session
    multiple_sessions
