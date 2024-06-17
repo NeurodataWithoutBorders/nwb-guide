@@ -12,9 +12,7 @@ const rowSymbol = Symbol("row");
 
 const maxRows = 20;
 
-const isRequired = (col, schema) => {
-    return schema.required?.includes(col);
-};
+const isRequired = (col, schema) => schema.required?.includes(col);
 
 export const getEditable = (value, rowData = {}, config, colName) => {
     if (typeof config === "boolean") return config;
@@ -22,7 +20,7 @@ export const getEditable = (value, rowData = {}, config, colName) => {
     return getEditable(value, rowData, config?.[colName] ?? true);
 };
 
-export function sortTable(schema, keyColumn, order) {
+export function sortTable(schema, order = []) {
     const cols = Object.keys(schema.properties)
 
         //Sort alphabetically
@@ -38,22 +36,15 @@ export function sortTable(schema, keyColumn, order) {
             if (aRequired) return -1;
             if (bRequired) return 1;
             return 0;
-        })
-        .sort((a, b) => {
-            if (a === keyColumn) return -1;
-            if (b === keyColumn) return 1;
-            return 0;
         });
 
-    return order
-        ? cols.sort((a, b) => {
-              const idxA = order.indexOf(a);
-              const idxB = order.indexOf(b);
-              if (idxA === -1) return 1;
-              if (idxB === -1) return -1;
-              return idxA - idxB;
-          })
-        : cols;
+    return cols.sort((a, b) => {
+        const idxA = order.indexOf(a);
+        const idxB = order.indexOf(b);
+        if (idxA === -1) return 1;
+        if (idxB === -1) return -1;
+        return idxA - idxB;
+    });
 }
 
 // Inject scoped stylesheet
@@ -263,14 +254,14 @@ export class Table extends LitElement {
         }
 
         // Sort Columns by Key Column and Requirement
+        const order = this.keyColumn ? [this.keyColumn, ...(this.#itemSchema.order ?? [])] : this.#itemSchema.order;
 
         const colHeaders = (this.colHeaders = sortTable(
             {
                 ...this.#itemSchema,
                 properties: entries,
             },
-            this.keyColumn,
-            this.#itemSchema.order
+            order
         ));
 
         // Try to guess the key column if unspecified
