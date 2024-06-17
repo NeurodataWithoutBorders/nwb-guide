@@ -17,7 +17,7 @@ Download and run `NWB-GUIDE-x64.dmg <https://github.com/NeurodataWithoutBorders/
 MacOS - Apple Silicon
 ---------------------
 
-This installation applies to [current-generation Apple computers (M1-M4+)](https://support.apple.com/en-us/116943).
+This installation applies to `current-generation Apple computers (M1-M4+) <https://support.apple.com/en-us/116943>`_.
 
 Download and run `NWB-GUIDE-arm64.dmg <https://github.com/NeurodataWithoutBorders/nwb-guide/releases/latest/download/NWB-GUIDE-arm64.dmg>`_. This will prompt you to move the app into your 'Applications' folder. Then open the 'NWB GUIDE' app from your 'Applications' folder.
 
