@@ -17,8 +17,12 @@ and uploading data to the :dandi-archive:`DANDI Archive <>`.
 .. note::
   Watch a tutorial video of NWB GUIDE `here <https://www.youtube.com/watch?v=EhhdDVuHAZ0>`_.
 
+Get started with NWB GUIDE by :doc:`installing it </installation>` on your computer and following the :doc:`tutorials </tutorials/index>` in this documentation.
+
+.. The TOC below is hidden from the main page contents but needed to generate the top menu
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
 
    installation
