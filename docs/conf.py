@@ -135,6 +135,15 @@ html_context = {
     "doc_path": "docs",
 }
 
+# Workaround for removing the left sidebar on pages without TOC
+# A better solution would be to follow the merge of:
+# https://github.com/pydata/pydata-sphinx-theme/pull/1682
+html_sidebars = {
+    "installation": [],
+    "format_support": [],
+    "developer_guide": [],
+}
+
 
 def _correct_signatures(app, what, name, obj, options, signature, return_annotation):
     if what == "class":
