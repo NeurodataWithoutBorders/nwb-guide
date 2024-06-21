@@ -435,7 +435,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "items": {
                 "allOf": [
                     {"$ref": "#/properties/Ecephys/definitions/Unit"},
-                    {"required": list(map(lambda info: info["name"], unit_columns))},
+                    {"required": [x["name"] for x in unit_columns]},
                 ]
             },
         }
@@ -469,7 +469,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "items": {
                 "allOf": [
                     {"$ref": "#/properties/Ecephys/definitions/Electrode"},
-                    {"required": list(map(lambda info: info["name"], electrode_columns))},
+                    {"required": [x["name"] for x in electrode_columns]},
                 ]
             },
         }
@@ -1128,9 +1128,7 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None):
         path = Path(path)
         new_path = folder_path / path.name
         if path.is_dir():
-            _aggregate_symlinks_in_new_directory(
-                list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path
-            )
+            _aggregate_symlinks_in_new_directory([os.path.join(path, name) for name in os.listdir(path)])
         else:
             new_path.symlink_to(path, path.is_dir())
 
