@@ -924,20 +924,40 @@ def create_file(
         options = {interface: {} for interface in info["source_data"]}
 
         for interface in options:
-            available_opts = available_options.get("properties").get(interface).get("properties", {})
+            print(f"{interface} entered")
 
-            # Specify if stub test
-            if run_stub_test:
-                if available_opts.get("stub_test"):
-                    options[interface]["stub_test"] = True
+            options_per_interface_or_converter = available_options.get("properties").get(interface)
+            # Nested converters
+            if "properties" not in options_per_interface_or_converter:
+                for subinterface in options_per_interface_or_converter:
+                    available_opts = options_per_interface_or_converter[subinterface].get("properties", {})
+                    options_to_update = options[interface][subinterface]
 
-            # Specify if iterator options are available
-            elif available_opts.get("iterator_opts"):
-                options[interface]["iterator_opts"] = dict(
-                    display_progress=True,
-                    progress_bar_class=TQDMProgressSubscriber,
-                    progress_bar_options=progress_bar_options,
-                )
+                    if run_stub_test and "stub_test" in available_opts:
+                        options_to_update["stub_test"] = True
+
+                    if "iterator_opts" in available_opts:
+                        options_to_update["iterator_opts"] = dict(
+                            display_progress=True,
+                            progress_bar_class=TQDMProgressSubscriber,
+                            progress_bar_options=progress_bar_options,
+                        )
+
+                print(f"{interface} has been stubbed")
+            # Standard interface
+            else:
+                available_opts = options_per_interface_or_converter.get("properties", {})
+                options_to_update = options[interface]
+
+                if run_stub_test and "stub_test" in available_opts:
+                    options_to_update["stub_test"] = True
+
+                if "iterator_opts" in available_opts:
+                    options_to_update["iterator_opts"] = dict(
+                        display_progress=True,
+                        progress_bar_class=TQDMProgressSubscriber,
+                        progress_bar_options=progress_bar_options,
+                    )
 
         # Add GUIDE watermark
         package_json_file_path = resource_path("package.json" if is_packaged() else "../package.json")
