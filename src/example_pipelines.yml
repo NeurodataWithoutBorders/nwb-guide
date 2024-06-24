@@ -177,4 +177,4 @@ SLEAP:
   interfaces:
     SLEAPInterface:
       file_path: behavior_testing_data/sleap/predictions_1.2.7_provenance_and_tracking.slp
-      video_file_path: behavior_testing_data/DLC/melanogaster_courtship.mp4
+      video_file_path: behavior_testing_data/sleap/melanogaster_courtship.mp4
