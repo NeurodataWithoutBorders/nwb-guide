@@ -599,7 +599,7 @@ export class JSONSchemaForm extends LitElement {
         if (resolvedErrors.length) {
             const len = resolvedErrors.length;
             if (len === 1) this.throw(resolvedErrors[0].message);
-            else this.throw(`${len} JSON Schema errors detected.`);
+            else this.throw(`${len} errors detected: ${resolvedErrors.map((e) => e.message).join(" ")}`);
         }
 
         const allErrors = flaggedInputs
