@@ -42,7 +42,7 @@ modules_to_collect = [
 ]
 for module_name in modules_to_collect:
     collection = collect_all(module_name)
-    
+
     datas += collection[0]
     binaries += collection[1]
     hiddenimports += collection[2]
