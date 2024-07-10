@@ -121,13 +121,14 @@ export class GuidedSourceDataPage extends ManagedPage {
 
                     if (result.message) {
                         const [type, ...splitText] = result.message.split(":");
+                        const escapedType = type.replaceAll("<", "&lt").replaceAll(">", "&gt");
                         const text = splitText.length
                             ? splitText.join(":").replaceAll("<", "&lt").replaceAll(">", "&gt")
                             : result.traceback
                               ? `<small><pre>${result.traceback.trim().split("\n").slice(-2)[0].trim()}</pre></small>`
                               : "";
 
-                        const message = `<h4 style="margin: 0;">Request Failed</h4><small>${type}</small><p>${text}</p>`;
+                        const message = `<h4 style="margin: 0;">Request Failed</h4><small>${escapedType}</small><p>${text}</p>`;
                         this.notify(message, "error");
                         throw result;
                     }
