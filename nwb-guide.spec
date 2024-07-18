@@ -39,6 +39,7 @@ modules_to_collect = [
     'ndx_pose',
     'tzdata',
     'elephant',
+    'ScanImageTiffReader',
 ]
 for module_name in modules_to_collect:
     collection = collect_all(module_name)
