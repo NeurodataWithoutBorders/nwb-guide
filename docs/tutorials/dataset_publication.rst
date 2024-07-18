@@ -1,7 +1,7 @@
 Dataset Publication
 ===================
 
-For this tutorial, we'll be adapting the previous :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` to publish our data to the DANDI Archive.
+For this tutorial, we'll publish the NWB files created in :doc:`Multi-Session Tutorial </tutorials/multiple_sessions>` as a Dandiset on the DANDI Archive. This workflow works for any collection of NWB files (2.1+), whether they were created by NWB GUIDE or not.
 
 .. note::
     Creating an account on DANDI requires approval from the archive administrators. Separate approval is required for both the main archive and the development server.
