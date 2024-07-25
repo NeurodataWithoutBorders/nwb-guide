@@ -53,7 +53,7 @@ Install the appropriate Python dependencies for your operating system.
 
 .. note::
 
-    The NWB GUIDE environment can be quite large. If your base folder for `conda` is on a small mounted partition, you may need to setup the environment elsewhere on your system. You can do this using:
+    The NWB GUIDE environment can be quite large. If your base folder for ``conda`` is on a small mounted partition, you may need to setup the environment elsewhere on your system. You can do this using:
     
     .. code-block:: bash
     
@@ -77,7 +77,7 @@ Before starting NWB GUIDE, you'll need to ensure that the Python environment is 
 
 .. note::
 
-    If you had to use the `--prefix` flag in the previous step, then this becomes
+    If you had to use the ``--prefix`` flag in the previous step, then this becomes
     
     .. code-block:: bash
     
