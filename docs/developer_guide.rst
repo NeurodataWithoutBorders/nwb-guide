@@ -63,7 +63,7 @@ Install the appropriate Python dependencies for your operating system.
 
     .. code-block:: bash
 
-        conda env create --file ./environments/environment-< platform >.yml --prefix /mnt/data/nwb-guide
+        conda env create --file ./environments/environment-Linux.yml --prefix /mnt/data/nwb-guide
 
 
 Activate the Python Environment
