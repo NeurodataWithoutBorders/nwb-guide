@@ -30,25 +30,40 @@ Install the appropriate Python dependencies for your operating system.
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-Windows.yml
+    conda env create --file ./environments/environment-Windows.yml
 
 **Mac with x64 architecture**
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC-intel.yml
+    conda env create --file ./environments/environment-MAC-intel.yml
 
 **Mac with arm64 architecture**
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC-apple-silicon.yml
+    conda env create --file ./environments/environment-MAC-apple-silicon.yml
 
 **Linux**
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-Linux.yml
+    conda env create --file ./environments/environment-Linux.yml
+
+
+.. note::
+
+    The NWB GUIDE environment can be quite large. If your base folder for `conda` is on a small mounted partition, you may need to setup the environment elsewhere on your system. You can do this using:
+    
+    .. code-block:: bash
+    
+        conda env create --file ./environments/environment-< platform >.yml --prefix < explicit location to setup environment >
+        
+    For example, on a remote Linux server, this might look like:
+    
+    .. code-block:: bash
+    
+        conda env create --file ./environments/environment-< platform >.yml --prefix /mnt/data/nwb-guide
 
 
 Activate the Python Environment
@@ -59,6 +74,20 @@ Before starting NWB GUIDE, you'll need to ensure that the Python environment is 
 .. code-block:: bash
 
     conda activate nwb-guide
+
+.. note::
+
+    If you had to use the `--prefix` flag in the previous step, then this becomes
+    
+    .. code-block:: bash
+    
+        conda activate < explicit location of environment >
+
+    Such as, using the previous example:
+    
+    .. code-block:: bash
+    
+        conda activate /mnt/data/nwb-guide
 
 
 Install JavaScript Dependencies
