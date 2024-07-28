@@ -67,7 +67,7 @@ jobs:
           node-version: 20
 
       - name: Install GUIDE
-        run: npm ci --verbose --unsafe-perm=true
+        run: npm ci --verbose --ignore-scripts
 
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
