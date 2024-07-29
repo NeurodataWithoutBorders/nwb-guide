@@ -931,19 +931,25 @@ def create_file(
         # print("\n")
 
         for interface_or_subconverter in conversion_options:
-            conversion_options_schema_per_interface_or_converter = conversion_options_schema.get("properties", dict()).get(interface_or_subconverter, dict())
+            conversion_options_schema_per_interface_or_converter = conversion_options_schema.get(
+                "properties", dict()
+            ).get(interface_or_subconverter, dict())
 
             # Object is a nested converter
-            if conversion_options_schema_per_interface_or_converter.get("title", "") =="Conversion options schema":
+            if conversion_options_schema_per_interface_or_converter.get("title", "") == "Conversion options schema":
                 subconverter = interface_or_subconverter
 
-                conversion_options_schema_per_subinterface = conversion_options_schema_per_interface_or_converter.get("properties", dict())
+                conversion_options_schema_per_subinterface = conversion_options_schema_per_interface_or_converter.get(
+                    "properties", dict()
+                )
 
                 for subinterface in conversion_options_schema_per_subinterface.keys():
                     conversion_options[subconverter][subinterface] = dict()
                     options_to_update = conversion_options[subconverter][subinterface]["conversion_options"]
 
-                    properties_per_subinterface = conversion_options_schema_per_subinterface[subinterface].get("properties", dict())
+                    properties_per_subinterface = conversion_options_schema_per_subinterface[subinterface].get(
+                        "properties", dict()
+                    )
 
                     if run_stub_test is True and "stub_test" in properties_per_subinterface:
                         options_to_update["stub_test"] = True
