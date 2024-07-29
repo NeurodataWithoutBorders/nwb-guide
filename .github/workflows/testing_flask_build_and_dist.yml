@@ -24,20 +24,20 @@ jobs:
           # manifesting as hanging/freezing/stalling during postinstall step of electron
           # Last time, manually updating the package-lock.json file was enough to fix the issue
           # But that didn't work this time
-#          - python-version: "3.9"
-#            os: macos-latest  # Mac arm64 runner
-#            label: environments/environment-MAC-apple-silicon.yml
-#            prefix: /Users/runner/miniconda3/envs/nwb-guide
-#
-#          - python-version: "3.9"
-#            os: macos-13  # Mac x64 runner
-#            label: environments/environment-MAC-intel.yml
-#            prefix: /Users/runner/miniconda3/envs/nwb-guide
+          - python-version: "3.9"
+            os: macos-latest  # Mac arm64 runner
+            label: environments/environment-MAC-apple-silicon.yml
+            prefix: /Users/runner/miniconda3/envs/nwb-guide
 
           - python-version: "3.9"
-            os: windows-latest
-            label: environments/environment-Windows.yml
-            prefix: C:\Miniconda3\envs\nwb-guide
+            os: macos-13  # Mac x64 runner
+            label: environments/environment-MAC-intel.yml
+            prefix: /Users/runner/miniconda3/envs/nwb-guide
+
+          # - python-version: "3.9"
+          #   os: windows-latest
+          #   label: environments/environment-Windows.yml
+          #   prefix: C:\Miniconda3\envs\nwb-guide
 
     steps:
       - uses: actions/checkout@v4
