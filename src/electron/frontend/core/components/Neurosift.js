@@ -86,7 +86,7 @@ export class Neurosift extends LitElement {
                   </div>
                   ${this.fullscreen ? new FullScreenToggle({ target: this }) : ""}
                   <iframe
-                      src="https://flatironinstitute.github.io/neurosift/?p=/nwb&url=${this.url}"
+                      src="https://neurosift.app/?p=/nwb&url=${this.url}"
                       @load=${function () {
                           const loader = this.shadowRoot.querySelector(".loader-container");
                           if (loader) loader.remove();
