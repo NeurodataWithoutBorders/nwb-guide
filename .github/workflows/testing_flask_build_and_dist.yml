@@ -73,10 +73,10 @@ jobs:
         name: Update environment
         run: mamba env update -f ${{ matrix.label }}
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+      # - name: Setup Node.js 20
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: "20"
 
       - run: npm ci --verbose
 
