@@ -920,44 +920,62 @@ def create_file(
         )
 
         # Assume all interfaces have the same conversion options for now
-        available_options = converter.get_conversion_options_schema()
-        options = {interface: {} for interface in info["source_data"]}
+        conversion_options_schema = converter.get_conversion_options_schema()
+        conversion_options = {interface: dict() for interface in info["source_data"]}
 
-        for interface in options:
-            print(f"{interface} entered")
+        # print(f"{run_stub_test=}")
+        # print("\n")
+        # print(f"{conversion_options_schema=}")
+        # print("\n")
+        # print(f"{conversion_options=}")
+        # print("\n")
 
-            options_per_interface_or_converter = available_options.get("properties").get(interface)
-            # Nested converters
-            if "properties" not in options_per_interface_or_converter:
-                for subinterface in options_per_interface_or_converter:
-                    available_opts = options_per_interface_or_converter[subinterface].get("properties", {})
-                    options_to_update = options[interface][subinterface]
+        for interface_or_subconverter in conversion_options:
+            conversion_options_schema_per_interface_or_converter = conversion_options_schema.get("properties", dict()).get(interface_or_subconverter, dict())
 
-                    if run_stub_test and "stub_test" in available_opts:
+            # Object is a nested converter
+            if conversion_options_schema_per_interface_or_converter.get("title", "") =="Conversion options schema":
+                subconverter = interface_or_subconverter
+
+                conversion_options_schema_per_subinterface = conversion_options_schema_per_interface_or_converter.get("properties", dict())
+
+                for subinterface in conversion_options_schema_per_subinterface.keys():
+                    conversion_options[subconverter][subinterface] = dict()
+                    options_to_update = conversion_options[subconverter][subinterface]["conversion_options"]
+
+                    properties_per_subinterface = conversion_options_schema_per_subinterface[subinterface].get("properties", dict())
+
+                    if run_stub_test is True and "stub_test" in properties_per_subinterface:
                         options_to_update["stub_test"] = True
 
-                    if "iterator_opts" in available_opts:
+                    # Only display per-file progress updates if not running a preview
+                    if run_stub_test is False and "iterator_opts" in properties_per_subinterface:
                         options_to_update["iterator_opts"] = dict(
                             display_progress=True,
                             progress_bar_class=TQDMProgressSubscriber,
                             progress_bar_options=progress_bar_options,
                         )
 
-                print(f"{interface} has been stubbed")
-            # Standard interface
+            # Object is a standard interface
             else:
-                available_opts = options_per_interface_or_converter.get("properties", {})
-                options_to_update = options[interface]
+                interface = interface_or_converter
 
-                if run_stub_test and "stub_test" in available_opts:
-                    options_to_update["stub_test"] = True
+                conversion_options_schema_per_interface = options_per_interface_or_converter.get("properties", dict())
+                options_to_update = conversion_options[interface]
 
-                if "iterator_opts" in available_opts:
-                    options_to_update["iterator_opts"] = dict(
+                if run_stub_test is True and "stub_test" in conversion_options_schema_per_interface:
+                    options_to_update[interface]["stub_test"] = True
+
+                # Only display per-file progress updates if not running a preview
+                if run_stub_test is False and "iterator_opts" in conversion_options_schema_per_interface:
+                    options_to_update[interface]["iterator_opts"] = dict(
                         display_progress=True,
                         progress_bar_class=TQDMProgressSubscriber,
                         progress_bar_options=progress_bar_options,
                     )
+
+        print(f"{conversion_options=}")
+        print("\n")
 
         # Add GUIDE watermark
         package_json_file_path = resource_path("package.json" if is_packaged() else "../package.json")
@@ -971,11 +989,12 @@ def create_file(
             metadata=metadata,
             nwbfile_path=nwbfile_path,
             overwrite=overwrite,
-            conversion_options=options,
+            conversion_options=conversion_options,
             backend=backend,
         )
 
-        if not run_stub_test:
+        # Only set full backend configuration if running a full conversion
+        if run_stub_test is False:
             run_conversion_kwargs.update(dict(backend_configuration=update_backend_configuration(info)))
 
         converter.run_conversion(**run_conversion_kwargs)
