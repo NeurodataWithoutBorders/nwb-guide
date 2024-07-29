@@ -4,7 +4,7 @@ channels:
   - defaults
 dependencies:
   - python = 3.9.18
-  - nodejs = 18.16.1
+  - nodejs = 20.15.1
   - numcodecs = 0.11.0
   - lxml = 4.9.3  # pypi build fails due to x64/arm64 mismatch so install from conda-forge
   - pyedflib = 0.1.32  # pypi build fails due to x64/arm64 mismatch so install from conda-forge
