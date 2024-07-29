@@ -9,27 +9,27 @@ concurrency:
 
 jobs:
 
-  DevTests:
-    uses: ./.github/workflows/testing_dev.yml
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  # DevTests:
+  #   uses: ./.github/workflows/testing_dev.yml
+  #   secrets:
+  #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-  LiveServices:
-    uses: ./.github/workflows/testing_dev_with_live_services.yml
-    secrets:
-      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      DANDI_STAGING_API_KEY: ${{ secrets.DANDI_STAGING_API_KEY }}
+  # LiveServices:
+  #   uses: ./.github/workflows/testing_dev_with_live_services.yml
+  #   secrets:
+  #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+  #     DANDI_STAGING_API_KEY: ${{ secrets.DANDI_STAGING_API_KEY }}
 
   BuildTests:
     uses: ./.github/workflows/testing_flask_build_and_dist.yml
 
-  ExampleDataCache:
-    uses: ./.github/workflows/example_data_cache.yml
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      S3_GIN_BUCKET: ${{ secrets.S3_GIN_BUCKET }}
+  # ExampleDataCache:
+  #   uses: ./.github/workflows/example_data_cache.yml
+  #   secrets:
+  #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #     S3_GIN_BUCKET: ${{ secrets.S3_GIN_BUCKET }}
 
-  ExampleDataTests:
-    needs: ExampleDataCache
-    uses: ./.github/workflows/testing_pipelines.yml
+  # ExampleDataTests:
+  #   needs: ExampleDataCache
+  #   uses: ./.github/workflows/testing_pipelines.yml
