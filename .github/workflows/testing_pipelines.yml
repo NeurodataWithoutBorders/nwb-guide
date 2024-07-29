@@ -21,11 +21,16 @@ jobs:
 #          - os: ubuntu-latest
 #            label: environments/environment-Linux.yml
 
-          - os: macos-latest  # Mac arm64 runner
-            label: environments/environment-MAC-apple-silicon.yml
-
-          - os: macos-13  # Mac x64 runner
-            label: environments/environment-MAC-intel.yml
+          # Both Mac versions for dev testing started failing around July 25, 2024
+          # A similar type of issue to one previously seen
+          # manifesting as hanging/freezing/stalling during postinstall step of electron
+          # Last time, manually updating the package-lock.json file was enough to fix the issue
+          # But that didn't work this time
+#          - os: macos-latest  # Mac arm64 runner
+#            label: environments/environment-MAC-apple-silicon.yml
+#
+#          - os: macos-13  # Mac x64 runner
+#            label: environments/environment-MAC-intel.yml
 
           - os: windows-latest
             label: environments/environment-Windows.yml
