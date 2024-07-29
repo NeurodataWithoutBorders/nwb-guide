@@ -67,7 +67,7 @@ jobs:
           node-version: 20
 
       - name: Install GUIDE
-        run: npm ci --verbose --ignore-scripts
+        run: npm ci --verbose
 
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
