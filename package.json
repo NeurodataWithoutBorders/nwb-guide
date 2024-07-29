@@ -9,7 +9,7 @@
   },
   "scripts": {
     "start": "electron-vite dev --outDir build",
-    "postinstall": "electron-builder install-app-deps",
+    "postinstall": "install-app-deps",
     "server": "cd src/pyflask && python -m flask run --port 4242",
     "build": "npm run build:app",
     "echo": "python -c \"print('hello')\"",
