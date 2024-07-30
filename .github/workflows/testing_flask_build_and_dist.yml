@@ -19,25 +19,14 @@ jobs:
         include:
           # No linux in this matrix since installation instructions use dev mode instead of distributable
 
-          # Both Mac versions for dev testing started failing around July 25, 2024
-          # A similar type of issue to one previously seen
-          # manifesting as hanging/freezing/stalling during postinstall step of electron
-          # Last time, manually updating the package-lock.json file was enough to fix the issue
-          # But that didn't work this time
-#          - python-version: "3.9"
-#            os: macos-latest  # Mac arm64 runner
-#            label: environments/environment-MAC-apple-silicon.yml
-#            prefix: /Users/runner/miniconda3/envs/nwb-guide
-#
-#          - python-version: "3.9"
-#            os: macos-13  # Mac x64 runner
-#            label: environments/environment-MAC-intel.yml
-#            prefix: /Users/runner/miniconda3/envs/nwb-guide
+          - os: macos-latest  # Mac arm64 runner
+            label: environments/environment-MAC-apple-silicon.yml
 
-          - python-version: "3.9"
-            os: windows-latest
+          - os: macos-13  # Mac x64 runner
+            label: environments/environment-MAC-intel.yml
+
+          - os: windows-latest
             label: environments/environment-Windows.yml
-            prefix: C:\Miniconda3\envs\nwb-guide
 
     steps:
       - uses: actions/checkout@v4
@@ -74,12 +63,11 @@ jobs:
         name: Update environment
         run: mamba env update -f ${{ matrix.label }}
 
-      - name: Setup Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+      - name: Update npm
+        run: npm install -g npm@latest
 
-      - run: npm ci --verbose
+      - name: Install GUIDE
+        run: npm ci --verbose
 
       # Fix for macos build - remove bad sonpy file
       - if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'
