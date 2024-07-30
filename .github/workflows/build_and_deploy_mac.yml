@@ -18,11 +18,7 @@ jobs:
         shell: bash -l {0}
 
     steps:
-      - uses: actions/checkout@v3
-
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
+      - uses: actions/checkout@v4
 
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v3
@@ -34,11 +30,6 @@ jobs:
 
       - name: Create and activate environment
         run: mamba env update --name nwb-guide --file environments/environment-MAC-intel.yml
-
-      - name: Use Node.js 20
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
 
       - name: Install package.json modules and their dependencies (not via `npm ci`)
         run: npm install --verbose

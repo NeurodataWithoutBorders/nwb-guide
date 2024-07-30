@@ -19,11 +19,6 @@ jobs:
         include:
           # No linux in this matrix since installation instructions use dev mode instead of distributable
 
-          # Both Mac versions for dev testing started failing around July 25, 2024
-          # A similar type of issue to one previously seen
-          # manifesting as hanging/freezing/stalling during postinstall step of electron
-          # Last time, manually updating the package-lock.json file was enough to fix the issue
-          # But that didn't work this time
           - os: macos-latest  # Mac arm64 runner
             label: environments/environment-MAC-apple-silicon.yml
 
@@ -68,9 +63,11 @@ jobs:
         name: Update environment
         run: mamba env update -f ${{ matrix.label }}
 
-      - run: npm install -g npm@latest
+      - name: Update npm
+        run: npm install -g npm@latest
 
-      - run: npm ci --verbose
+      - name: Install GUIDE
+        run: npm ci --verbose
 
       # Fix for macos build - remove bad sonpy file
       - if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'
