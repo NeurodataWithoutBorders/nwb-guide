@@ -943,13 +943,11 @@ def create_file(
                     "properties", dict()
                 )
 
-                for subinterface in conversion_options_schema_per_subinterface.keys():
+                for subinterface, subschema in conversion_options_schema_per_subinterface.items():
                     conversion_options[subconverter][subinterface] = dict()
-                    options_to_update = conversion_options[subconverter][subinterface]["conversion_options"]
+                    options_to_update = conversion_options[subconverter][subinterface]
 
-                    properties_per_subinterface = conversion_options_schema_per_subinterface[subinterface].get(
-                        "properties", dict()
-                    )
+                    properties_per_subinterface = subschema.get("properties", dict())
 
                     if run_stub_test is True and "stub_test" in properties_per_subinterface:
                         options_to_update["stub_test"] = True
