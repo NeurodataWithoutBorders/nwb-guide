@@ -72,6 +72,9 @@ jobs:
       - name: Install GUIDE
         run: npm ci --verbose
 
+      - name: Install testing dependencies
+        run: pip install pytest pytest-cov
+
       # Load example data caches
       - name: Get ephy_testing_data current head hash
         id: ephys
