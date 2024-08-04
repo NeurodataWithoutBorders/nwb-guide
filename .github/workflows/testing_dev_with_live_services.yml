@@ -79,6 +79,9 @@ jobs:
       - name: Install testing dependencies
         run: pip install pytest pytest-cov
 
+      - name: Manually remove matplotlib
+        run: pip uninstall matplotlib
+
       - name: Create env file
         run: |
           touch .env
