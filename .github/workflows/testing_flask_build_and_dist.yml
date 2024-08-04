@@ -85,6 +85,9 @@ jobs:
       - name: Install testing dependencies
         run: pip install pytest pytest-cov
 
+      - name: Manually remove matplotlib
+        run: pip uninstall matplotlib
+
       # Fix for macos build - remove bad sonpy file
       - if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'
         run: rm -f "$CONDA_PREFIX/lib/python3.9/site-packages/sonpy/linux/sonpy.so"
