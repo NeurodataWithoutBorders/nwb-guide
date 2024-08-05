@@ -86,7 +86,7 @@ jobs:
         run: pip install pytest pytest-cov
 
       - name: Manually remove matplotlib
-        run: pip uninstall matplotlib
+        run: pip uninstall matplotlib --yes
 
       # Fix for macos build - remove bad sonpy file
       - if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'

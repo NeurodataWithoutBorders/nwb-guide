@@ -80,7 +80,7 @@ jobs:
         run: pip install pytest pytest-cov
 
       - name: Manually remove matplotlib
-        run: pip uninstall matplotlib
+        run: pip uninstall matplotlib --yes
 
       - name: Create env file
         run: |
