@@ -79,7 +79,14 @@ jobs:
         with:
           node-version: "20"
 
-      - run: npm ci --verbose
+      - name: Install GUIDE
+        run: npm ci --verbose
+
+      - name: Install testing dependencies
+        run: pip install pytest pytest-cov
+
+      - name: Manually remove matplotlib
+        run: pip uninstall matplotlib --yes
 
       # Fix for macos build - remove bad sonpy file
       - if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'

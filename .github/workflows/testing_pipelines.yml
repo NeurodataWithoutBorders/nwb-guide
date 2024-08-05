@@ -72,6 +72,12 @@ jobs:
       - name: Install GUIDE
         run: npm ci --verbose
 
+      - name: Install testing dependencies
+        run: pip install pytest pytest-cov
+
+      - name: Manually remove matplotlib
+        run: pip uninstall matplotlib --yes
+
       # Load example data caches
       - name: Get ephy_testing_data current head hash
         id: ephys

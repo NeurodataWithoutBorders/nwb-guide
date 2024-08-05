@@ -76,6 +76,12 @@ jobs:
       - name: Install GUIDE
         run: npm ci --verbose
 
+      - name: Install testing dependencies
+        run: pip install pytest pytest-cov
+
+      - name: Manually remove matplotlib
+        run: pip uninstall matplotlib --yes
+
       - name: Create env file
         run: |
           touch .env
