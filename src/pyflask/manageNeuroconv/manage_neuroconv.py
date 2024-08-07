@@ -13,6 +13,8 @@ from pathlib import Path
 from shutil import copytree, rmtree
 from typing import Any, Dict, List, Optional, Union
 
+import signature
+from pynwb import NWBFile
 from tqdm_publisher import TQDMProgressHandler
 
 from .info import (
@@ -363,6 +365,28 @@ def get_custom_converter(interface_class_dict: dict, alignment_info: Union[dict,
         # TODO: this currently works off of cross-scoping injection of `alignment_info` - refactor to be more explicit
         def temporally_align_data_interfaces(self):
             set_interface_alignment(self, alignment_info=alignment_info)
+
+        # From previous issue regarding SpikeGLX not generating previews of correct size
+        def add_to_nwbfile(self, nwbfile: NWBFile, metadata, conversion_options: Optional[dict] = None) -> None:
+            conversion_options = conversion_options or dict()
+            for interface_key, data_interface in self.data_interface_objects.items():
+                if isinstance(data_interface, NWBConverter):
+                    subconverter_kwargs = dict(nwbfile=nwbfile, metadata=metadata)
+
+                    # Certain subconverters fully expose control over their interfaces conversion options
+                    # (such as iterator options, including progress bar details)
+                    subconverter_keyword_arguments = list(signature(data_interface.add_to_nwbfile).parameters.keys())
+                    if "conversion_options" in subconverter_keyword_arguments:
+                        subconverter_kwargs["conversion_options"] = conversion_options.get(interface_key, None)
+                    # Others do not, and instead expose simplified global keywords similar to a classic interface
+                    else:
+                        subconverter_kwargs.update(conversion_options.get(interface_key, dict()))
+
+                    data_interface.add_to_nwbfile(**subconverter_kwargs)
+                else:
+                    data_interface.add_to_nwbfile(
+                        nwbfile=nwbfile, metadata=metadata, **conversion_options.get(interface_key, dict())
+                    )
 
     return CustomNWBConverter
 
