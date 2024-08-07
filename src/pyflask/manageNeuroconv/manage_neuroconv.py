@@ -2,6 +2,7 @@
 
 import copy
 import hashlib
+import inspect
 import json
 import math
 import os
@@ -13,7 +14,6 @@ from pathlib import Path
 from shutil import copytree, rmtree
 from typing import Any, Dict, List, Optional, Union
 
-import signature
 from pynwb import NWBFile
 from tqdm_publisher import TQDMProgressHandler
 
@@ -375,7 +375,9 @@ def get_custom_converter(interface_class_dict: dict, alignment_info: Union[dict,
 
                     # Certain subconverters fully expose control over their interfaces conversion options
                     # (such as iterator options, including progress bar details)
-                    subconverter_keyword_arguments = list(signature(data_interface.add_to_nwbfile).parameters.keys())
+                    subconverter_keyword_arguments = list(
+                        inspect.signature(data_interface.add_to_nwbfile).parameters.keys()
+                    )
                     if "conversion_options" in subconverter_keyword_arguments:
                         subconverter_kwargs["conversion_options"] = conversion_options.get(interface_key, None)
                     # Others do not, and instead expose simplified global keywords similar to a classic interface
