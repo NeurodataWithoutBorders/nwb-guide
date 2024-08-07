@@ -981,9 +981,9 @@ def create_file(
 
             # Object is a standard interface
             else:
-                interface = interface_or_converter
+                interface = interface_or_subconverter
 
-                conversion_options_schema_per_interface = options_per_interface_or_converter.get("properties", dict())
+                conversion_options_schema_per_interface = conversion_options_schema.get("properties", dict())
                 options_to_update = conversion_options[interface]
 
                 if run_stub_test is True and "stub_test" in conversion_options_schema_per_interface:
