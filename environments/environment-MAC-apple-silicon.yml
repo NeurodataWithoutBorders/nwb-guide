@@ -26,7 +26,7 @@ dependencies:
       # For stability, NeuroConv is pinned at a commit equivalent to main branch on 8/7/2024
       - neuroconv @ git+https://github.com/catalystneuro/neuroconv.git@cb8687f6456dea51545144bb2e81a0ee4fe36c02#neuroconv[dandi,compressors,ecephys,ophys,behavior,text]
       # For stability, pinning SpikeInterface to a version that works with NeuroConv and with tutorial generation
-      - spikeinterface == 0.101.0
+      - spikeinterface == 0.100.8
       - scikit-learn == 1.4.0  # Tutorial data generation
       - tqdm_publisher >= 0.0.1  # Progress bars
       - tzlocal >= 5.2  # Frontend timezone handling
