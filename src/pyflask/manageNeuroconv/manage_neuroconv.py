@@ -947,13 +947,6 @@ def create_file(
         conversion_options_schema = converter.get_conversion_options_schema()
         conversion_options = {interface: dict() for interface in info["source_data"]}
 
-        # print(f"{run_stub_test=}")
-        # print("\n")
-        # print(f"{conversion_options_schema=}")
-        # print("\n")
-        # print(f"{conversion_options=}")
-        # print("\n")
-
         for interface_or_subconverter in conversion_options:
             conversion_options_schema_per_interface_or_converter = conversion_options_schema.get(
                 "properties", dict()
@@ -1001,9 +994,6 @@ def create_file(
                         progress_bar_class=TQDMProgressSubscriber,
                         progress_bar_options=progress_bar_options,
                     )
-
-        print(f"{conversion_options=}")
-        print("\n")
 
         # Add GUIDE watermark
         package_json_file_path = resource_path("package.json" if is_packaged() else "../package.json")
