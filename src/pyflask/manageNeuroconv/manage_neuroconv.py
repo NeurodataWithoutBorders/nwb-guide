@@ -2,6 +2,7 @@
 
 import copy
 import hashlib
+import inspect
 import json
 import math
 import os
@@ -13,6 +14,7 @@ from pathlib import Path
 from shutil import copytree, rmtree
 from typing import Any, Dict, List, Optional, Union
 
+from pynwb import NWBFile
 from tqdm_publisher import TQDMProgressHandler
 
 from .info import (
@@ -363,6 +365,30 @@ def get_custom_converter(interface_class_dict: dict, alignment_info: Union[dict,
         # TODO: this currently works off of cross-scoping injection of `alignment_info` - refactor to be more explicit
         def temporally_align_data_interfaces(self):
             set_interface_alignment(self, alignment_info=alignment_info)
+
+        # From previous issue regarding SpikeGLX not generating previews of correct size
+        def add_to_nwbfile(self, nwbfile: NWBFile, metadata, conversion_options: Optional[dict] = None) -> None:
+            conversion_options = conversion_options or dict()
+            for interface_key, data_interface in self.data_interface_objects.items():
+                if isinstance(data_interface, NWBConverter):
+                    subconverter_kwargs = dict(nwbfile=nwbfile, metadata=metadata)
+
+                    # Certain subconverters fully expose control over their interfaces conversion options
+                    # (such as iterator options, including progress bar details)
+                    subconverter_keyword_arguments = list(
+                        inspect.signature(data_interface.add_to_nwbfile).parameters.keys()
+                    )
+                    if "conversion_options" in subconverter_keyword_arguments:
+                        subconverter_kwargs["conversion_options"] = conversion_options.get(interface_key, None)
+                    # Others do not, and instead expose simplified global keywords similar to a classic interface
+                    else:
+                        subconverter_kwargs.update(conversion_options.get(interface_key, dict()))
+
+                    data_interface.add_to_nwbfile(**subconverter_kwargs)
+                else:
+                    data_interface.add_to_nwbfile(
+                        nwbfile=nwbfile, metadata=metadata, **conversion_options.get(interface_key, dict())
+                    )
 
     return CustomNWBConverter
 
@@ -920,24 +946,56 @@ def create_file(
         )
 
         # Assume all interfaces have the same conversion options for now
-        available_options = converter.get_conversion_options_schema()
-        options = {interface: {} for interface in info["source_data"]}
+        conversion_options_schema = converter.get_conversion_options_schema()
+        conversion_options = {interface: dict() for interface in info["source_data"]}
 
-        for interface in options:
-            available_opts = available_options.get("properties").get(interface).get("properties", {})
+        for interface_or_subconverter in conversion_options:
+            conversion_options_schema_per_interface_or_converter = conversion_options_schema.get(
+                "properties", dict()
+            ).get(interface_or_subconverter, dict())
 
-            # Specify if stub test
-            if run_stub_test:
-                if available_opts.get("stub_test"):
-                    options[interface]["stub_test"] = True
+            # Object is a nested converter
+            if conversion_options_schema_per_interface_or_converter.get("title", "") == "Conversion options schema":
+                subconverter = interface_or_subconverter
 
-            # Specify if iterator options are available
-            elif available_opts.get("iterator_opts"):
-                options[interface]["iterator_opts"] = dict(
-                    display_progress=True,
-                    progress_bar_class=TQDMProgressSubscriber,
-                    progress_bar_options=progress_bar_options,
+                conversion_options_schema_per_subinterface = conversion_options_schema_per_interface_or_converter.get(
+                    "properties", dict()
                 )
+
+                for subinterface, subschema in conversion_options_schema_per_subinterface.items():
+                    conversion_options[subconverter][subinterface] = dict()
+                    options_to_update = conversion_options[subconverter][subinterface]
+
+                    properties_per_subinterface = subschema.get("properties", dict())
+
+                    if run_stub_test is True and "stub_test" in properties_per_subinterface:
+                        options_to_update["stub_test"] = True
+
+                    # Only display per-file progress updates if not running a preview
+                    if run_stub_test is False and "iterator_opts" in properties_per_subinterface:
+                        options_to_update["iterator_opts"] = dict(
+                            display_progress=True,
+                            progress_bar_class=TQDMProgressSubscriber,
+                            progress_bar_options=progress_bar_options,
+                        )
+
+            # Object is a standard interface
+            else:
+                interface = interface_or_subconverter
+
+                conversion_options_schema_per_interface = conversion_options_schema.get("properties", dict())
+                options_to_update = conversion_options[interface]
+
+                if run_stub_test is True and "stub_test" in conversion_options_schema_per_interface:
+                    options_to_update[interface]["stub_test"] = True
+
+                # Only display per-file progress updates if not running a preview
+                if run_stub_test is False and "iterator_opts" in conversion_options_schema_per_interface:
+                    options_to_update[interface]["iterator_opts"] = dict(
+                        display_progress=True,
+                        progress_bar_class=TQDMProgressSubscriber,
+                        progress_bar_options=progress_bar_options,
+                    )
 
         # Add GUIDE watermark
         package_json_file_path = resource_path("package.json" if is_packaged() else "../package.json")
@@ -951,11 +1009,12 @@ def create_file(
             metadata=metadata,
             nwbfile_path=nwbfile_path,
             overwrite=overwrite,
-            conversion_options=options,
+            conversion_options=conversion_options,
             backend=backend,
         )
 
-        if not run_stub_test:
+        # Only set full backend configuration if running a full conversion
+        if run_stub_test is False:
             run_conversion_kwargs.update(dict(backend_configuration=update_backend_configuration(info)))
 
         converter.run_conversion(**run_conversion_kwargs)
