@@ -190,7 +190,7 @@ export class Sidebar extends LitElement {
                         }
 
                         const parent = info.group
-                            ? groups[info.group] ?? (groups[info.group] = document.createElement("div"))
+                            ? (groups[info.group] ?? (groups[info.group] = document.createElement("div")))
                             : ul;
                         parent.append(li);
                     });

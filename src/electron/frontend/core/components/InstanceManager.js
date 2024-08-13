@@ -400,7 +400,7 @@ export class InstanceManager extends LitElement {
                       const res = this.onAdded(path);
 
                       let resolvedPath = res?.key ? res.key.split("/") : path;
-                      let resolvedValue = res instanceof HTMLElement ? res : res?.value ?? null;
+                      let resolvedValue = res instanceof HTMLElement ? res : (res?.value ?? null);
 
                       let key = resolvedPath.pop();
 

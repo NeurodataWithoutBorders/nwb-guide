@@ -68,7 +68,7 @@ function saveNewPipelineFromYaml(name, info, rootFolder) {
         Subject: { subject_id },
     };
 
-    resolvedMetadata.__generated = structuredClone(info.interfaces ? info.metadata ?? {} : {});
+    resolvedMetadata.__generated = structuredClone(info.interfaces ? (info.metadata ?? {}) : {});
 
     const resolvedInfo = {
         source_data: resolvedInterfaces,

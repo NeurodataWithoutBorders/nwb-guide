@@ -322,7 +322,7 @@ export class SimpleTable extends LitElement {
 
     set data(val) {
         this.#data = val;
-        this.keyColumn = Array.isArray(this.#data) ? undefined : this.#keyColumn ?? "Property Key";
+        this.keyColumn = Array.isArray(this.#data) ? undefined : (this.#keyColumn ?? "Property Key");
     }
 
     #selected = {};
