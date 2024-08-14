@@ -1,16 +1,18 @@
-name: Dev tests
+name: Dev tests with live services
 on:
   workflow_call:
     secrets:
       CODECOV_TOKEN:
         required: true
+      DANDI_STAGING_API_KEY:
+        required: true
 
 jobs:
 
   run:
-    # Will read on PR dashboard as 'Deploy / DevTests / {os}'
-    # Action dashboard identified by 'Dev tests'
-    # Requirement settings identified as 'DevTests / {os}'
+    # Will read on PR dashboard as 'Deploy / LiveServices / {os}'
+    # Action dashboard identified by 'Dev tests with live services'
+    # Requirement settings identified as 'LiveServices / {os}'
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
@@ -59,7 +61,7 @@ jobs:
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Create and activate environment
-        run: mamba env update --name nwb-guide --file ${{ matrix.label }}
+        run: mamba env update -n nwb-guide -f ${{ matrix.label }}
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
@@ -75,13 +77,26 @@ jobs:
       - name: Manually remove matplotlib
         run: pip uninstall matplotlib --yes
 
+      - name: Create env file
+        run: |
+          touch .env
+          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
+
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests
-        run: npm run test:coverage
+        run: npm run coverage:tutorial
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run test:coverage
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:tutorial
+
+      - name: Archive E2E Test Screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots-${{ matrix.os }}
+          path: docs/assets/tutorials
+          retention-days: 1
+          overwrite: true
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4

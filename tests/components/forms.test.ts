@@ -6,9 +6,8 @@ import { SimpleTable } from '../../src/electron/frontend/core/components/SimpleT
 
 import baseMetadataSchema from '../../src/schemas/base-metadata.schema'
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+import { sleep } from '../utils.js';
+
 
 const NWBFileSchemaProperties = baseMetadataSchema.properties.NWBFile.properties
 

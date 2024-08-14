@@ -1,7 +1,7 @@
 import { expect } from "vitest"
 import { ScreenshotOptions } from 'puppeteer'
 
-import { sleep } from '../puppeteer'
+import { sleep } from '../utils.js'
 
 import { mkdirSync, existsSync, rmSync } from 'node:fs'
 import { join, sep } from 'node:path'

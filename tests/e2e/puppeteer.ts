@@ -4,11 +4,11 @@ import { afterAll, beforeAll, expect, describe, vi, test } from 'vitest'
 import * as puppeteer from 'puppeteer'
 
 import { exec } from 'child_process'
-import { electronDebugPort } from './globals'
+import { electronDebugPort } from '../globals.js'
 
 export const sharePort = 1234
 
-export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+import { sleep } from '../utils.js';
 
 
 const beforeStart = (timeout) => new Promise(async (resolve, reject) => {

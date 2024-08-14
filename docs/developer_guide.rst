@@ -254,7 +254,7 @@ Updating Tutorial Screenshots
 Before a release, you'll want to update the tutorial screenshots to reflect the latest changes in the application.
 
 #. To regenerate the dataset, you'll need to change ``regenerateTestData`` in the ``tests/e2e/config.ts`` to ``true``.
-#. Run the End-to-End Tests locally using ``npm test:app``.
+#. Run the End-to-End Tests locally using ``npm test:tutorial``.
     - This will generate new screenshots in the ``docs/assets/tutorials`` directory.
 #. Review the new screenshots to ensure they are accurate.
 #. If the screenshots are accurate, commit them to the repository. Their paths should be consistent across runs—allowing the new versions to show up on the tutorial.
