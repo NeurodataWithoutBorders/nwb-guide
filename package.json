@@ -156,7 +156,7 @@
     "lit": "^2.6.1",
     "lottie-web": "^5.9.5",
     "notyf": "^3.9.0",
-    "puppeteer": "^21.7.0",
+    "puppeteer": "^22.15.0",
     "sweetalert2": "^11.6.13",
     "tippy.js": "^6.3.7",
     "url": "^0.11.3",
