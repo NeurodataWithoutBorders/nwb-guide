@@ -9,6 +9,17 @@ concurrency:
 
 jobs:
 
+  DevTests:
+    uses: ./.github/workflows/testing_dev.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  LiveServices:
+    uses: ./.github/workflows/testing_dev_with_live_services.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      DANDI_STAGING_API_KEY: ${{ secrets.DANDI_STAGING_API_KEY }}
+
   BuildTests:
     uses: ./.github/workflows/testing_flask_build_and_dist.yml
 
