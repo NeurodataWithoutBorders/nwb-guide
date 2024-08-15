@@ -33,7 +33,8 @@ type BrowserTestOutput = {
   browser?: puppeteer.Browser,
 }
 
-const timeout = 60 * 1000 // Wait for 1 minute for Electron to open (mostly for Windows)
+const beforeStartTimeout = 60 * 1000 // Wait for 1 minute for Electron to open (mostly for Windows)
+const launchProtocolTimeout = 6 * 60 * 1000 // Creating the test dataset can take up to 6 minutes (mostly for Windows)
 
 export const connect = () => {
 
@@ -43,9 +44,7 @@ export const connect = () => {
 
   beforeAll(async () => {
 
-    await beforeStart(timeout)
-
-
+    await beforeStart(beforeStartTimeout)
 
     // Ensure Electron will exit gracefully
     const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
@@ -53,7 +52,7 @@ export const connect = () => {
     });
 
     const browserURL = `http://localhost:${electronDebugPort}`
-    const browser = output.browser = await puppeteer.launch({ headless: 'new' })
+    const browser = output.browser = await puppeteer.launch({ headless: 'new', protocolTimeout: launchProtocolTimeout})
     const page = output.page = await browser.newPage();
     await page.goto(browserURL);
     const endpoint = await page.evaluate(() => fetch(`json/version`).then(res => res.json()).then(res => res.webSocketDebuggerUrl))
