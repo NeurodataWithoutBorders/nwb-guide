@@ -67,7 +67,7 @@ export const connect = () => {
     const pages = await output.browser.pages()
     output.page = pages[0]
 
-  }, timeout + 1000)
+  }, beforeStartTimeout + 1000)
 
   afterAll(async () => {
     if (output.browser) await output.browser.close() // Will also exit the Electron instance
