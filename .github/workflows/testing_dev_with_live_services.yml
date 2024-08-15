@@ -4,8 +4,6 @@ on:
     secrets:
       CODECOV_TOKEN:
         required: true
-      DANDI_STAGING_API_KEY:
-        required: true
 
 jobs:
 
@@ -76,11 +74,6 @@ jobs:
 
       - name: Manually remove matplotlib
         run: pip uninstall matplotlib --yes
-
-      - name: Create env file
-        run: |
-          touch .env
-          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_STAGING_API_KEY }} >> .env
 
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests

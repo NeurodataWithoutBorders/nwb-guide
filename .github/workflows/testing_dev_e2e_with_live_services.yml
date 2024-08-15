@@ -1,4 +1,4 @@
-name: Dev tests with live services
+name: End-to-end tests with live services
 on:
   workflow_call:
     secrets:
@@ -10,9 +10,9 @@ on:
 jobs:
 
   run:
-    # Will read on PR dashboard as 'Deploy / LiveServices / {os}'
-    # Action dashboard identified by 'Dev tests with live services'
-    # Requirement settings identified as 'LiveServices / {os}'
+    # Will read on PR dashboard as 'Deploy / E2ELiveServices / {os}'
+    # Action dashboard identified by 'End-to-end tests with live services'
+    # Requirement settings identified as 'E2ELiveServices / {os}'
     name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
