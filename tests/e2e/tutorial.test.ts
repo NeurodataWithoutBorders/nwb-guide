@@ -36,8 +36,8 @@ describe('E2E Test', () => {
 
   const datasetTestFunction = config.regenerateTestData ? test : test.skip
 
-  datasetTestFunction('Create tutorial dataset', async () => {
-
+  datasetTestFunction('Create tutorial dataset', {'timeout': 360_000}, async () => {
+    // Creating the dataset can take up to 6 minutes, especially on Windows
 
     await evaluate(async () => {
 
