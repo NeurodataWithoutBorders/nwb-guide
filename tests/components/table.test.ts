@@ -1,7 +1,7 @@
 // tests/table.test.js
 import { expect, test, describe, vi, beforeEach, afterEach } from 'vitest';
 import { Table, sortTable } from '../../src/electron/frontend/core/components/Table.js';
-import { sleep } from '../puppeteer.js';
+import { sleep } from '../utils.js';
 
 global.ResizeObserver = global.IntersectionObserver = vi.fn().mockImplementation(() => ({
     observe: vi.fn(),

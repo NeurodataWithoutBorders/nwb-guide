@@ -1,3 +1,5 @@
+export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
 export function createMockGlobalState() {
 
     const globalState = {

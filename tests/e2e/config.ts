@@ -4,7 +4,7 @@ import { homedir } from 'node:os'
 import { existsSync } from 'node:fs'
 
 import paths from "../../src/paths.config.json" assert { type: "json" };
-import { connect as connectToElectron } from '../puppeteer';
+import { connect as connectToElectron } from './puppeteer';
 
 // ------------------------------------------------------------------
 // ------------------------ Path Definitions ------------------------
@@ -106,7 +106,7 @@ export const regenerateTestData = !existsSync(testDataPath) || !existsSync(testD
 // export const regenerateTestData = true // Force regeneration
 
 export const dandiInfo = {
-  id: '212750',
+  id: '215297',  // this dandiset is used for testing and owned by Ryan
   token: process.env.DANDI_STAGING_API_KEY
 }
 
