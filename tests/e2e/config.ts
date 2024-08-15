@@ -106,7 +106,7 @@ export const regenerateTestData = !existsSync(testDataPath) || !existsSync(testD
 // export const regenerateTestData = true // Force regeneration
 
 export const dandiInfo = {
-  id: '212750',
+  id: '215297',  // this dandiset is used for testing and owned by Ryan
   token: process.env.DANDI_STAGING_API_KEY
 }
 
