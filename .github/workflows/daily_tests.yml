@@ -20,6 +20,11 @@ jobs:
     uses: ./.github/workflows/testing_dev_with_live_services.yml
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  E2ELiveServices:
+    uses: ./.github/workflows/testing_dev_e2e_with_live_services.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       DANDI_STAGING_API_KEY: ${{ secrets.DANDI_STAGING_API_KEY }}
 
   BuildTests:

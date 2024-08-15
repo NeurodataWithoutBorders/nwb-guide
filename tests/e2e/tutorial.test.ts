@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, test } from 'vitest'
-import { sleep } from '../puppeteer'
+import { sleep } from '../utils.js'
 
 import { existsSync } from 'node:fs'
 import { join } from 'node:path'
@@ -37,7 +37,6 @@ describe('E2E Test', () => {
   const datasetTestFunction = config.regenerateTestData ? test : test.skip
 
   datasetTestFunction('Create tutorial dataset', async () => {
-
 
     await evaluate(async () => {
 
