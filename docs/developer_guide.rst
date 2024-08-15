@@ -253,7 +253,8 @@ Updating Tutorial Screenshots
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Before a release, you'll want to update the tutorial screenshots to reflect the latest changes in the application.
 
-#. To regenerate the dataset, you'll need to change ``regenerateTestData`` in the ``tests/e2e/config.ts`` to ``true``.
+#. To regenerate the dataset, you'll need to change ``regenerateTestData`` in the ``tests/e2e/config.ts`` to ``true`` or delete the test dataset directory ``rm -rf ~/NWB_GUIDE/.test``.
+#. Create a ``.env`` file with the following content: ``DANDI_STAGING_API_KEY={your_dandi_staging_api_key}`` where ``{your_dandi_staging_api_key}`` is your DANDI staging API key from https://gui-staging.dandiarchive.org.
 #. Run the End-to-End Tests locally using ``npm test:tutorial``.
     - This will generate new screenshots in the ``docs/assets/tutorials`` directory.
 #. Review the new screenshots to ensure they are accurate.
