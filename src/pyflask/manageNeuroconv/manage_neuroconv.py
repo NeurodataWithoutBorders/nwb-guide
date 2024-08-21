@@ -1668,8 +1668,8 @@ def generate_test_data(output_path: str):
     Consists of a single-probe single-segment SpikeGLX recording (both AP and LF bands) as well as Phy sorting data.
     """
     import spikeinterface
-    from spikeinterface.exporters import export_to_phy
-    from spikeinterface.preprocessing import bandpass_filter, decimate, scale
+    import spikeinterface.exporters
+    import spikeinterface.preprocessing
 
     base_path = Path(output_path)
     spikeglx_output_folder = base_path / "spikeglx"
@@ -1694,12 +1694,18 @@ def generate_test_data(output_path: str):
         seed=0,  # Fixed seed for reproducibility
     )
 
-    unscaled_artificial_ap_band = scale(recording=artificial_ap_band_in_uV, gain=1 / conversion_factor_to_uV)
+    unscaled_artificial_ap_band = spikeinterface.preprocessing.scale(
+        recording=artificial_ap_band_in_uV, gain=1 / conversion_factor_to_uV
+    )
     int16_artificial_ap_band = unscaled_artificial_ap_band.astype(dtype="int16")
     int16_artificial_ap_band.set_channel_gains(conversion_factor_to_uV)
 
-    unscaled_artificial_lf_filter = bandpass_filter(recording=unscaled_artificial_ap_band, freq_min=0.5, freq_max=1_000)
-    unscaled_artificial_lf_band = decimate(recording=unscaled_artificial_lf_filter, decimation_factor=downsample_factor)
+    unscaled_artificial_lf_filter = spikeinterface.preprocessing.bandpass_filter(
+        recording=unscaled_artificial_ap_band, freq_min=0.5, freq_max=1_000
+    )
+    unscaled_artificial_lf_band = spikeinterface.preprocessing.decimate(
+        recording=unscaled_artificial_lf_filter, decimation_factor=downsample_factor
+    )
     int16_artificial_lf_band = unscaled_artificial_lf_band.astype(dtype="int16")
     int16_artificial_lf_band.set_channel_gains(conversion_factor_to_uV)
 
@@ -1723,11 +1729,11 @@ def generate_test_data(output_path: str):
         io.write(lf_meta_content)
 
     # Make Phy folder
-    sorting_analyzer = si.create_sorting_analyzer(
+    sorting_analyzer = spikeinterface.create_sorting_analyzer(
         sorting=sorting, recording=artificial_ap_band_in_uV, mode="memory", sparse=False
     )
 
-    export_to_phy(
+    spikeinterface.exporters.export_to_phy(
         sorting_analyzer=sorting_analyzer, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
     )
 
