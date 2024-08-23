@@ -36,7 +36,8 @@ describe('E2E Test', () => {
 
   const datasetTestFunction = config.regenerateTestData ? test : test.skip
 
-  datasetTestFunction('Create tutorial dataset', async () => {
+  // Wait up to 10 minutes for dataset generation
+  datasetTestFunction('Create tutorial dataset', { timeout: 10 * 10 * 1000 }, async () => {
 
     await evaluate(async () => {
 
@@ -57,7 +58,7 @@ describe('E2E Test', () => {
       const outputLocation = await page.generateTestData()
       page.requestUpdate()
       return outputLocation
-    }, { timeout: 6 * 10 * 1000 }) // Wait up to 6 minutes for dataset generation
+    })
 
     // Take image after dataset generation
     await takeScreenshot('dataset-created', 500, { clip: datasetScreenshotClip })
