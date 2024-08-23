@@ -34,7 +34,7 @@ type BrowserTestOutput = {
 }
 
 const beforeStartTimeout = 60 * 1000 // Wait for 1 minute for Electron to open (mostly for Windows)
-const launchProtocolTimeout = 10 * 60 * 1000 // Creating the test dataset can take up to 10 minutes (mostly for Windows)
+const protocolTimeout = 10 * 60 * 1000 // Creating the test dataset can take up to 10 minutes (mostly for Windows)
 
 export const connect = () => {
 
@@ -52,7 +52,7 @@ export const connect = () => {
     });
 
     const browserURL = `http://localhost:${electronDebugPort}`
-    const browser = output.browser = await puppeteer.launch({ headless: 'new', timeout: launchProtocolTimeout, protocolTimeout: launchProtocolTimeout, dumpio: true})
+    const browser = output.browser = await puppeteer.launch({ headless: 'new'})
     const page = output.page = await browser.newPage();
     await page.goto(browserURL);
     const endpoint = await page.evaluate(() => fetch(`json/version`).then(res => res.json()).then(res => res.webSocketDebuggerUrl))
@@ -62,11 +62,10 @@ export const connect = () => {
 
     // Connect to browser WS Endpoint
     const browserWSEndpoint = endpoint.replace('localhost', '0.0.0.0')
-    output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null, protocolTimeout: launchProtocolTimeout})
+    output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null, protocolTimeout: protocolTimeout})
 
     const pages = await output.browser.pages()
     output.page = pages[0]
-    output.page.setDefaultTimeout(launchProtocolTimeout);
 
   }, beforeStartTimeout + 1000)
 
