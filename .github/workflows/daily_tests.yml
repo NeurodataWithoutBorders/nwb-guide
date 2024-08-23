@@ -53,6 +53,6 @@ jobs:
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: NWB GUIDE Daily Test Failure
-          to: ${{ secrets.DAILY_FAILURE_EMAIL_LIST }}
+          to: cody.c.baker.phd@gmail.com
           from: NWB Guide Daily Tests
           body: "The daily tests workflow failed, please check the status at https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/daily_tests.yml"
