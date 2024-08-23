@@ -1574,7 +1574,7 @@ def inspect_all(url, payload) -> dict:
     except Exception as exception:
         raise exception
 
-    header = get_report_header()
+    header = nwbinspector._formatting._get_report_header()
     header["NWBInspector_version"] = str(header["NWBInspector_version"])
     json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
 
