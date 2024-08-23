@@ -1576,9 +1576,9 @@ def inspect_all(url, payload) -> dict:
 
     header = nwbinspector._formatting._get_report_header()
     header["NWBInspector_version"] = str(header["NWBInspector_version"])
-    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
+    json_report = dict(header=header, messages=messages, text="\n".join(nwbinspector.format_messages(messages=messages)))
 
-    return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
+    return json.loads(json.dumps(obj=json_report, cls=nwbinspector.InspectorOutputJSONEncoder))
 
 
 def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None) -> Path:
