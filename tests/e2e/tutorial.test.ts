@@ -54,10 +54,10 @@ describe('E2E Test', () => {
     const outputLocation = await evaluate(async () => {
       const dashboard = document.querySelector('nwb-dashboard')
       const page = dashboard.page
-      const outputLocation = await page.waitForResponse(page.generateTestData())
+      const outputLocation = await page.generateTestData()
       page.requestUpdate()
       return outputLocation
-    })
+    }, { timeout: 6 * 10 * 1000 }) // Wait up to 6 minutes for dataset generation
 
     // Take image after dataset generation
     await takeScreenshot('dataset-created', 500, { clip: datasetScreenshotClip })
