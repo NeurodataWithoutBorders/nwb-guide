@@ -648,7 +648,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
 def get_check_function(check_function_name: str) -> callable:
     """Function used to fetch an arbitrary NWB Inspector function."""
-    from nwbinspector.nwbinspector import configure_checks, load_config
+    from nwbinspector import configure_checks, load_config
 
     dandi_check_list = configure_checks(config=load_config(filepath_or_keyword="dandi"))
     dandi_check_registry = {check.__name__: check for check in dandi_check_list}
@@ -662,7 +662,7 @@ def get_check_function(check_function_name: str) -> callable:
 
 def run_check_function(check_function: callable, arg: dict) -> dict:
     """.Function used to run an arbitrary NWB Inspector function."""
-    from nwbinspector.register_checks import Importance, InspectorMessage
+    from nwbinspector import Importance, InspectorMessage
 
     output = check_function(arg)
     if isinstance(output, InspectorMessage):
@@ -718,7 +718,7 @@ def validate_metadata(
     timezone: Optional[str] = None,
 ) -> dict:
     """Function used to validate data using an arbitrary NWB Inspector function."""
-    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    from nwbinspector import InspectorOutputJSONEncoder
     from pynwb.file import NWBFile, Subject
 
     check_function = get_check_function(check_function_name)
@@ -1457,8 +1457,8 @@ def _inspect_file_per_job(
     request_id: Optional[str] = None,
 ) -> list:
 
+    import nwbinspector
     import requests
-    from nwbinspector import nwbinspector
     from pynwb import NWBHDF5IO
     from tqdm_publisher import TQDMProgressSubscriber
 
@@ -1561,8 +1561,7 @@ def _inspect_all(url, config):
 def inspect_all(url, payload) -> dict:
     from pickle import PicklingError
 
-    from nwbinspector.inspector_tools import format_messages, get_report_header
-    from nwbinspector.nwbinspector import InspectorOutputJSONEncoder
+    import nwbinspector
 
     try:
         messages = _inspect_all(url, payload)
@@ -1575,11 +1574,13 @@ def inspect_all(url, payload) -> dict:
     except Exception as exception:
         raise exception
 
-    header = get_report_header()
+    header = nwbinspector._formatting._get_report_header()
     header["NWBInspector_version"] = str(header["NWBInspector_version"])
-    json_report = dict(header=header, messages=messages, text="\n".join(format_messages(messages=messages)))
+    json_report = dict(
+        header=header, messages=messages, text="\n".join(nwbinspector.format_messages(messages=messages))
+    )
 
-    return json.loads(json.dumps(obj=json_report, cls=InspectorOutputJSONEncoder))
+    return json.loads(json.dumps(obj=json_report, cls=nwbinspector.InspectorOutputJSONEncoder))
 
 
 def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None) -> Path:

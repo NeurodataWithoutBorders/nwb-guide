@@ -1,5 +1,5 @@
 Ecosystem Format Support
-=======================================
+========================
 The following is a live record of all the supported formats in the NWB GUIDE and underlying ecosystem.
 
 .. raw:: html
