@@ -1206,12 +1206,6 @@
 .card-right.bf-account-span,
 .card-right.bf-account-details-span,
 .card-right.bf-dataset-span,
-.card-right.current-permissions {
-    width: auto;
-    margin-left: 5px;
-    margin-top: 0px;
-    padding-left: 5px;
-}
 
 .card-container.manage-dataset .card-right.bf-dataset-span {
     width: fit-content;
