@@ -1457,8 +1457,8 @@ def _inspect_file_per_job(
     request_id: Optional[str] = None,
 ) -> list:
 
-    import requests
     import nwbinspector
+    import requests
     from pynwb import NWBHDF5IO
     from tqdm_publisher import TQDMProgressSubscriber
 
