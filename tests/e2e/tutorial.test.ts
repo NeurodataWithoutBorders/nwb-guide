@@ -54,7 +54,7 @@ describe('E2E Test', () => {
     const outputLocation = await evaluate(async () => {
       const dashboard = document.querySelector('nwb-dashboard')
       const page = dashboard.page
-      const outputLocation = await page.generateTestData()
+      const outputLocation = await page.waitForResponse(page.generateTestData())
       page.requestUpdate()
       return outputLocation
     })
