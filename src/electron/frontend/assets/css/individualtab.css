@@ -1206,7 +1206,6 @@
 .card-right.bf-account-span,
 .card-right.bf-account-details-span,
 .card-right.bf-dataset-span,
-
 .card-container.manage-dataset .card-right.bf-dataset-span {
     width: fit-content;
 }

@@ -24,9 +24,7 @@ export class GuidedHomePage extends Page {
         const resumeList = htmlBase.querySelector("#guided-div-resume-progress-cards");
         resumeList.innerHTML = "";
 
-        progressFileJSONdata.forEach((progressFile) =>
-            resumeList.appendChild(createCard(progressFile))
-        );
+        progressFileJSONdata.forEach((progressFile) => resumeList.appendChild(createCard(progressFile)));
     };
 
     resume = (resumeProgressButton) => {
