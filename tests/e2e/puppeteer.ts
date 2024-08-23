@@ -55,7 +55,6 @@ export const connect = () => {
     const browser = output.browser = await puppeteer.launch({ headless: 'new', timeout: launchProtocolTimeout, protocolTimeout: launchProtocolTimeout, dumpio: true})
     const page = output.page = await browser.newPage();
     await page.goto(browserURL);
-    page.setDefaultTimeout(launchProtocolTimeout);
     const endpoint = await page.evaluate(() => fetch(`json/version`).then(res => res.json()).then(res => res.webSocketDebuggerUrl))
     await browser.close()
     delete output.browser
@@ -63,10 +62,11 @@ export const connect = () => {
 
     // Connect to browser WS Endpoint
     const browserWSEndpoint = endpoint.replace('localhost', '0.0.0.0')
-    output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null })
+    output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null, protocolTimeout: launchProtocolTimeout})
 
     const pages = await output.browser.pages()
     output.page = pages[0]
+    output.page.setDefaultTimeout(launchProtocolTimeout);
 
   }, beforeStartTimeout + 1000)
 
