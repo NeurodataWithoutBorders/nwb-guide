@@ -115,13 +115,13 @@ Repo Structure
 - `src`
     - `electron`
         - `main`
-            - `src` - Contains all the source code for the backend
-            - `assets` - Contains all the backend-facing assets (e.g. images, css, etc.)
+            - `application-menu.js` - Configures the application window
+            - `main.ts` - Configures the Python backend process
         - `preload`
             - `preload.js` - Exposes electron-specific variables to the frontend
         - `frontend`
             - `core` - Contains all the source code for the frontend
-                - `index.js` - The entry point for the application
+                - `index.ts` - The entry point for the application. Manages initial system and internet connection checks, and sets up auto-updating
                 - `pages.js` - The main code that controls which pages are rendered and how they are linked together
                 - `components` - Contains all the UI Components used throughout the app
             - `assets` - Contains all the frontend-facing assets (e.g. images, css, etc.)
@@ -160,12 +160,12 @@ Starting a New Feature
 Adding a New Page
 ^^^^^^^^^^^^^^^^^
 
-New pages can be added by linking a component in the ``src/pages.js`` file. For example, if you wanted to
-add a new page called ``NewPage``, you would add the following to the configuration file:
+New pages can be added by linking a component in the ``src/electron/frontend/core/pages.js`` file.
+For example, if you wanted to add a new page called ``NewPage``, you would add the following to the configuration file:
 
 .. code-block:: javascript
 
-    import NewPage from "./stories/pages/NewPage";
+    import NewPage from "./components/pages/new_page/NewPage";
 
     // ...
 
@@ -173,34 +173,24 @@ add a new page called ``NewPage``, you would add the following to the configurat
 
         // ...
 
-        'guided': new GuidedHomePage({
-            label: "Guided Mode",
-            icon: guidedIcon,
-            pages: {
-                start: new GuidedStartPage({
-                    label: "Start",
-                }),
+        uploads: new UploadsPage({
+            label: "Upload",
+            icon: uploadIcon,
+        }),
 
-                // ...
-
-                newpage: new NewPage({
-                    label: "New Page", // This is the label that will be displayed in the sidebar
-                }),
-
-                // ...
-
-            },
-        })
+        newpage: new NewPage({
+            label: "New Page", // This is the label that will be displayed in the sidebar
+        }),
 
         // ...
 
-        }
+    }
 
     // ...
 
 This will automatically add the new page to the sidebar. The page itself can be defined in the
-``src/stories/pages/NewPage.js`` file. For example, if you wanted to add a new page that displays
-a simple message, you could add the following to the ``src/stories/pages/NewPage.js`` file:
+``./components/pages/new_page/NewPage.js`` file. For example, if you wanted to add a new page that displays
+a simple message, you could add the following to the ``./components/pages/new_page/NewPage.js`` file:
 
 
 .. code-block:: javascript
