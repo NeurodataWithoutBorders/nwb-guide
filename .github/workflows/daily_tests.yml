@@ -43,8 +43,8 @@ jobs:
 
   NotifyOnAnyFailure:
     runs-on: ubuntu-latest
-    needs: [DevTests, LiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
-    if: always() && failure()
+    needs: [DevTests, LiveServices, E2ELiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
+    if: failure()
     steps:
       - uses: dawidd6/action-send-mail@v3
         with:
