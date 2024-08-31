@@ -11,7 +11,7 @@ import paths from "../../src/paths.config.json" assert { type: "json" };
 
 import { evaluate, initTests, takeScreenshot } from './utils'
 import { header } from '../../src/electron/frontend/utils/text'
-import { sleep } from '../puppeteer';
+import { sleep } from '../utils.js'
 
 
 // NOTE: We assume the user has put the GIN data in ~/NWB_GUIDE/test-data/GIN

@@ -4,11 +4,11 @@ import { afterAll, beforeAll, expect, describe, vi, test } from 'vitest'
 import * as puppeteer from 'puppeteer'
 
 import { exec } from 'child_process'
-import { electronDebugPort } from './globals'
+import { electronDebugPort } from '../globals.js'
 
 export const sharePort = 1234
 
-export const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+import { sleep } from '../utils.js';
 
 
 const beforeStart = (timeout) => new Promise(async (resolve, reject) => {
@@ -22,7 +22,7 @@ const beforeStart = (timeout) => new Promise(async (resolve, reject) => {
   process.stdout.on('data', handleOutput);
   process.stderr.on('data', handleOutput);
   process.on('close', (code) => console.log(`[electron] Exited with code ${code}`));
-  await sleep(timeout) // Wait for five seconds for Electron to open
+  await sleep(timeout)
 
   reject('Failed to open Electron window successfully.')
 })
@@ -33,19 +33,16 @@ type BrowserTestOutput = {
   browser?: puppeteer.Browser,
 }
 
-const timeout = 60 * 1000 // Wait for 1 minute for Electron to open (mostly for Windows)
+const beforeStartTimeout = 2 * 60 * 1000 // Wait 2 minutes for Electron to open
+const protocolTimeout = 10 * 60 * 1000 // Creating the test dataset can take up to 10 minutes (mostly for Windows)
 
 export const connect = () => {
 
-
   const output: BrowserTestOutput = {}
-
 
   beforeAll(async () => {
 
-    await beforeStart(timeout)
-
-
+    await beforeStart(beforeStartTimeout)
 
     // Ensure Electron will exit gracefully
     const mockExit = vi.spyOn(process, 'exit').mockImplementation(() => {
@@ -63,12 +60,12 @@ export const connect = () => {
 
     // Connect to browser WS Endpoint
     const browserWSEndpoint = endpoint.replace('localhost', '0.0.0.0')
-    output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null })
+    output.browser = await puppeteer.connect({ browserWSEndpoint, defaultViewport: null, protocolTimeout: protocolTimeout})
 
     const pages = await output.browser.pages()
     output.page = pages[0]
 
-  }, timeout + 1000)
+  }, beforeStartTimeout + 1000)
 
   afterAll(async () => {
     if (output.browser) await output.browser.close() // Will also exit the Electron instance

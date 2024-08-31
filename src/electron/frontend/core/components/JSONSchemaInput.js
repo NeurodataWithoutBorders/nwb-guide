@@ -1285,7 +1285,7 @@ export class JSONSchemaInput extends LitElement {
 
                 const type = isDateTime
                     ? "datetime-local"
-                    : schema.format ?? (schema.type === "string" ? "text" : schema.type);
+                    : (schema.format ?? (schema.type === "string" ? "text" : schema.type));
 
                 const value = isDateTime ? renderDateTime(this.value) : this.value;
 

@@ -698,7 +698,7 @@ export class JSONSchemaForm extends LitElement {
             required: isRequired,
             conditional: isConditional,
             validateEmptyValue: this.validateEmptyValues,
-            pattern: propertyType === "pattern" ? name : propertyType ?? undefined,
+            pattern: propertyType === "pattern" ? name : (propertyType ?? undefined),
             renderTable: this.renderTable,
             renderCustomHTML: this.renderCustomHTML,
             showLabel: !("title" in info && !info.title),

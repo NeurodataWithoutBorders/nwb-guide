@@ -20,6 +20,11 @@ jobs:
     uses: ./.github/workflows/testing_dev_with_live_services.yml
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  E2ELiveServices:
+    uses: ./.github/workflows/testing_dev_e2e_with_live_services.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       DANDI_STAGING_API_KEY: ${{ secrets.DANDI_STAGING_API_KEY }}
 
   BuildTests:
@@ -38,7 +43,7 @@ jobs:
 
   NotifyOnAnyFailure:
     runs-on: ubuntu-latest
-    needs: [DevTests, LiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
+    needs: [DevTests, LiveServices, E2ELiveServices, BuildTests, ExampleDataCache, ExampleDataTests]
     if: failure()
     steps:
       - uses: dawidd6/action-send-mail@v3
@@ -48,6 +53,6 @@ jobs:
           username: ${{ secrets.MAIL_USERNAME }}
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: NWB GUIDE Daily Test Failure
-          to: ${{ secrets.DAILY_FAILURE_EMAIL_LIST }}
+          to: cody.c.baker.phd@gmail.com,rly@lbl.gov
           from: NWB Guide Daily Tests
           body: "The daily tests workflow failed, please check the status at https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/daily_tests.yml"

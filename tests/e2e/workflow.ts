@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest"
 
-import { sleep } from '../puppeteer'
+import { sleep } from '../utils.js'
 
 import { join } from 'node:path'
 import { evaluate, takeScreenshot, toNextPage } from "./utils"

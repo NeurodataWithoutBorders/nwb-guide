@@ -7,7 +7,6 @@ import main from '@electron/remote/main';
 main.initialize()
 
 import path from 'path';
-// import { autoUpdater } from 'electron-updater';
 import { ipcMain } from 'electron';
 import fp from 'find-free-port';
 import 'v8-compile-cache'
@@ -20,9 +19,6 @@ import './application-menu.js';
 import icon from '../frontend/assets/img/logo-guide-draft.png?asset'
 import splashHTML from './splash-screen.html?asset'
 import preloadUrl from '../preload/preload.js?asset'
-
-import devUpdateConfig from './dev-app-update.yml?asset'
-
 
 import { autoUpdater } from 'electron-updater';
 
@@ -52,9 +48,6 @@ const PYINSTALLER_NAME = "nwb-guide"
 
 const isWindows = process.platform === 'win32'
 
-
-
-
 let pyflaskProcess: any = null;
 
 let PORT: number | string | null = 4242;
@@ -69,6 +62,7 @@ let globals: {
   python: {
     status: boolean,
     sent: boolean,
+    restart: boolean,
     latestError: string
   },
 } =  {

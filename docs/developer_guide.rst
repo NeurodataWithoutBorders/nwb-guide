@@ -30,25 +30,40 @@ Install the appropriate Python dependencies for your operating system.
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-Windows.yml
+    conda env create --file ./environments/environment-Windows.yml
 
 **Mac with x64 architecture**
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC-intel.yml
+    conda env create --file ./environments/environment-MAC-intel.yml
 
 **Mac with arm64 architecture**
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-MAC-apple-silicon.yml
+    conda env create --file ./environments/environment-MAC-apple-silicon.yml
 
 **Linux**
 
 .. code-block:: bash
 
-    conda env create -f ./environments/environment-Linux.yml
+    conda env create --file ./environments/environment-Linux.yml
+
+
+.. note::
+
+    The NWB GUIDE environment can be quite large. If your base folder for ``conda`` is on a small mounted partition, you may need to setup the environment elsewhere on your system. You can do this using:
+
+    .. code-block:: bash
+
+        conda env create --file ./environments/environment-< platform >.yml --prefix < explicit location to setup environment >
+
+    For example, on a remote Linux server, this might look like:
+
+    .. code-block:: bash
+
+        conda env create --file ./environments/environment-Linux.yml --prefix /mnt/data/nwb-guide
 
 
 Activate the Python Environment
@@ -59,6 +74,20 @@ Before starting NWB GUIDE, you'll need to ensure that the Python environment is 
 .. code-block:: bash
 
     conda activate nwb-guide
+
+.. note::
+
+    If you had to use the ``--prefix`` flag in the previous step, then this becomes
+
+    .. code-block:: bash
+
+        conda activate < explicit location of environment >
+
+    Such as, using the previous example:
+
+    .. code-block:: bash
+
+        conda activate /mnt/data/nwb-guide
 
 
 Install JavaScript Dependencies
@@ -86,13 +115,13 @@ Repo Structure
 - `src`
     - `electron`
         - `main`
-            - `src` - Contains all the source code for the backend
-            - `assets` - Contains all the backend-facing assets (e.g. images, css, etc.)
+            - `application-menu.js` - Configures the application window
+            - `main.ts` - Configures the Python backend process
         - `preload`
             - `preload.js` - Exposes electron-specific variables to the frontend
         - `frontend`
             - `core` - Contains all the source code for the frontend
-                - `index.js` - The entry point for the application
+                - `index.ts` - The entry point for the application. Manages initial system and internet connection checks, and sets up auto-updating
                 - `pages.js` - The main code that controls which pages are rendered and how they are linked together
                 - `components` - Contains all the UI Components used throughout the app
             - `assets` - Contains all the frontend-facing assets (e.g. images, css, etc.)
@@ -131,12 +160,12 @@ Starting a New Feature
 Adding a New Page
 ^^^^^^^^^^^^^^^^^
 
-New pages can be added by linking a component in the ``src/pages.js`` file. For example, if you wanted to
-add a new page called ``NewPage``, you would add the following to the configuration file:
+New pages can be added by linking a component in the ``src/electron/frontend/core/pages.js`` file.
+For example, if you wanted to add a new page called ``NewPage``, you would add the following to the configuration file:
 
 .. code-block:: javascript
 
-    import NewPage from "./stories/pages/NewPage";
+    import NewPage from "./components/pages/new_page/NewPage";
 
     // ...
 
@@ -144,34 +173,24 @@ add a new page called ``NewPage``, you would add the following to the configurat
 
         // ...
 
-        'guided': new GuidedHomePage({
-            label: "Guided Mode",
-            icon: guidedIcon,
-            pages: {
-                start: new GuidedStartPage({
-                    label: "Start",
-                }),
+        uploads: new UploadsPage({
+            label: "Upload",
+            icon: uploadIcon,
+        }),
 
-                // ...
-
-                newpage: new NewPage({
-                    label: "New Page", // This is the label that will be displayed in the sidebar
-                }),
-
-                // ...
-
-            },
-        })
+        newpage: new NewPage({
+            label: "New Page", // This is the label that will be displayed in the sidebar
+        }),
 
         // ...
 
-        }
+    }
 
     // ...
 
 This will automatically add the new page to the sidebar. The page itself can be defined in the
-``src/stories/pages/NewPage.js`` file. For example, if you wanted to add a new page that displays
-a simple message, you could add the following to the ``src/stories/pages/NewPage.js`` file:
+``./components/pages/new_page/NewPage.js`` file. For example, if you wanted to add a new page that displays
+a simple message, you could add the following to the ``./components/pages/new_page/NewPage.js`` file:
 
 
 .. code-block:: javascript
@@ -224,8 +243,9 @@ Updating Tutorial Screenshots
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Before a release, you'll want to update the tutorial screenshots to reflect the latest changes in the application.
 
-#. To regenerate the dataset, you'll need to change ``regenerateTestData`` in the ``tests/e2e/config.ts`` to ``true``.
-#. Run the End-to-End Tests locally using ``npm test:app``.
+#. To regenerate the dataset, you'll need to change ``regenerateTestData`` in the ``tests/e2e/config.ts`` to ``true`` or delete the test dataset directory ``rm -rf ~/NWB_GUIDE/.test``.
+#. Create a ``.env`` file with the following content: ``DANDI_STAGING_API_KEY={your_dandi_staging_api_key}`` where ``{your_dandi_staging_api_key}`` is your DANDI staging API key from https://gui-staging.dandiarchive.org.
+#. Run the End-to-End Tests locally using ``npm test:tutorial``.
     - This will generate new screenshots in the ``docs/assets/tutorials`` directory.
 #. Review the new screenshots to ensure they are accurate.
 #. If the screenshots are accurate, commit them to the repository. Their paths should be consistent across runs—allowing the new versions to show up on the tutorial.

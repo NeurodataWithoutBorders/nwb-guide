@@ -17,26 +17,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # linux installation instructions use dev mode instead of distributable
-          # - python-version: "3.9"
-          #   os: ubuntu-latest
-          #   label: environments/environment-Linux.yml
-          #   prefix: /usr/share/miniconda3/envs/nwb-guide
+          # No linux in this matrix since installation instructions use dev mode instead of distributable
 
-          - python-version: "3.9"
-            os: macos-latest  # Mac arm64 runner
+          - os: macos-latest  # Mac arm64 runner
             label: environments/environment-MAC-apple-silicon.yml
-            prefix: /Users/runner/miniconda3/envs/nwb-guide
 
-          - python-version: "3.9"
-            os: macos-13  # Mac x64 runner
+          - os: macos-13  # Mac x64 runner
             label: environments/environment-MAC-intel.yml
-            prefix: /Users/runner/miniconda3/envs/nwb-guide
 
-          - python-version: "3.9"
-            os: windows-latest
+          - os: windows-latest
             label: environments/environment-Windows.yml
-            prefix: C:\Miniconda3\envs\nwb-guide
 
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +68,14 @@ jobs:
         with:
           node-version: "20"
 
-      - run: npm ci --verbose
+      - name: Install GUIDE
+        run: npm ci --verbose
+
+      - name: Install testing dependencies
+        run: pip install pytest pytest-cov
+
+      - name: Manually remove matplotlib
+        run: pip uninstall matplotlib --yes
 
       # Fix for macos build - remove bad sonpy file
       - if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'
