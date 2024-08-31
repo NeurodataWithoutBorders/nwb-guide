@@ -14,7 +14,7 @@
         "name": "1.0.3",
         "version": "v1.0.3",
         "url": "https://nwb-guide.readthedocs.io/en/v1.0.3/",
-        "preferred": true
+        "preferred": false
     },
     {
         "name": "1.0.2",
