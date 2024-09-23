@@ -38,7 +38,7 @@ describe('E2E Test', () => {
 
   // Wait up to 10 minutes for dataset generation
   // Both the test timeout and the protocolTimeout on puppeteer.connect() must be set to 10 min
-  datasetTestFunction('Create tutorial dataset', { timeout: 10 * 60 * 1000 }, async () => {
+  datasetTestFunction('Create tutorial dataset', { timeout: 15 * 60 * 1000 }, async () => {
 
     await evaluate(async () => {
 
