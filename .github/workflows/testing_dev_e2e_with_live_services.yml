@@ -39,7 +39,7 @@ jobs:
       - run: git fetch --prune --unshallow --tags
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
-      - name: Set up conda 
+      - name: Set up conda
         uses: conda-incubator/setup-miniconda@v3
         with:
           miniforge-version: latest
