@@ -39,13 +39,11 @@ jobs:
       - run: git fetch --prune --unshallow --tags
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
-      - name: Setup Mambaforge
+      - name: Set up conda 
         uses: conda-incubator/setup-miniconda@v3
         with:
-          miniforge-variant: Mambaforge
           miniforge-version: latest
           activate-environment: nwb-guide
-          use-mamba: true
 
       - name: Set cache date
         id: get-date
@@ -61,7 +59,7 @@ jobs:
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Create and activate environment
-        run: mamba env update -n nwb-guide -f ${{ matrix.label }}
+        run: conda env update -n nwb-guide -f ${{ matrix.label }}
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
