@@ -24,16 +24,14 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Setup Mambaforge
+      - name: Set up conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          miniforge-variant: Mambaforge
           miniforge-version: latest
           activate-environment: nwb-guide
-          use-mamba: true
 
       - name: Create and activate environment
-        run: mamba env update --name nwb-guide --file environments/environment-MAC-intel.yml
+        run: conda env update --name nwb-guide --file environments/environment-MAC-intel.yml
 
       - name: Use Node.js 20
         uses: actions/setup-node@v4
