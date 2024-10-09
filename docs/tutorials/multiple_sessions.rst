@@ -52,7 +52,7 @@ To avoid specifying the format string path by hand, click the **Autocomplete** b
   :align: center
   :alt: Autocomplete modal on path expansion page
 
-Provide a source data path for Phy by either dragging and dropping the folder ``multi_session_dataset/mouse1/mouse1_Session2/mouse1_Session2_phy`` into the **Example Folder** box or clicking the box and selecting a folder. Then enter the Subject ID (``mouse1``) and Session ID (``Session1``) for this particular path.
+Provide a source data path for Phy by either dragging and dropping the folder ``multi_session_dataset/mouse1/mouse1_Session1/mouse1_Session1_phy`` into the **Example Folder** box or clicking the box and selecting a folder. Then enter the Subject ID (``mouse1``) and Session ID (``Session1``) for this particular path.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-autocomplete-filled.png
   :align: center
@@ -64,7 +64,7 @@ When you submit this form, you'll notice that the Format String Path input has b
   :align: center
   :alt: Path expansion page with autocompleted format string
 
-Repeat this process for SpikeGLX, where ``multi_session_dataset/mouse1/mouse1_Session2/mouse1_Session2_g0/mouse1_Session2_g0_imec0/mouse1_Session1_g0_t0.imec0.ap.bin`` will be the example source data path.
+Repeat this process for SpikeGLX, where ``multi_session_dataset/mouse1/mouse1_Session1/mouse1_Session1_g0/mouse1_Session1_g0_imec0/mouse1_Session1_g0_t0.imec0.ap.bin`` will be the example source data path.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-completed.png
   :align: center
