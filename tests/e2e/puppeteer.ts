@@ -34,7 +34,7 @@ type BrowserTestOutput = {
 }
 
 const beforeStartTimeout = 2 * 60 * 1000 // Wait 2 minutes for Electron to open
-const protocolTimeout = 10 * 60 * 1000 // Creating the test dataset can take up to 10 minutes (mostly for Windows)
+const protocolTimeout = 15 * 60 * 1000 // Creating the test dataset can take up to 15 minutes (mostly for Windows)
 
 export const connect = () => {
 
