@@ -237,6 +237,14 @@ export default async function runWorkflow(name, workflow, identifier) {
 
     await takeScreenshot(join(identifier, 'pathexpansion-autocomplete-submitted'), 1000)
 
+    // collapse the first interface accordion for the screenshot
+    await evaluate(() => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      const page = dashboard.page
+      const first = Object.values(page.form.accordions)[0]
+      first.toggle(false)
+    })
+
     // Fill out the other path expansion information
     await evaluate(({ multi, common }) => {
       const dashboard = document.querySelector('nwb-dashboard')
@@ -253,7 +261,6 @@ export default async function runWorkflow(name, workflow, identifier) {
       })
 
     }, testInterfaceInfo)
-
 
     await takeScreenshot(join(identifier, 'pathexpansion-completed'), 300)
 

@@ -133,7 +133,7 @@ export function createDandiset(results = {}) {
 
                 const metadata = {
                     description: form.resolved.description,
-                    license: form.resolved.license,
+                    license: [form.resolved.license],
                 };
 
                 if (form.resolved.nih_award_number) {
