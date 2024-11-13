@@ -1735,9 +1735,9 @@ def generate_test_data(output_path: str):
     sorting_analyzer = spikeinterface.create_sorting_analyzer(
         sorting=sorting, recording=artificial_ap_band_in_uV, mode="memory", sparse=False
     )
-    sorting_analyzer.compute(['random_spikes', 'waveforms', 'templates', 'noise_levels'])
-    sorting_analyzer.compute('spike_amplitudes')
-    sorting_analyzer.compute('principal_components', n_components = 5, mode="by_channel_local")
+    sorting_analyzer.compute(["random_spikes", "waveforms", "templates", "noise_levels"])
+    sorting_analyzer.compute("spike_amplitudes")
+    sorting_analyzer.compute("principal_components", n_components=5, mode="by_channel_local")
 
     spikeinterface.exporters.export_to_phy(
         sorting_analyzer=sorting_analyzer, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
