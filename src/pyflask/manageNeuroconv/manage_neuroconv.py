@@ -1735,6 +1735,7 @@ def generate_test_data(output_path: str):
     sorting_analyzer = spikeinterface.create_sorting_analyzer(
         sorting=sorting, recording=artificial_ap_band_in_uV, mode="memory", sparse=False
     )
+    sorting_analyzer.compute("templates")
 
     spikeinterface.exporters.export_to_phy(
         sorting_analyzer=sorting_analyzer, output_folder=phy_output_folder, remove_if_exists=True, copy_binary=False
