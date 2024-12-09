@@ -26,11 +26,9 @@ SpikeGLX-Phy:
     PhySortingInterface:
       folder_path: ephy_testing_data/phy/phy_example_0
 
-
 SpikeGLX_v1_SingleProbe_AP:
   SpikeGLXRecordingInterface:
     file_path: ephy_testing_data/spikeglx/Noise4Sam_g0/Noise4Sam_g0_imec0/Noise4Sam_g0_t0.imec0.ap.bin
-
 
 SpikeGLXConverter-Phy:
   SpikeGLXConverterPipe:
@@ -38,23 +36,19 @@ SpikeGLXConverter-Phy:
   PhySortingInterface:
     folder_path: ephy_testing_data/phy/phy_example_0
 
-
 Suite2P_SinglePlane_SingleChannel:
   metadata:
     NWBFile:
       session_start_time: 2024-05-09T00:00
     Ophys:
       ImagingPlane:
-        -
-          excitation_lambda: NaN
+        - excitation_lambda: NaN
           optical_channel:
-            -
-              emission_lambda: NaN
+            - emission_lambda: NaN
 
   interfaces:
     Suite2pSegmentationInterface:
       folder_path: ophys_testing_data/segmentation_datasets/suite2p
-
 
 Caiman_SinglePlane_SingleChannel:
   metadata:
@@ -62,43 +56,35 @@ Caiman_SinglePlane_SingleChannel:
       session_start_time: 2024-05-09T00:00
     Ophys:
       ImagingPlane:
-        -
-          excitation_lambda: NaN
+        - excitation_lambda: NaN
           optical_channel:
-            -
-              emission_lambda: NaN
+            - emission_lambda: NaN
 
   interfaces:
     CaimanSegmentationInterface:
       file_path: ophys_testing_data/segmentation_datasets/caiman/caiman_analysis.hdf5
 
-
 ScanImage_SinglePlane_SingleChannel:
-
   metadata:
     Ophys:
       ImagingPlane:
-        -
-          excitation_lambda: NaN
+        - excitation_lambda: NaN
           optical_channel:
-            -
-              emission_lambda: NaN
+            - emission_lambda: NaN
 
   interfaces:
     ScanImageImagingInterface:
       file_path: ophys_testing_data/imaging_datasets/ScanImage/sample_scanimage_version_3_8.tiff
 
-
 TDT:
   metadata:
-      NWBFile:
-        session_start_time: 2024-05-09T00:00
+    NWBFile:
+      session_start_time: 2024-05-09T00:00
 
   interfaces:
     TdtRecordingInterface:
       folder_path: ephy_testing_data/tdt/aep_05
       gain: 1
-
 
 CellExplorer:
   metadata:
@@ -108,7 +94,6 @@ CellExplorer:
   interfaces:
     CellExplorerRecordingInterface:
       folder_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed
-
 
 CellExplorerUnits:
   metadata:
@@ -121,7 +106,6 @@ CellExplorerUnits:
     CellExplorerSortingInterface:
       file_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed/Peter_MS22_180629_110319_concat_stubbed.spikes.cellinfo.mat
 
-
 CellExplorerSortingOnly:
   metadata:
     NWBFile:
@@ -131,23 +115,18 @@ CellExplorerSortingOnly:
     CellExplorerSortingInterface:
       file_path: ephy_testing_data/cellexplorer/dataset_4/Peter_MS22_180629_110319_concat_stubbed/Peter_MS22_180629_110319_concat_stubbed.spikes.cellinfo.mat
 
-
 IntanSingleFileRecording:
   metadata:
     NWBFile:
       session_start_time: 2024-05-09T00:00
     Ecephys:
       ElectrodeGroup:
-        -
-          location: Test location
-        -
-          location: Test location
-        -
-          location: Test location
+        - location: Test location
+        - location: Test location
+        - location: Test location
   interfaces:
     IntanRecordingInterface:
       file_path: ephy_testing_data/intan/intan_rhd_test_1.rhd
-
 
 MEArec:
   metadata:
@@ -158,21 +137,17 @@ MEArec:
     MEArecRecordingInterface:
       file_path: ephy_testing_data/mearec/mearec_test_10s.h5
 
-
 BrukerTiffMultiChannelSinglePlane:
   metadata:
     Ophys:
       ImagingPlane:
-        -
-          excitation_lambda: NaN
+        - excitation_lambda: NaN
           optical_channel:
-            -
-              emission_lambda: NaN
+            - emission_lambda: NaN
 
   interfaces:
     BrukerTiffSinglePlaneConverter:
       folder_path: ophys_testing_data/imaging_datasets/BrukerTif/NCCR32_2023_02_20_Into_the_void_t_series_baseline-000
-
 
 DeepLabCut:
   metadata:
@@ -181,9 +156,8 @@ DeepLabCut:
 
   interfaces:
     DeepLabCutInterface:
-      file_path: behavior_testing_data/DLC/m3v1mp4DLC_resnet50_openfieldAug20shuffle1_30000.h5
-      config_file_path: behavior_testing_data/DLC/config.yaml
-
+      file_path: behavior_testing_data/DLC/open_field_with_video/m3v1mp4DLC_resnet50_openfieldOct30shuffle1_1000.h5
+      config_file_path: behavior_testing_data/DLC/open_field_with_video/config.yaml
 
 SLEAP:
   metadata:
