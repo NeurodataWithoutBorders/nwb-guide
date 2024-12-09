@@ -27,4 +27,5 @@ dependencies:
       - tqdm_publisher >= 0.0.1 # Progress bars
       - tzlocal >= 5.2 # Frontend timezone handling
       - ndx-pose == 0.1.1
+      - nwbinspector==0.6.1
       - tables
