@@ -50,7 +50,7 @@ export const connect = () => {
     });
 
     const browserURL = `http://localhost:${electronDebugPort}`
-    const browser = output.browser = await puppeteer.launch({ headless: 'new' })
+    const browser = output.browser = await puppeteer.launch({ headless: 'new', args: ["--no-sandbox"] })
     const page = output.page = await browser.newPage();
     await page.goto(browserURL);
     const endpoint = await page.evaluate(() => fetch(`json/version`).then(res => res.json()).then(res => res.webSocketDebuggerUrl))
