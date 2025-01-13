@@ -85,7 +85,7 @@ but could later block progress if left unspecified.
 
 In this case, we have two subjects with two sessions each. Let's say that each of their sessions happened close enough in time that they can be identified using the same **age** entry: ``P29W`` for ``mouse1`` and ``P30W`` for ``mouse2``.
 
-We should also indicate the ``sex`` of each subject since this is a requirement for `uploading to the DANDI Archive <https://www.dandiarchive.org/handbook/135_validation/#missing-dandi-metadata>`_.
+We should also indicate the ``sex`` of each subject since this is a requirement for `uploading to the DANDI Archive <https://docs.dandiarchive.org/135_validation/#missing-dandi-metadata>`_.
 
 .. figure:: ../assets/tutorials/multiple/subject-complete.png
   :align: center
