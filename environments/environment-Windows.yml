@@ -12,7 +12,7 @@ dependencies:
   - pip:
       - setuptools==70.0.0
       - PyInstaller==6.7.0
-      - pyinstaller-hooks-contrib == 2024.6  # Fix needed for pydantic v2; otherwise imports pydantic.compiled
+      - pyinstaller-hooks-contrib == 2024.6 # Fix needed for pydantic v2; otherwise imports pydantic.compiled
       - chardet == 5.1.0
       - configparser == 6.0.0
       - flask == 2.3.2
@@ -23,3 +23,6 @@ dependencies:
       - scikit-learn == 1.4.0  # Tutorial data generation
       - tqdm_publisher >= 0.0.1  # Progress bars
       - tzlocal >= 5.2  # Frontend timezone handling
+      - ndx-pose == 0.1.1
+      - nwbinspector ==0.6.1
+      - tables

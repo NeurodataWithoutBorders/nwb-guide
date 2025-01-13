@@ -50,7 +50,8 @@ export const connect = () => {
     });
 
     const browserURL = `http://localhost:${electronDebugPort}`
-    const browser = output.browser = await puppeteer.launch({ headless: 'new' })
+    // See notes on no sandbox mode: https://pptr.dev/troubleshooting#setting-up-chrome-linux-sandbox
+    const browser = output.browser = await puppeteer.launch({ headless: 'new', args: ["--no-sandbox", "--disable-setuid-sandbox"] })
     const page = output.page = await browser.newPage();
     await page.goto(browserURL);
     const endpoint = await page.evaluate(() => fetch(`json/version`).then(res => res.json()).then(res => res.webSocketDebuggerUrl))

@@ -86,7 +86,12 @@ jobs:
 
       - if: matrix.os == 'ubuntu-latest'
         name: Run tests with xvfb
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:tutorial
+        run: |
+          # Adjust Chrome sandbox (used by Puppeteer) owner and permissions to bypass Ubuntu 24.04's
+          # new restrictions for AppImage apps. https://github.com/electron/electron/issues/42510
+          sudo chown root ./node_modules/electron/dist/chrome-sandbox
+          sudo chmod 4755 ./node_modules/electron/dist/chrome-sandbox
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:tutorial
 
       - name: Archive E2E Test Screenshots
         uses: actions/upload-artifact@v4
