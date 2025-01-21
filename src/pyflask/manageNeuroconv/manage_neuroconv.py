@@ -1730,9 +1730,9 @@ def generate_test_data(output_path: str):
         recording=artificial_ap_band_in_uV,
         sorting=spiking,
     )
-    sorting_analyzer.compute(['random_spikes', 'waveforms', 'templates', 'noise_levels'])
-    _ = sorting_analyzer.compute('spike_amplitudes')
-    _ = sorting_analyzer.compute('principal_components', n_components = 5, mode="by_channel_local")
+    sorting_analyzer.compute(["random_spikes", "waveforms", "templates", "noise_levels"])
+    _ = sorting_analyzer.compute("spike_amplitudes")
+    _ = sorting_analyzer.compute("principal_components", n_components=5, mode="by_channel_local")
 
     export_to_phy(
         sorting_analyzer=sorting_analyzer,
