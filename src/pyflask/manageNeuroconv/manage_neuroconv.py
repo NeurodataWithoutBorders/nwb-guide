@@ -1726,7 +1726,7 @@ def generate_test_data(output_path: str):
         io.write(lf_meta_content)
 
     # Make Phy folder
-    sorting_analyzer = si.create_sorting_analyzer(
+    sorting_analyzer = spikeinterface.create_sorting_analyzer(
         recording=artificial_ap_band_in_uV,
         sorting=spiking,
     )
