@@ -1674,6 +1674,8 @@ def generate_test_data(output_path: str):
     import spikeinterface.exporters
     import spikeinterface.preprocessing
 
+    spikeinterface.set_global_job_kwargs(n_jobs=-1)
+
     base_path = Path(output_path)
     spikeglx_output_folder = base_path / "spikeglx"
     phy_output_folder = base_path / "phy"
