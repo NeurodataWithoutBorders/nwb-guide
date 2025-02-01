@@ -371,7 +371,7 @@ export class GuidedPathExpansionPage extends Page {
                 const name = parentPath.pop();
 
                 if (name === "base_directory") {
-                    form.getFormElement([...parentPath, "base_directory"]).value = value; // Update value pre-emptively
+                    form.getFormElement([...parentPath, "base_directory"]).value = value; // Update value preemptively
                     const input = form.getFormElement([...parentPath, "format_string_path"]);
                     if (input.value) input.updateData(input.value, true);
                 }
