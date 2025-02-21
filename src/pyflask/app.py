@@ -1,6 +1,5 @@
 """The primary Flask server for the Python backend."""
 
-import collections
 import json
 import multiprocessing
 import sys
@@ -21,7 +20,6 @@ from flask import Flask, request, send_file, send_from_directory
 from flask_cors import CORS
 from flask_restx import Api, Resource
 from manageNeuroconv.info import (
-    CONVERSION_SAVE_FOLDER_PATH,
     GUIDE_ROOT_FOLDER,
     STUB_SAVE_FOLDER_PATH,
     is_packaged,
@@ -31,12 +29,12 @@ from namespaces import (
     dandi_namespace,
     data_namespace,
     neuroconv_namespace,
-    neurosift_namespace,
+    # neurosift_namespace,
     startup_namespace,
     system_namespace,
 )
 
-neurosift_file_registry = collections.defaultdict(bool)
+neurosift_file_registry = list()
 
 flask_app = Flask(__name__)
 
@@ -76,28 +74,47 @@ def exception_handler(error: Exception) -> Dict[str, str]:
 
 @flask_app.route("/preview/<path:file_path>")
 def send_preview(file_path):
+    """
+    This endpoint is used to send a file in the stub folder by relative file path to the frontend.
+    """
     return send_from_directory(directory=STUB_SAVE_FOLDER_PATH, path=file_path)
 
 
-@flask_app.route("/files/<path:file_path>", methods=["GET", "POST"])
+@flask_app.route("/files/<int:index>")
+def handle_get_file_request(index) -> Union[str, None]:
+    """
+    This endpoint is used to access a file that has been registered with the Neurosift service.
+    """
+    if request.method == "GET" and (index >= len(neurosift_file_registry) or index < 0):
+        raise KeyError(f"Resource at index {index} is not accessible.")
+
+    file_path = neurosift_file_registry[index]
+    if not isabs(file_path):
+        file_path = f"/{file_path}"
+
+    return send_file(path_or_file=file_path)
+    
+
+@flask_app.route("/files/<path:file_path>", methods=["POST"])
 def handle_file_request(file_path) -> Union[str, None]:
-    if ".nwb" not in file_path:
-        raise ValueError("This endpoint must be called on an NWB file!")
+    """
+    This endpoint is used to register a new file with the Neurosift service.
+    It will return a URL that can be used to access the file.
+    """
+    if not file_path.endswith(".nwb"):
+        raise ValueError("This endpoint must be called on an NWB file that ends with '.nwb'!")
 
-    if request.method == "GET" and neurosift_file_registry[file_path] is False:
-        raise KeyError("Resource is not accessible.")
+    # NOTE: It may be faster to look for the file in the registry and return a URL that has already been received
+    # by GUIDE because of caching, but in testing, it seemed that GUIDE/Neurosift was not caching the files.
+    neurosift_file_registry.append(file_path)
+    index = len(neurosift_file_registry) - 1
 
-    if request.method == "GET":
-        file_path = unquote(file_path)
-        if not isabs(file_path):
-            file_path = f"/{file_path}"
-
-        return send_file(path_or_file=file_path)
-
-    else:
-        neurosift_file_registry[file_path] = True
-
-        return request.base_url
+    # files/<index> is the URL that can be used to access the file
+    # NOTE: This endpoint used to be files/<file_path> but file_path would become URL-decoded
+    # by Neurosift which changed + signs to spaces before making the GET request. This broke local reading
+    # of files with + signs in the filename. Other symbols may be affected as well.
+    # This is why we use the safer, but less transparent, files/<index> instead.
+    return request.host_url + "/files/" + str(index)
 
 
 @api.route("/log")
