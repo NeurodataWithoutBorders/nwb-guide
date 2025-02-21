@@ -25,11 +25,10 @@ from manageNeuroconv.info import (
     is_packaged,
     resource_path,
 )
-from namespaces import (
+from namespaces import (  # neurosift_namespace,
     dandi_namespace,
     data_namespace,
     neuroconv_namespace,
-    # neurosift_namespace,
     startup_namespace,
     system_namespace,
 )
@@ -93,7 +92,7 @@ def handle_get_file_request(index) -> Union[str, None]:
         file_path = f"/{file_path}"
 
     return send_file(path_or_file=file_path)
-    
+
 
 @flask_app.route("/files/<path:file_path>", methods=["POST"])
 def handle_file_request(file_path) -> Union[str, None]:
