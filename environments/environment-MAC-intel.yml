@@ -7,6 +7,7 @@ dependencies:
   - nodejs = 18.16.1
   # install these from conda-forge so that dependent packages get included in the distributable
   - jsonschema = 4.18.0 # installs jsonschema-specifications
+  - pytables = 3.10.2
   - pip
   - pip:
       - setuptools==70.0.0
@@ -27,4 +28,3 @@ dependencies:
       - tzlocal >= 5.2 # Frontend timezone handling
       - ndx-pose == 0.1.1
       - nwbinspector==0.6.2
-      - tables
