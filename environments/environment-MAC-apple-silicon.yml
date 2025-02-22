@@ -3,7 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python = 3.9.18
+  - python = 3.12.9
   - nodejs = 18.16.1
   # Install these from conda-forge so that dependent packages get included in the distributable
   - numcodecs = 0.11.0
