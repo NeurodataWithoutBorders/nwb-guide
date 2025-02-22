@@ -7,7 +7,7 @@ dependencies:
   - nodejs = 18.16.1
   - pywin32 = 308
   - git = 2.20.1
-  - scipy = 1.15.2 # SciPy has vendored numpy.fft libraries that may not be found if installed from PyPI 
+  - scipy = 1.15.2 # SciPy has vendored numpy.fft libraries that may not be found if installed from PyPI
   - pip
   - pip:
       - setuptools==70.0.0

@@ -11,7 +11,7 @@ dependencies:
   - numpy # May have x64/arm64 mismatch issues so install from conda-forge
   - pytables = 3.10.2 # PyPI build fails on arm64 so install from conda-forge (used by neuroconv deps)
   - jsonschema = 4.18.0 # Also installs jsonschema-specifications
-  - scipy = 1.15.2 # SciPy has vendored numpy.fft libraries that may not be found if installed from PyPI 
+  - scipy = 1.15.2 # SciPy has vendored numpy.fft libraries that may not be found if installed from PyPI
   - pip
   - pip:
       - setuptools==70.0.0
