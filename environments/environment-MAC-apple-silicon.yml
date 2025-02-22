@@ -6,7 +6,6 @@ dependencies:
   - python = 3.12.9
   - nodejs = 18.16.1
   # Install these from conda-forge so that dependent packages get included in the distributable
-  - numcodecs = 0.11.0
   - lxml = 4.9.3 # PyPI build fails due to x64/arm64 mismatch so install from conda-forge
   - pyedflib = 0.1.32 # PyPI build fails due to x64/arm64 mismatch so install from conda-forge
   - numpy # May have x64/arm64 mismatch issues so install from conda-forge
