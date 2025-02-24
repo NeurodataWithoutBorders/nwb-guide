@@ -3,11 +3,11 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python = 3.9.18
+  - python = 3.12.9
   - nodejs = 18.16.1
-  - numcodecs = 0.11.0
   # install these from conda-forge so that dependent packages get included in the distributable
   - jsonschema = 4.18.0 # installs jsonschema-specifications
+  - pytables = 3.10.2 # Install from conda-forge because PyPI version results in hdf5 conflicts and missing libs
   - pip
   - pip:
       - setuptools==70.0.0
@@ -28,4 +28,3 @@ dependencies:
       - tzlocal >= 5.2 # Frontend timezone handling
       - ndx-pose == 0.1.1
       - nwbinspector==0.6.2
-      - tables
