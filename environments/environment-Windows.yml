@@ -7,7 +7,6 @@ dependencies:
   - nodejs = 18.16.1
   - pywin32 = 308
   - git = 2.20.1
-  - numcodecs = 0.15.1 # Install from conda-forge so that dependent packages get included in the distributable
   - pip
   - pip:
       - setuptools==70.0.0
