@@ -41,6 +41,7 @@ modules_to_collect = [
     'tzdata',
     'elephant',
     'ScanImageTiffReader',
+    'numcodecs',
 ]
 for module_name in modules_to_collect:
     collection = collect_all(module_name)
