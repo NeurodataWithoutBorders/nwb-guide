@@ -59,6 +59,13 @@ describe('Neurosift', () => {
         expect(mockDeleteDatabase).toHaveBeenCalledWith('neurosift-hdf5-cache');
         expect(mockDeleteDatabase).toHaveBeenCalledTimes(1);
 
+        // Wait for the component to render again
+        await neurosift.requestUpdate();
+
+        // Verify deleteDatabase was called
+        expect(mockDeleteDatabase).toHaveBeenCalledWith('neurosift-hdf5-cache');
+        expect(mockDeleteDatabase).toHaveBeenCalledTimes(2);
+
         // Remove the component from the DOM
         document.body.removeChild(neurosift);
     });
