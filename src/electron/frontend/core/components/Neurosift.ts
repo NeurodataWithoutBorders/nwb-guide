@@ -107,4 +107,4 @@ export class Neurosift extends LitElement {
     }
 }
 
-customElements.get("neurosift-iframe") || customElements.define("neurosift-iframe", Neurosift); 
+customElements.get("neurosift-iframe") || customElements.define("neurosift-iframe", Neurosift);
