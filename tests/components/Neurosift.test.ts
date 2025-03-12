@@ -1,7 +1,7 @@
 // Test that the indexed database is not cleared on initial render and cleared
 // when a url is provided and the component is rendered again as in PreviewPage.js
 import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Neurosift } from '../../src/electron/frontend/core/components/Neurosift.js';
+import { Neurosift } from '../../src/electron/frontend/core/components/Neurosift';
 
 describe('Neurosift', () => {
     let originalIndexedDB: IDBFactory;
@@ -31,7 +31,7 @@ describe('Neurosift', () => {
         document.body.appendChild(neurosift);
 
         // Wait for the component to render
-        await neurosift.requestUpdate();
+        neurosift.requestUpdate();
 
         // Verify deleteDatabase was not called
         expect(mockDeleteDatabase).not.toHaveBeenCalled();
@@ -47,20 +47,22 @@ describe('Neurosift', () => {
         document.body.appendChild(neurosift);
 
         // Wait for the component to render
-        await neurosift.requestUpdate();
+        neurosift.requestUpdate();
 
         // Set the URL to a test URL
         neurosift.url = 'http://test.url/files/test.nwb';
 
         // Wait for the component to render again
-        await neurosift.requestUpdate();
+        neurosift.requestUpdate();
+        await neurosift.updateComplete;
 
         // Verify deleteDatabase was called
         expect(mockDeleteDatabase).toHaveBeenCalledWith('neurosift-hdf5-cache');
         expect(mockDeleteDatabase).toHaveBeenCalledTimes(1);
 
         // Wait for the component to render again
-        await neurosift.requestUpdate();
+        neurosift.requestUpdate();
+        await neurosift.updateComplete;
 
         // Verify deleteDatabase was called
         expect(mockDeleteDatabase).toHaveBeenCalledWith('neurosift-hdf5-cache');
