@@ -27,7 +27,7 @@ describe('Neurosift', () => {
     test('if neurosift storage is not cleared on initial render', async () => {
         const neurosift = new Neurosift();
 
-        // Add the component to the DOM 
+        // Add the component to the DOM
         document.body.appendChild(neurosift);
 
         // Wait for the component to render
@@ -43,7 +43,7 @@ describe('Neurosift', () => {
     test('if neurosift storage is cleared when url is provided and component is rendered again', async () => {
         const neurosift = new Neurosift();
 
-        // Add the component to the DOM 
+        // Add the component to the DOM
         document.body.appendChild(neurosift);
 
         // Wait for the component to render
@@ -62,4 +62,4 @@ describe('Neurosift', () => {
         // Remove the component from the DOM
         document.body.removeChild(neurosift);
     });
-}); 
+});

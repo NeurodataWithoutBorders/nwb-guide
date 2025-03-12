@@ -1,6 +1,6 @@
 import { LitElement, CSSResult, TemplateResult } from "lit";
 
-export declare function getURLFromFilePath(file: string, projectName: string): string; 
+export declare function getURLFromFilePath(file: string, projectName: string): string;
 
 export declare class Neurosift extends LitElement {
     url?: string;
