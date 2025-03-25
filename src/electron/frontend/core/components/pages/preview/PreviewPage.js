@@ -2,7 +2,7 @@ import { html } from "lit";
 import { Page } from "../Page.js";
 import { onThrow } from "../../../errors";
 import { JSONSchemaInput } from "../../JSONSchemaInput.js";
-import { Neurosift } from "../../Neurosift.js";
+import { Neurosift } from "../../Neurosift";
 import { baseUrl } from "../../../server/globals";
 
 export class PreviewPage extends Page {
