@@ -5,16 +5,10 @@
         "preferred": false
     },
     {
-        "name": "1.0.6",
-        "version": "v1.0.6",
-        "url": "https://nwb-guide.readthedocs.io/en/v1.0.6/",
-        "preferred": true
-    },
-    {
         "name": "1.0.5",
         "version": "v1.0.5",
         "url": "https://nwb-guide.readthedocs.io/en/v1.0.5/",
-        "preferred": false
+        "preferred": true
     },
     {
         "name": "1.0.4",
