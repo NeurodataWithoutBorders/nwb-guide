@@ -3,14 +3,13 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python = 3.9.18
+  - python = 3.12.9
   - nodejs = 18.16.1
   # Install these from conda-forge so that dependent packages get included in the distributable
-  - numcodecs = 0.11.0
   - lxml = 4.9.3 # PyPI build fails due to x64/arm64 mismatch so install from conda-forge
-  - pyedflib = 0.1.32 # PyPI build fails due to x64/arm64 mismatch so install from conda-forge
+  - pyedflib = 0.1.38 # PyPI build fails due to x64/arm64 mismatch so install from conda-forge
   - numpy # May have x64/arm64 mismatch issues so install from conda-forge
-  - pytables = 3.8 # PyPI build fails on arm64 so install from conda-forge (used by neuroconv deps)
+  - pytables = 3.10.2 # PyPI build fails on arm64 so install from conda-forge (used by neuroconv deps)
   - jsonschema = 4.18.0 # Also installs jsonschema-specifications
   - pip
   - pip:
@@ -29,4 +28,4 @@ dependencies:
       - tqdm_publisher >= 0.0.1 # Progress bars
       - tzlocal >= 5.2 # Frontend timezone handling
       - ndx-pose == 0.1.1
-      - nwbinspector @ git+https://github.com/NeurodataWithoutBorders/nwbinspector.git@33ca3732efc8dc4c5fc99b58e978deb15e0bfe6c
+      - nwbinspector == 0.6.2

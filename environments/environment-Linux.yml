@@ -3,9 +3,8 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python = 3.9.18
+  - python = 3.12.9
   - nodejs = 18.16.1
-  - numcodecs = 0.11.0
   # install these from conda-forge so that dependent packages get included in the distributable
   - jsonschema = 4.18.0 # installs jsonschema-specifications
   - pip
@@ -21,5 +20,5 @@ dependencies:
       - tqdm_publisher >= 0.0.1 # Progress bars
       - tzlocal >= 5.2 # Frontend timezone handling
       - ndx-pose == 0.1.1
-      - nwbinspector @ git+https://github.com/NeurodataWithoutBorders/nwbinspector.git@33ca3732efc8dc4c5fc99b58e978deb15e0bfe6c
+      - nwbinspector == 0.6.2
       - tables

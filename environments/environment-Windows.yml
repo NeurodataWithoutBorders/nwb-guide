@@ -3,11 +3,10 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - python = 3.9.17
+  - python = 3.12.9
   - nodejs = 18.16.1
-  - pywin32 = 303
+  - pywin32 = 308
   - git = 2.20.1
-  - setuptools = 58.0.4
   - pip
   - pip:
       - setuptools==70.0.0
@@ -24,5 +23,5 @@ dependencies:
       - tqdm_publisher >= 0.0.1 # Progress bars
       - tzlocal >= 5.2 # Frontend timezone handling
       - ndx-pose == 0.1.1
-      - nwbinspector @ git+https://github.com/NeurodataWithoutBorders/nwbinspector.git@33ca3732efc8dc4c5fc99b58e978deb15e0bfe6c
+      - nwbinspector == 0.6.2
       - tables
