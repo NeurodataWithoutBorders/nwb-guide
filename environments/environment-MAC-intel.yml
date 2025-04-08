@@ -7,9 +7,7 @@ dependencies:
   - nodejs = 18.16.1
   # install these from conda-forge so that dependent packages get included in the distributable
   - jsonschema = 4.18.0 # installs jsonschema-specifications
-  - hdf5 = 1.14.4 # Install from conda-forge because PyPI version results in hdf5 conflicts and missing libs
-  # - h5py = 3.12.1 # Install from conda-forge because PyPI version results in hdf5 conflicts and missing libs
-  - pytables = 3.10.2 # Install from conda-forge because PyPI version results in hdf5 conflicts and missing libs
+  - hdf5 = 1.14.4 # Install from conda-forge because h5py and pytables use of hdf5 will cause conflicts in both pip/conda
   - pip
   - pip:
       - setuptools==70.0.0
