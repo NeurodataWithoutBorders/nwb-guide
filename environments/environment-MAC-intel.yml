@@ -7,7 +7,6 @@ dependencies:
   - nodejs = 18.16.1
   # install these from conda-forge so that dependent packages get included in the distributable
   - jsonschema = 4.18.0 # installs jsonschema-specifications
-  - hdf5 = 1.14.4 # Install from conda-forge because h5py and pytables use of hdf5 will cause conflicts in both pip/conda
   - pip
   - pip:
       - setuptools==70.0.0
@@ -26,3 +25,6 @@ dependencies:
       - ndx-pose == 0.1.1
       - nwbinspector == 0.6.2
       - numcodecs < 0.16.0  # numcodecs 0.16.0 is not compatible with zarr 2.18.5
+      - h5py == 3.12.1 # 3.13.0 uses features in hdf5 1.14.4 that is not available in earlier hdf5 libs packaged
+                       # with tables==3.9.1 (latest that can be used by neuroconv 0.6.0). 
+                       # h5py and tables need to be consistent for electron build for unknown reason
