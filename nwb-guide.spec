@@ -42,7 +42,6 @@ modules_to_collect = [
     'elephant',
     'ScanImageTiffReader',
     'deprecated',
-    'h5py',
 ]
 for module_name in modules_to_collect:
     collection = collect_all(module_name)
