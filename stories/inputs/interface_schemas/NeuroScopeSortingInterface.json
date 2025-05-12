@@ -2,34 +2,53 @@
     "required": [],
     "properties": {
         "NeuroScopeSortingInterface": {
-            "required": [
-                "folder_path"
-            ],
             "properties": {
                 "folder_path": {
-                    "format": "directory",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "Path to folder containing .res and .clu files."
                 },
                 "keep_mua_units": {
-                    "type": "boolean",
                     "default": true,
+                    "type": "boolean",
                     "description": "Whether to return sorted spikes from multi-unit activity."
                 },
                 "exclude_shanks": {
-                    "type": "array",
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "integer"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
                     "description": "List of indices to ignore."
                 },
                 "xml_file_path": {
-                    "format": "file",
-                    "type": "string",
+                    "anyOf": [
+                        {
+                            "format": "file-path",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
                     "description": "Path to .xml file containing device and electrode configuration."
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                 }
             },
+            "required": [
+                "folder_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

@@ -53,7 +53,7 @@ const questions = {
 
     base_directory: {
         type: "string",
-        format: "directory",
+        format: "directory-path",
         title: "Where is your data located?",
         description:
             "A single directory where all data is contained. Can override for specific data formats.<br><small>Leave blank if unknown</small>",

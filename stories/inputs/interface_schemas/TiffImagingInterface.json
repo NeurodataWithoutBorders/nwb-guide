@@ -2,13 +2,9 @@
     "required": [],
     "properties": {
         "TiffImagingInterface": {
-            "required": [
-                "file_path",
-                "sampling_frequency"
-            ],
             "properties": {
                 "file_path": {
-                    "format": "file",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to Tiff file."
                 },
@@ -16,10 +12,22 @@
                     "type": "number"
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
+                },
+                "photon_series_type": {
+                    "default": "TwoPhotonSeries",
+                    "enum": [
+                        "OnePhotonSeries",
+                        "TwoPhotonSeries"
+                    ],
+                    "type": "string"
                 }
             },
+            "required": [
+                "file_path",
+                "sampling_frequency"
+            ],
             "type": "object",
             "additionalProperties": false
         }

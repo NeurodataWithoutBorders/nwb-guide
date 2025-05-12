@@ -2,30 +2,30 @@
     "required": [],
     "properties": {
         "SpikeGLXNIDQInterface": {
+            "properties": {
+                "file_path": {
+                    "format": "file-path",
+                    "type": "string",
+                    "description": "Path to SpikeGLX .nidq file."
+                },
+                "verbose": {
+                    "default": true,
+                    "type": "boolean",
+                    "description": "Whether to output verbose text."
+                },
+                "load_sync_channel": {
+                    "default": false,
+                    "type": "boolean",
+                    "description": "Whether to load the last channel in the stream, which is typically used for synchronization.\nIf True, then the probe is not loaded."
+                },
+                "es_key": {
+                    "default": "ElectricalSeriesNIDQ",
+                    "type": "string"
+                }
+            },
             "required": [
                 "file_path"
             ],
-            "properties": {
-                "file_path": {
-                    "format": "file",
-                    "description": "Path to SpikeGLX .nidq file.",
-                    "type": "string"
-                },
-                "verbose": {
-                    "description": "Whether to output verbose text.",
-                    "type": "boolean",
-                    "default": true
-                },
-                "load_sync_channel": {
-                    "description": "Whether to load the last channel in the stream, which is typically used for synchronization.\nIf True, then the probe is not loaded.",
-                    "type": "boolean",
-                    "default": false
-                },
-                "es_key": {
-                    "type": "string",
-                    "default": "ElectricalSeriesNIDQ"
-                }
-            },
             "type": "object",
             "additionalProperties": false
         }

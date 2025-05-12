@@ -509,7 +509,7 @@ export class BasicTable extends LitElement {
                           size="small"
                           @click=${() => {
                               const input = document.createElement("input");
-                              input.type = "file";
+                              input.type = "file-path";
                               input.accept = "text/tab-separated-values";
                               input.click();
                               input.onchange = () => {

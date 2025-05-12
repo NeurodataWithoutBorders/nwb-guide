@@ -2,26 +2,28 @@
     "required": [],
     "properties": {
         "BrukerTiffMultiPlaneConverter": {
-            "required": [
-                "folder_path"
-            ],
             "properties": {
                 "folder_path": {
-                    "format": "directory",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "The folder that contains the Bruker TIF image files (.ome.tif) and configuration files (.xml, .env)."
                 },
                 "plane_separation_type": {
+                    "default": null,
                     "enum": [
                         "disjoint",
                         "contiguous"
-                    ]
+                    ],
+                    "type": "string"
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": false
+                    "default": false,
+                    "type": "boolean"
                 }
             },
+            "required": [
+                "folder_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

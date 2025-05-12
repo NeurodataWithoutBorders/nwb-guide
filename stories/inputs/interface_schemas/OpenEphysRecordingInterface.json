@@ -2,30 +2,46 @@
     "required": [],
     "properties": {
         "OpenEphysRecordingInterface": {
-            "required": [
-                "folder_path"
-            ],
             "properties": {
                 "folder_path": {
-                    "format": "directory",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "Path to OpenEphys directory (.continuous or .dat files)."
                 },
                 "stream_name": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 },
                 "block_index": {
-                    "type": "number"
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                 },
                 "es_key": {
-                    "type": "string",
-                    "default": "ElectricalSeries"
+                    "default": "ElectricalSeries",
+                    "type": "string"
                 }
             },
+            "required": [
+                "folder_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

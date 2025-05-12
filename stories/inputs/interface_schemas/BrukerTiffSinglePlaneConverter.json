@@ -2,19 +2,19 @@
     "required": [],
     "properties": {
         "BrukerTiffSinglePlaneConverter": {
-            "required": [
-                "folder_path"
-            ],
             "properties": {
                 "folder_path": {
-                    "format": "directory",
+                    "format": "directory-path",
                     "type": "string"
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": false
+                    "default": false,
+                    "type": "boolean"
                 }
             },
+            "required": [
+                "folder_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

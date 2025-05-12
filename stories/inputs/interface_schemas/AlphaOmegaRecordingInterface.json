@@ -2,24 +2,24 @@
     "required": [],
     "properties": {
         "AlphaOmegaRecordingInterface": {
-            "required": [
-                "folder_path"
-            ],
             "properties": {
                 "folder_path": {
-                    "format": "directory",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "Path to the folder of .mpx files."
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                 },
                 "es_key": {
-                    "type": "string",
-                    "default": "ElectricalSeries"
+                    "default": "ElectricalSeries",
+                    "type": "string"
                 }
             },
+            "required": [
+                "folder_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

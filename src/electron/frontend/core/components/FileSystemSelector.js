@@ -13,9 +13,9 @@ function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
             .map((type) => getObjectTypeReferenceString(type, multiple, { native, nested: true }))
             .join(" / ")}`;
 
-    const isDir = type === "directory";
+    const isDir = type === "directory-path";
     return multiple && (!isDir || (isDir && !native) || dialog)
-        ? type === "directory"
+        ? type === "directory-path"
             ? "directories"
             : "files"
         : nested
@@ -113,7 +113,7 @@ export class FilesystemSelector extends LitElement {
 
         this.accept = props.accept;
         this.multiple = props.multiple;
-        this.type = props.type ?? "file";
+        this.type = props.type ?? "file-path";
         this.value = props.value ?? "";
         this.dialogOptions = props.dialogOptions ?? {};
         this.onChange = props.onChange ?? (() => {});
@@ -146,7 +146,7 @@ export class FilesystemSelector extends LitElement {
         }
 
         options.properties = [
-            type === "file" ? "openFile" : "openDirectory",
+            type === "file-path" ? "openFile" : "openDirectory",
             "noResolveAliases",
             ...(options.properties ?? []),
         ];
@@ -165,7 +165,7 @@ export class FilesystemSelector extends LitElement {
     #check = (value) => {
         // Check type
         const isLikelyFile = fs ? fs.statSync(value).isFile() : value.split(".").length;
-        if ((this.type === "directory" && isLikelyFile) || (this.type === "file" && !isLikelyFile))
+        if ((this.type === "directory-path" && isLikelyFile) || (this.type === "file-path" && !isLikelyFile))
             this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
     };
 
@@ -182,7 +182,7 @@ export class FilesystemSelector extends LitElement {
         if (Array.isArray(resolvedValue) && !this.multiple) {
             if (resolvedValue.length > 1)
                 this.#onThrow(
-                    `Too many ${resolvedType === "directory" ? "directories" : "files"} detected`,
+                    `Too many ${resolvedType === "directory-path" ? "directories" : "files"} detected`,
                     `This selector will only accept one.`
                 );
             resolvedValue = resolvedValue[0];
@@ -205,7 +205,7 @@ export class FilesystemSelector extends LitElement {
             this.#handleFiles(results.filePath ?? results.filePaths, type);
         } else {
             let handles = await (
-                type === "directory"
+                type === "directory-path"
                     ? window.showDirectoryPicker()
                     : window.showOpenFilePicker({ multiple: this.multiple })
             ).catch(() => []); // Call using the same options
@@ -273,8 +273,8 @@ export class FilesystemSelector extends LitElement {
                                             native: true,
                                         })}`}</span
                               >${this.multiple &&
-                              (this.type === "directory" ||
-                                  (isMultipleTypes && this.type.includes("directory") && !dialog))
+                              (this.type === "directory-path" ||
+                                  (isMultipleTypes && this.type.includes("directory-path") && !dialog))
                                   ? html`<br /><small
                                             >Multiple directory support only available using drag-and-drop.</small
                                         >`

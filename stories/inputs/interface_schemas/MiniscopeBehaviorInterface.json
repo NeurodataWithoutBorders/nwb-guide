@@ -2,16 +2,16 @@
     "required": [],
     "properties": {
         "MiniscopeBehaviorInterface": {
-            "required": [
-                "folder_path"
-            ],
             "properties": {
                 "folder_path": {
-                    "format": "directory",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "The main Miniscope folder. The movie files are expected to be in sub folders within the main folder."
                 }
             },
+            "required": [
+                "folder_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

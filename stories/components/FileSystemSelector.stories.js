@@ -6,7 +6,7 @@ export default {
 
 const Template = (args) => new FilesystemSelector(args);
 
-const types = ["file", "directory"];
+const types = ["file-path", "directory-path"];
 
 export const File = Template.bind({});
 export const Folder = Template.bind({});

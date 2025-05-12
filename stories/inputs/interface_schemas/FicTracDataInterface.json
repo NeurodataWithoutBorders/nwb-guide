@@ -2,27 +2,43 @@
     "required": [],
     "properties": {
         "FicTracDataInterface": {
-            "required": [
-                "file_path"
-            ],
             "properties": {
                 "file_path": {
-                    "format": "file",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to the .dat file (the output of fictrac)"
                 },
                 "radius": {
-                    "type": "number"
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 },
                 "configuration_file_path": {
-                    "format": "file",
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "format": "file-path",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                 }
             },
+            "required": [
+                "file_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

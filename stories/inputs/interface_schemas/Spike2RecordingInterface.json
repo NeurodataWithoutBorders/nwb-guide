@@ -2,24 +2,24 @@
     "required": [],
     "properties": {
         "Spike2RecordingInterface": {
+            "properties": {
+                "file_path": {
+                    "format": "file-path",
+                    "type": "string",
+                    "description": "Path to .smrx file."
+                },
+                "verbose": {
+                    "default": true,
+                    "type": "boolean"
+                },
+                "es_key": {
+                    "default": "ElectricalSeries",
+                    "type": "string"
+                }
+            },
             "required": [
                 "file_path"
             ],
-            "properties": {
-                "file_path": {
-                    "format": "file",
-                    "description": "Path to .smr or .smrx file.",
-                    "type": "string"
-                },
-                "verbose": {
-                    "type": "boolean",
-                    "default": true
-                },
-                "es_key": {
-                    "type": "string",
-                    "default": "ElectricalSeries"
-                }
-            },
             "type": "object",
             "additionalProperties": true
         }

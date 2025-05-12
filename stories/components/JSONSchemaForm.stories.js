@@ -22,13 +22,13 @@ const defaultSchema = {
         },
         optional: {
             type: "string",
-            format: "file",
+            format: "file-path",
         },
         list: {
             type: "array",
             items: {
                 type: "string",
-                format: "file",
+                format: "file-path",
             },
         },
     },

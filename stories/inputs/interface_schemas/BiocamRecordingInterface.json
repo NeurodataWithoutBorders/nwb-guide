@@ -2,24 +2,24 @@
     "required": [],
     "properties": {
         "BiocamRecordingInterface": {
-            "required": [
-                "file_path"
-            ],
             "properties": {
                 "file_path": {
-                    "format": "file",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to the .bwr file."
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                 },
                 "es_key": {
-                    "type": "string",
-                    "default": "ElectricalSeries"
+                    "default": "ElectricalSeries",
+                    "type": "string"
                 }
             },
+            "required": [
+                "file_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }
