@@ -1,8 +1,9 @@
 import { LitElement, css, html } from "lit";
 import { InspectorList } from "./InspectorList";
-import { Neurosift, getURLFromFilePath } from "./Neurosift";
+import { Neurosift } from "./Neurosift";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { run } from "../../utils/run";
+import { baseUrl } from "../server/globals";
 
 import { until } from "lit/directives/until.js";
 import { InstanceManager } from "./InstanceManager";
@@ -48,9 +49,30 @@ class NWBPreviewInstance extends LitElement {
         super();
         this.file = file;
         this.project = project;
+        this.neurosiftUrl = undefined;
 
         window.addEventListener("online", () => this.requestUpdate());
         window.addEventListener("offline", () => this.requestUpdate());
+
+        // Register the file when the instance is created
+        this.registerFile(this.file);
+    }
+
+    async registerFile(path) {
+        if (path) {
+            try {
+                // Enable access to the explicit file path
+                const result = await fetch(`${baseUrl}/files/${path}`, {
+                    method: "POST",
+                }).then((res) => res.text());
+
+                // Set the URL for Neurosift
+                if (result) this.neurosiftUrl = result;
+                this.requestUpdate();
+            } catch (error) {
+                console.error("Error registering file:", error);
+            }
+        }
     }
 
     render() {
@@ -58,7 +80,7 @@ class NWBPreviewInstance extends LitElement {
 
         return isOnline
             ? new Neurosift({
-                  url: getURLFromFilePath(this.file, this.project),
+                  url: this.neurosiftUrl,
                   fullscreen: false,
               })
             : until(

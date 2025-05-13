@@ -71,14 +71,6 @@ def exception_handler(error: Exception) -> Dict[str, str]:
     return {"message": str(error), "type": type(error).__name__}
 
 
-@flask_app.route("/preview/<path:file_path>")
-def send_preview(file_path):
-    """
-    This endpoint is used to send a file in the stub folder by relative file path to the frontend.
-    """
-    return send_from_directory(directory=STUB_SAVE_FOLDER_PATH, path=file_path)
-
-
 @flask_app.route("/files/<int:index>")
 def handle_get_file_request(index) -> Union[str, None]:
     """
