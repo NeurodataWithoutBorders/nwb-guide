@@ -3,6 +3,8 @@
 import json
 import multiprocessing
 import sys
+import random
+import string
 from datetime import datetime
 from logging import DEBUG, Formatter
 from logging.handlers import RotatingFileHandler
@@ -33,7 +35,7 @@ from namespaces import (  # neurosift_namespace,
     system_namespace,
 )
 
-neurosift_file_registry = list()
+neurosift_file_registry = dict()
 
 flask_app = Flask(__name__)
 
@@ -71,15 +73,15 @@ def exception_handler(error: Exception) -> Dict[str, str]:
     return {"message": str(error), "type": type(error).__name__}
 
 
-@flask_app.route("/files/<int:index>")
-def handle_get_file_request(index) -> Union[str, None]:
+@flask_app.route("/files/<string:file_id>")
+def handle_get_file_request(file_id) -> Union[str, None]:
     """
     This endpoint is used to access a file that has been registered with the Neurosift service.
     """
-    if request.method == "GET" and (index >= len(neurosift_file_registry) or index < 0):
-        raise KeyError(f"Resource at index {index} is not accessible.")
+    if request.method == "GET" and file_id not in neurosift_file_registry:
+        raise KeyError(f"File with internal id {file_id} is not accessible.")
 
-    file_path = neurosift_file_registry[index]
+    file_path = neurosift_file_registry[file_id]
     if not isabs(file_path):
         file_path = f"/{file_path}"
 
@@ -95,17 +97,20 @@ def handle_file_request(file_path) -> Union[str, None]:
     if not file_path.endswith(".nwb"):
         raise ValueError("This endpoint must be called on an NWB file that ends with '.nwb'!")
 
-    # NOTE: It may be faster to look for the file in the registry and return a URL that has already been received
-    # by GUIDE because of caching, but in testing, it seemed that GUIDE/Neurosift was not caching the files.
-    neurosift_file_registry.append(file_path)
-    index = len(neurosift_file_registry) - 1
+    file_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    neurosift_file_registry[file_id] = file_path
 
-    # files/<index> is the URL that can be used to access the file
+    # files/<file_id> is the URL that can be used to access the file
     # NOTE: This endpoint used to be files/<file_path> but file_path would become URL-decoded
     # by Neurosift which changed + signs to spaces before making the GET request. This broke local reading
     # of files with + signs in the filename. Other symbols may be affected as well.
-    # This is why we use the safer, but less transparent, files/<index> instead.
-    return request.host_url + "/files/" + str(index)
+    # This is why we use the safer, but less transparent, files/<file_id> instead.
+    # We do not use an incremental index because Neurosift caches information about the file in persistent
+    # Chrome storage (IndexedDB) that is based on the URL and cannot be cleared by NWB GUIDE. Subsequent loads
+    # of a file would return cached information from host/files/0. So, we use a random string instead.
+    # We also want to make sure multiple loads of the same file do not return the same URL because cached
+    # information about the file that is no longer valid may be returned.
+    return request.host_url + "/files/" + file_id
 
 
 @api.route("/log")
