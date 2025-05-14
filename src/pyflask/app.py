@@ -2,9 +2,9 @@
 
 import json
 import multiprocessing
-import sys
 import random
 import string
+import sys
 from datetime import datetime
 from logging import DEBUG, Formatter
 from logging.handlers import RotatingFileHandler
@@ -97,7 +97,7 @@ def handle_file_request(file_path) -> Union[str, None]:
     if not file_path.endswith(".nwb"):
         raise ValueError("This endpoint must be called on an NWB file that ends with '.nwb'!")
 
-    file_id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    file_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
     neurosift_file_registry[file_id] = file_path
 
     # files/<file_id> is the URL that can be used to access the file
