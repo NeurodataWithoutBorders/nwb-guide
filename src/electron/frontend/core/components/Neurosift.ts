@@ -75,12 +75,6 @@ export class Neurosift extends LitElement {
     }
 
     render(): TemplateResult | string {
-        // Clear neurosift cross-session storage database
-        // see https://github.com/NeurodataWithoutBorders/nwb-guide/issues/974
-        if (this.url) {
-            indexedDB.deleteDatabase("neurosift-hdf5-cache");
-        }
-
         return this.url
             ? html` <div class="loader-container">
                       ${new Loader({

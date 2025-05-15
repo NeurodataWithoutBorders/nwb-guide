@@ -2,6 +2,7 @@
 
 import json
 import multiprocessing
+import os
 import sys
 from datetime import datetime
 from logging import DEBUG, Formatter
@@ -33,7 +34,8 @@ from namespaces import (  # neurosift_namespace,
     system_namespace,
 )
 
-neurosift_file_registry = list()
+# Dictionary to store file paths with their IDs
+neurosift_file_registry = dict()
 
 flask_app = Flask(__name__)
 
@@ -71,15 +73,15 @@ def exception_handler(error: Exception) -> Dict[str, str]:
     return {"message": str(error), "type": type(error).__name__}
 
 
-@flask_app.route("/files/<int:index>")
-def handle_get_file_request(index) -> Union[str, None]:
+@flask_app.route("/files/<string:file_id>")
+def handle_get_file_request(file_id) -> Union[str, None]:
     """
     This endpoint is used to access a file that has been registered with the Neurosift service.
     """
-    if request.method == "GET" and (index >= len(neurosift_file_registry) or index < 0):
-        raise KeyError(f"Resource at index {index} is not accessible.")
+    if request.method == "GET" and file_id not in neurosift_file_registry:
+        raise KeyError(f"File with internal id {file_id} is not accessible.")
 
-    file_path = neurosift_file_registry[index]
+    file_path = neurosift_file_registry[file_id]
     if not isabs(file_path):
         file_path = f"/{file_path}"
 
@@ -95,17 +97,27 @@ def handle_file_request(file_path) -> Union[str, None]:
     if not file_path.endswith(".nwb"):
         raise ValueError("This endpoint must be called on an NWB file that ends with '.nwb'!")
 
-    # NOTE: It may be faster to look for the file in the registry and return a URL that has already been received
-    # by GUIDE because of caching, but in testing, it seemed that GUIDE/Neurosift was not caching the files.
-    neurosift_file_registry.append(file_path)
-    index = len(neurosift_file_registry) - 1
+    # Get the last modified time of the file
+    try:
+        last_modified = os.path.getmtime(file_path)
+        last_modified_str = datetime.fromtimestamp(last_modified).strftime("%Y%m%d%H%M%S")
+    except (OSError, ValueError):
+        # If we can't get the last modified time, use current time
+        last_modified_str = datetime.now().strftime("%Y%m%d%H%M%S")
 
-    # files/<index> is the URL that can be used to access the file
-    # NOTE: This endpoint used to be files/<file_path> but file_path would become URL-decoded
-    # by Neurosift which changed + signs to spaces before making the GET request. This broke local reading
-    # of files with + signs in the filename. Other symbols may be affected as well.
-    # This is why we use the safer, but less transparent, files/<index> instead.
-    return request.host_url + "/files/" + str(index)
+    # Use the number of items in the dictionary as the index
+    index = len(neurosift_file_registry) + 1
+
+    # Create a file_id that combines the index and last modified date
+    file_id = f"{index}_{last_modified_str}"
+    neurosift_file_registry[file_id] = file_path
+
+    # files/<file_id> is the URL that can be used to access the file
+    # NOTE: We use an index joined with the last modified date to ensure uniqueness for
+    # each request (avoiding Neurosift caching issues) and avoid issues with URL-decoding
+    # by the external Neurosift app, while providing somewhat meaningful IDs that include
+    # file modification information.
+    return request.host_url + "/files/" + file_id
 
 
 @api.route("/log")
