@@ -2,8 +2,7 @@
 
 import json
 import multiprocessing
-import random
-import string
+import os
 import sys
 from datetime import datetime
 from logging import DEBUG, Formatter
@@ -35,6 +34,7 @@ from namespaces import (  # neurosift_namespace,
     system_namespace,
 )
 
+# Dictionary to store file paths with their IDs
 neurosift_file_registry = dict()
 
 flask_app = Flask(__name__)
@@ -97,19 +97,26 @@ def handle_file_request(file_path) -> Union[str, None]:
     if not file_path.endswith(".nwb"):
         raise ValueError("This endpoint must be called on an NWB file that ends with '.nwb'!")
 
-    file_id = "".join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    # Get the last modified time of the file
+    try:
+        last_modified = os.path.getmtime(file_path)
+        last_modified_str = datetime.fromtimestamp(last_modified).strftime("%Y%m%d%H%M%S")
+    except (OSError, ValueError):
+        # If we can't get the last modified time, use current time
+        last_modified_str = datetime.now().strftime("%Y%m%d%H%M%S")
+
+    # Use the number of items in the dictionary as the index
+    index = len(neurosift_file_registry) + 1
+
+    # Create a file_id that combines the index and last modified date
+    file_id = f"{index}_{last_modified_str}"
     neurosift_file_registry[file_id] = file_path
 
     # files/<file_id> is the URL that can be used to access the file
-    # NOTE: This endpoint used to be files/<file_path> but file_path would become URL-decoded
-    # by Neurosift which changed + signs to spaces before making the GET request. This broke local reading
-    # of files with + signs in the filename. Other symbols may be affected as well.
-    # This is why we use the safer, but less transparent, files/<file_id> instead.
-    # We do not use an incremental index because Neurosift caches information about the file in persistent
-    # Chrome storage (IndexedDB) that is based on the URL and cannot be cleared by NWB GUIDE. Subsequent loads
-    # of a file would return cached information from host/files/0. So, we use a random string instead.
-    # We also want to make sure multiple loads of the same file do not return the same URL because cached
-    # information about the file that is no longer valid may be returned.
+    # NOTE: We use an index joined with the last modified date to ensure uniqueness for
+    # each request (avoiding Neurosift caching issues) and avoid issues with URL-decoding
+    # by the external Neurosift app, while providing somewhat meaningful IDs that include
+    # file modification information.
     return request.host_url + "/files/" + file_id
 
 
