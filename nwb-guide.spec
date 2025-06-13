@@ -42,6 +42,7 @@ modules_to_collect = [
     'elephant',
     'ScanImageTiffReader',
     'deprecated',
+    'pyedflib',  # Otherwise, error: No module named pyedflib
 ]
 for module_name in modules_to_collect:
     collection = collect_all(module_name)
