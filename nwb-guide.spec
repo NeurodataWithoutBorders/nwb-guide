@@ -16,6 +16,7 @@ hiddenimports = [
     'email_validator',
     *collect_submodules('scipy.special.cython_special'),
     *collect_submodules('scipy.special._cdflib'),
+    *collect_submodules('scipy._cyutility'),
     'scipy._lib.array_api_compat.numpy.fft',
 ]
 
