@@ -39,7 +39,7 @@ const normalizeFilePaths = (items) => {
         if (item.file_path) {
             return {
                 ...item,
-                file_path: item.file_path.replace(/\\/g, "/")
+                file_path: item.file_path.replace(/\\/g, "/"),
             };
         }
         return item;
