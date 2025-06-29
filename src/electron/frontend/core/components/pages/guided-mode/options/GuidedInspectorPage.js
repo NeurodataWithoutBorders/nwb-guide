@@ -33,6 +33,19 @@ const filter = (list, toFilter) => {
     });
 };
 
+// Normalize file paths to use forward slashes for cross-platform compatibility
+const normalizeFilePaths = (items) => {
+    return items.map((item) => {
+        if (item.file_path) {
+            return {
+                ...item,
+                file_path: item.file_path.replace(/\\/g, "/")
+            };
+        }
+        return item;
+    });
+};
+
 const emptyMessage = "No issues detected in these files!";
 
 export class GuidedInspectorPage extends Page {
@@ -202,7 +215,7 @@ export class GuidedInspectorPage extends Page {
                     if (!inspector) await this.save();
 
                     const messages = this.report.messages;
-                    const items = truncateFilePaths(messages, path);
+                    const items = normalizeFilePaths(truncateFilePaths(messages, path));
 
                     const _instances = fileArr.map(({ subject, session, info }) => {
                         const file_path = [`sub-${subject}`, `sub-${subject}_ses-${session}`];
