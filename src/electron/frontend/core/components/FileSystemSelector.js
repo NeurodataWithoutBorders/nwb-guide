@@ -7,20 +7,41 @@ const { dialog } = remote;
 import restartSVG from "../../assets/icons/restart.svg?raw";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 
-function getObjectTypeReferenceString(type, multiple, { nested, native } = {}) {
-    if (Array.isArray(type))
-        return `${multiple ? "" : "a "}${type
-            .map((type) => getObjectTypeReferenceString(type, multiple, { native, nested: true }))
-            .join(" / ")}`;
+/**
+ * Generates a human-readable reference string for filesystem object types.
+ *
+ * @param {string|Array<string>} type - The filesystem object type(s). Can be "file-path",
+ *   "directory-path", or an array ["file-path", "directory-path"].
+ * @param {boolean} multiple - Whether multiple objects are expected (affects pluralization).
+ *
+ * @returns {string} A formatted reference string like "a file", "directories",
+ *   "a file / directory", etc.
+ */
+function getObjectTypeReferenceString(type, multiple) {
+    if (Array.isArray(type)) {
+        const article = multiple ? "" : "a ";
+        return `${article}file / directory`;
+    }
 
-    const isDir = type === "directory-path";
-    return multiple && (!isDir || (isDir && !native) || dialog)
-        ? type === "directory-path"
-            ? "directories"
-            : "files"
-        : nested
-          ? type
-          : `a ${type}`;
+    if (multiple) {
+        return type === "directory-path" ? "directories" : "files";
+    }
+
+    const cleanTypeName = type.replace("-path", "");
+    return `a ${cleanTypeName}`;
+}
+
+/**
+ * Generates a simple string representation of a filesystem object type.
+ *
+ * @param {string|Array<string>} type - The filesystem object type(s).
+ * @returns {string} A simple string representation of the type(s): "file", "directory", or "file / directory".
+ */
+function getSimpleObjectTypeString(type) {
+    if (Array.isArray(type)) {
+        return "file / directory";
+    }
+    return type.replace("-path", "");
 }
 
 const componentCSS = css`
@@ -166,7 +187,10 @@ export class FilesystemSelector extends LitElement {
         // Check type
         const isLikelyFile = fs ? fs.statSync(value).isFile() : value.split(".").length;
         if ((this.type === "directory-path" && isLikelyFile) || (this.type === "file-path" && !isLikelyFile))
-            this.#onThrow("Incorrect filesystem object", `Please provide a <b>${this.type}</b> instead.`);
+            this.#onThrow(
+                "Incorrect filesystem object",
+                `Please provide a <b>${this.type.replace("-path", "")}</b> instead.`
+            );
     };
 
     #handleFiles = async (pathOrPaths, type) => {
@@ -230,8 +254,6 @@ export class FilesystemSelector extends LitElement {
                 : this.value[0]
             : this.value;
 
-        const objectTypeReference = getObjectTypeReferenceString(this.type, this.multiple);
-
         const instanceThis = this;
 
         return html`
@@ -261,17 +283,15 @@ export class FilesystemSelector extends LitElement {
                               ${dialog
                                   ? ""
                                   : html`<br /><small
-                                            >Cannot get full ${isMultipleTypes ? this.type.join(" / ") : this.type}
+                                            >Cannot get full ${getSimpleObjectTypeString(this.type)}
                                             path${this.multiple ? "s" : ""} on web distribution</small
                                         >`}
                           `
                         : html`<span
-                                  >Drop ${objectTypeReference}
+                                  >Drop ${getObjectTypeReferenceString(this.type, this.multiple)}
                                   here${isMultipleTypes
                                       ? ""
-                                      : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple, {
-                                            native: true,
-                                        })}`}</span
+                                      : `, or click to choose ${getObjectTypeReferenceString(this.type, this.multiple)}`}</span
                               >${this.multiple &&
                               (this.type === "directory-path" ||
                                   (isMultipleTypes && this.type.includes("directory-path") && !dialog))
@@ -302,7 +322,7 @@ export class FilesystemSelector extends LitElement {
                           (type) =>
                               html`<nwb-button primary @click=${() => this.selectFormat(type)}
                                   >Select
-                                  ${getObjectTypeReferenceString(type, this.multiple, { native: true })}</nwb-button
+                                  ${getObjectTypeReferenceString(type, this.multiple)}</nwb-button
                               >`
                       )}
                   </div>`
