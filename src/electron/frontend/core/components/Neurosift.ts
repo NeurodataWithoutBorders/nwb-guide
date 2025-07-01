@@ -1,14 +1,6 @@
 import { LitElement, css, html, CSSResult, TemplateResult } from "lit";
 import { Loader } from "./Loader";
 import { FullScreenToggle } from "./FullScreenToggle";
-import { baseUrl } from "../server/globals";
-
-export function getURLFromFilePath(file: string, projectName: string): string {
-    const regexp = new RegExp(`.+(${projectName}.+)`);
-    const match = file.match(regexp);
-    if (!match) throw new Error(`File path ${file} does not contain project name ${projectName}`);
-    return `${baseUrl}/preview/${match[1]}`;
-}
 
 export class Neurosift extends LitElement {
     static get styles(): CSSResult {
@@ -83,12 +75,6 @@ export class Neurosift extends LitElement {
     }
 
     render(): TemplateResult | string {
-        // Clear neurosift cross-session storage database
-        // see https://github.com/NeurodataWithoutBorders/nwb-guide/issues/974
-        if (this.url) {
-            indexedDB.deleteDatabase("neurosift-hdf5-cache");
-        }
-
         return this.url
             ? html` <div class="loader-container">
                       ${new Loader({
