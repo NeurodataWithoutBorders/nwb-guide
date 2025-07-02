@@ -236,7 +236,7 @@ export class GuidedInspectorPage extends Page {
 
                         instances[subLabel] = {
                             ["All Files"]: display,
-                            ...instances[subLabel],
+                            ...Object.fromEntries(Object.entries(instances[subLabel]).sort()),  // sort by session ID
                         };
                     });
 
@@ -245,7 +245,7 @@ export class GuidedInspectorPage extends Page {
 
                     const allInstances = {
                         ["All Files"]: allDisplay,
-                        ...instances,
+                        ...Object.fromEntries(Object.entries(instances).sort()),  // sort by subject ID
                     };
 
                     const manager = new InstanceManager({
