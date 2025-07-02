@@ -59,7 +59,7 @@ export const globalState = {
                         file_path: {
                             type: "string",
                             description: "Enter the path to the source data file.",
-                            format: "file",
+                            format: "file-path",
                         },
                     },
                     required: ["file_path"],

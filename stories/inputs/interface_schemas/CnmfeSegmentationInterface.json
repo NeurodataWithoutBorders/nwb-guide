@@ -2,19 +2,19 @@
     "required": [],
     "properties": {
         "CnmfeSegmentationInterface": {
-            "required": [
-                "file_path"
-            ],
             "properties": {
                 "file_path": {
-                    "format": "file",
+                    "format": "file-path",
                     "type": "string"
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                 }
             },
+            "required": [
+                "file_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

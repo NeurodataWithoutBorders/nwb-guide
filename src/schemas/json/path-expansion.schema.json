@@ -2,7 +2,7 @@
     "properties": {
         "base_directory": {
             "type": "string",
-            "format": "directory",
+            "format": "directory-path",
             "description": "Enter the base directory of your data."
         },
         "format_string_path": {

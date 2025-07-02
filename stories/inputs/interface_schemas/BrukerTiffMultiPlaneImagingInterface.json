@@ -2,23 +2,31 @@
     "required": [],
     "properties": {
         "BrukerTiffMultiPlaneImagingInterface": {
-            "required": [
-                "folder_path"
-            ],
             "properties": {
                 "folder_path": {
-                    "format": "directory",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "The folder that contains the Bruker TIF image files (.ome.tif) and configuration files (.xml, .env)."
                 },
                 "stream_name": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                 }
             },
+            "required": [
+                "folder_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }
