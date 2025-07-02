@@ -18,7 +18,7 @@ export default function preprocessSourceDataSchema (schema) {
 
             if (schema.properties.file_paths) {
                 Object.assign(schema.properties.file_paths, {
-                    items: { type: 'string' },
+                    items: { format: 'file-path', type: 'string' },
                     description: '<b>Only one file supported at this time.</b> Multiple file support coming soon.',
                     maxItems: 1,
                 })

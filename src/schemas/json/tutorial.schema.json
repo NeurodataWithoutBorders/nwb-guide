@@ -2,7 +2,7 @@
     "properties": {
       "test_data_directory_path": {
         "type": "string",
-        "format": "directory",
+        "format": "directory-path",
         "description": "Enter the path to your local instance of the ephy_testing_data directory",
         "placeholder": "Enter testing directory path"
       }

@@ -2,23 +2,39 @@
     "required": [],
     "properties": {
         "NeuroScopeLFPInterface": {
-            "required": [
-                "file_path"
-            ],
             "properties": {
                 "file_path": {
-                    "format": "file",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to .lfp or .eeg file."
                 },
                 "gain": {
-                    "type": "number"
+                    "anyOf": [
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 },
                 "xml_file_path": {
-                    "format": "file",
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "format": "file-path",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 }
             },
+            "required": [
+                "file_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

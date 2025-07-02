@@ -2,7 +2,7 @@
     "properties": {
         "conversion_output_folder": {
             "type": "string",
-            "format": "directory",
+            "format": "directory-path",
             "description": "Provide a custom output location for your NWB files. Will default to ~/NWB_GUIDE/conversions"
         }
     },
