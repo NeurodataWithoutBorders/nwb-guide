@@ -33,19 +33,6 @@ const filter = (list, toFilter) => {
     });
 };
 
-// Normalize file paths to use forward slashes for cross-platform compatibility
-const normalizeFilePaths = (items) => {
-    return items.map((item) => {
-        if (item.file_path) {
-            return {
-                ...item,
-                file_path: item.file_path.replace(/\\/g, "/"),
-            };
-        }
-        return item;
-    });
-};
-
 const emptyMessage = "No issues detected in these files!";
 
 export class GuidedInspectorPage extends Page {
@@ -137,7 +124,6 @@ export class GuidedInspectorPage extends Page {
         const options = {}; // NOTE: Currently options are handled on the Python end until exposed to the user
         const title = "Inspecting your file";
 
-        console.log("Stubs:", stubs);
         const fileArr = Object.entries(stubs)
             .map(([subject, v]) =>
                 Object.entries(v).map(([session, info]) => {
@@ -145,8 +131,6 @@ export class GuidedInspectorPage extends Page {
                 })
             )
             .flat();
-        console.log("File array:", fileArr);
-
         return html`
             ${until(
                 (async () => {
@@ -218,15 +202,11 @@ export class GuidedInspectorPage extends Page {
                     if (!inspector) await this.save();
 
                     const messages = this.report.messages;
-                    console.log("Messages:", messages);
-                    const items = normalizeFilePaths(truncateFilePaths(messages, path));
-                    console.log("Inspector items:", items);
-                    console.log("File array:", fileArr);
+                    const items = truncateFilePaths(messages, path);
 
                     const _instances = fileArr.map(({ subject, session, info }) => {
                         const file_path = [`sub-${subject}`, `sub-${subject}_ses-${session}`];
                         const filtered = removeFilePaths(filter(items, { file_path }));
-                        console.log("Filtered items for subject:", subject, "session:", session, filtered);
 
                         const display = () => new InspectorList({ items: filtered, emptyMessage });
                         display.status = this.getStatus(filtered);
