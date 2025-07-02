@@ -248,7 +248,7 @@ export class Page extends LitElement {
 
                 results.forEach((info) => {
                     const { file } = info;
-                    const fileName = file.split("/").pop();
+                    const fileName = file.eplace(/\\/g, "/").split("/").pop();
                     console.log("File name:", fileName);
                     const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
                     console.log("Subject:", subject, "Session:", session);
