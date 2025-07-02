@@ -138,11 +138,14 @@ export class NWBFilePreview extends LitElement {
     };
 
     render() {
-        const fileArr = Object.entries(this.files).sort()
+        const fileArr = Object.entries(this.files)
+            .sort()
             .map(([subject, v]) =>
-                Object.entries(v).sort().map(([session, info]) => {
-                    return { subject, session, info };
-                })
+                Object.entries(v)
+                    .sort()
+                    .map(([session, info]) => {
+                        return { subject, session, info };
+                    })
             )
             .flat();
 
