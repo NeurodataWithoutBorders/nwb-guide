@@ -321,8 +321,7 @@ export class FilesystemSelector extends LitElement {
                       ${this.type.map(
                           (type) =>
                               html`<nwb-button primary @click=${() => this.selectFormat(type)}
-                                  >Select
-                                  ${getObjectTypeReferenceString(type, this.multiple)}</nwb-button
+                                  >Select ${getObjectTypeReferenceString(type, this.multiple)}</nwb-button
                               >`
                       )}
                   </div>`
