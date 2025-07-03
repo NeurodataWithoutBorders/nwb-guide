@@ -44,6 +44,7 @@ import BrukerTiffSinglePlaneConverterSchema from "../inputs/interface_schemas/Br
 import BrukerTiffMultiPlaneConverterSchema from "../inputs/interface_schemas/BrukerTiffMultiPlaneConverter.json";
 import MiniscopeConverterSchema from "../inputs/interface_schemas/MiniscopeConverter.json";
 import CellExplorerRecordingInterfaceSchema from "../inputs/interface_schemas/CellExplorerRecordingInterface.json";
+import Plexon2RecordingInterfaceSchema from "../inputs/interface_schemas/Plexon2RecordingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -142,6 +143,8 @@ globalStateCopy.schema.source_data.properties.MiniscopeConverter =
     MiniscopeConverterSchema.properties.MiniscopeConverter;
 globalStateCopy.schema.source_data.properties.CellExplorerRecordingInterface =
     CellExplorerRecordingInterfaceSchema.properties.CellExplorerRecordingInterface;
+globalStateCopy.schema.source_data.properties.Plexon2RecordingInterface =
+    Plexon2RecordingInterfaceSchema.properties.Plexon2RecordingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -424,3 +427,9 @@ const CellExplorerRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globa
 CellExplorerRecordingInterfaceGlobalCopy.interfaces.interface = CellExplorerRecordingInterface;
 CellExplorerRecordingInterfaceGlobalCopy.schema.source_data = CellExplorerRecordingInterfaceSchema;
 CellExplorerRecordingInterface.args = { activePage, globalState: CellExplorerRecordingInterfaceGlobalCopy };
+
+export const Plexon2RecordingInterface = PageTemplate.bind({});
+const Plexon2RecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+Plexon2RecordingInterfaceGlobalCopy.interfaces.interface = Plexon2RecordingInterface;
+Plexon2RecordingInterfaceGlobalCopy.schema.source_data = Plexon2RecordingInterfaceSchema;
+Plexon2RecordingInterface.args = { activePage, globalState: Plexon2RecordingInterfaceGlobalCopy };
