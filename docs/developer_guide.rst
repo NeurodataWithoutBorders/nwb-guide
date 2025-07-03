@@ -377,5 +377,3 @@ This will update the draft release on GitHub created in Step 5.
 13. Once the builds are complete, test installing the built application files on Mac and Windows.
 14. Update the changelog in the draft release and publish the release.
 15. Merge the ``main`` branch into the ``linux-dev`` branch.
-
-
