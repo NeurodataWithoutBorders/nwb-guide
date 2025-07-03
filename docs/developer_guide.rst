@@ -348,3 +348,30 @@ switcher. ``docs/_static/switcher.json`` must be manually updated to specify new
 that are too old, label a particular version as stable in the name, and identify which version is
 "preferred" for use in version warning banners. See
 :pydata-sphinx-theme:`PyData Sphinx theme user guide <user_guide>` for instructions and more information.
+
+Making a Release
+----------------
+To make a release, follow these steps:
+1. Ensure that all changes are committed to the ``main`` branch.
+2. Update the version number in the ``package.json`` file.
+3. Add a new entry for the new version in the ``docs/_static/switcher.json`` file.
+4. Make a pull request to merge these changes to the ``main`` branch.
+5. Manually trigger the `build_and_deploy_mac` and `build_and_deploy_win` GitHub Actions to build the application.
+   This will create a new draft release on GitHub with the updated version number and the built application files.
+6. Ensure all tests and workflows pass and request a review.
+7. Once the pull request is approved, merge it into the ``main`` branch.
+8. Create a new tag for the release using the format "v" followed by the version number in the ``package.json`` file.
+   For example, if the version number is ``1.0.0``, you would create a tag called ``v1.0.0``. Push the changes.
+   You can do this using the following command:
+    .. code-block:: bash
+
+         git tag v1.0.0
+         git push origin v1.0.0
+
+9. Manually trigger the `build_and_deploy_mac` and `build_and_deploy_win` GitHub Actions to build the application.
+   This will update the draft release on GitHub created in Step 5.
+10. Once the builds are complete, review the draft release to ensure everything is correct. Publish the release when
+    ready.
+11. Check the ReadTheDocs build and ensure https://nwb-guide.readthedocs.io/ points to the new version.
+12. Check the install links on the main page of the documentation point to the new application files.
+
