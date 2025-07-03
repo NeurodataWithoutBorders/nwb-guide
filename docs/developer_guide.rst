@@ -357,12 +357,13 @@ To make a release, follow these steps:
 3. Add a new entry for the new version in the ``docs/_static/switcher.json`` file.
 4. Make a pull request to merge these changes to the ``main`` branch.
 5. Manually trigger the `build_and_deploy_mac` and `build_and_deploy_win` GitHub Actions to build the application.
-   This will create a new draft release on GitHub with the updated version number and the built application files.
+This will create a new draft release on GitHub with the updated version number and the built application files.
 6. Ensure all tests and workflows pass and request a review.
 7. Once the pull request is approved, merge it into the ``main`` branch.
 8. Create a new tag for the release using the format "v" followed by the version number in the ``package.json`` file.
    For example, if the version number is ``1.0.0``, you would create a tag called ``v1.0.0``. Push the changes.
    You can do this using the following command:
+
     .. code-block:: bash
 
          git tag v1.0.0
@@ -372,7 +373,7 @@ To make a release, follow these steps:
 10. Check the install links on the main page of the documentation point to the new application files.
 11. Manually trigger all tests. Ensure they pass.
 12. Manually trigger the ``build_and_deploy_mac`` and ``build_and_deploy_win`` GitHub Actions to build the application.
-    This will update the draft release on GitHub created in Step 5.
+This will update the draft release on GitHub created in Step 5.
 13. Once the builds are complete, test installing the built application files on Mac and Windows.
 14. Update the changelog in the draft release and publish the release.
 15. Merge the ``main`` branch into the ``linux-dev`` branch.
