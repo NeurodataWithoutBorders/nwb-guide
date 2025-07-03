@@ -439,25 +439,28 @@ export default async function runWorkflow(name, workflow, identifier) {
 
     expect(hasReport).toBe(true)
 
-    const hasCorrectSubjects = await evaluate(() => {
-      const instance_manager = document.querySelector('nwb-instance-manager')
-      const instances = instance_manager?.instances
-      const expected = ['All Files', 'sub-mouse1', 'sub-mouse2']
-      const keys = Object.keys(instances || {})
-      return expected.length === keys.length && expected.every((k, i) => k === keys[i])
-    })
+    // If there are multiple subjects, est subject and session order in instance manager
+    if (willProvideSubjectInfo) {
+      const hasCorrectSubjects = await evaluate(() => {
+        const instance_manager = document.querySelector('nwb-instance-manager')
+        const instances = instance_manager?.instances
+        const expected = ['All Files', 'sub-mouse1', 'sub-mouse2']
+        const keys = Object.keys(instances || {})
+        return expected.length === keys.length && expected.every((k, i) => k === keys[i])
+      })
 
-    expect(hasCorrectSubjects).toBe(true)
+      expect(hasCorrectSubjects).toBe(true)
 
-    const hasCorrectSessions = await evaluate(() => {
-      const instance_manager = document.querySelector('nwb-instance-manager')
-      const instance = instance_manager?.instances['sub-mouse1']
-      const expected = ['All Files', 'ses-Session1', 'ses-Session2']
-      const keys = Object.keys(instance || {})
-      return expected.length === keys.length && expected.every((k, i) => k === keys[i])
-    })
+      const hasCorrectSessions = await evaluate(() => {
+        const instance_manager = document.querySelector('nwb-instance-manager')
+        const instance = instance_manager?.instances['sub-mouse1']
+        const expected = ['All Files', 'ses-Session1', 'ses-Session2']
+        const keys = Object.keys(instance || {})
+        return expected.length === keys.length && expected.every((k, i) => k === keys[i])
+      })
 
-    expect(hasCorrectSessions).toBe(true)
+      expect(hasCorrectSessions).toBe(true)
+    }
 
     await toNextPage('preview')
 
@@ -466,25 +469,28 @@ export default async function runWorkflow(name, workflow, identifier) {
   test('Review Neurosift visualization', async () => {
     await takeScreenshot(join(identifier, 'preview-page'), 1000) // Allow full load of Neurosift page
 
-    const hasCorrectSubjects = await evaluate(() => {
-      const instance_manager = document.querySelector('nwb-file-preview')?.shadowRoot?.querySelector('nwb-instance-manager')
-      const instances = instance_manager?.instances
-      const expected = ['sub-mouse1', 'sub-mouse2']
-      const keys = Object.keys(instances || {})
-      return expected.length === keys.length && expected.every((k, i) => k === keys[i])
-    })
+    // If there are multiple subjects, est subject and session order in instance manager
+    if (willProvideSubjectInfo) {
+      const hasCorrectSubjects = await evaluate(() => {
+        const instance_manager = document.querySelector('nwb-file-preview')?.shadowRoot?.querySelector('nwb-instance-manager')
+        const instances = instance_manager?.instances
+        const expected = ['sub-mouse1', 'sub-mouse2']
+        const keys = Object.keys(instances || {})
+        return expected.length === keys.length && expected.every((k, i) => k === keys[i])
+      })
 
-    expect(hasCorrectSubjects).toBe(true)
+      expect(hasCorrectSubjects).toBe(true)
 
-    const hasCorrectSessions = await evaluate(() => {
-      const instance_manager = document.querySelector('nwb-file-preview')?.shadowRoot?.querySelector('nwb-instance-manager')
-      const instance = instance_manager?.instances['sub-mouse1']
-      const expected = ['ses-Session1', 'ses-Session2']
-      const keys = Object.keys(instance || {})
-      return expected.length === keys.length && expected.every((k, i) => k === keys[i])
-    })
+      const hasCorrectSessions = await evaluate(() => {
+        const instance_manager = document.querySelector('nwb-file-preview')?.shadowRoot?.querySelector('nwb-instance-manager')
+        const instance = instance_manager?.instances['sub-mouse1']
+        const expected = ['ses-Session1', 'ses-Session2']
+        const keys = Object.keys(instance || {})
+        return expected.length === keys.length && expected.every((k, i) => k === keys[i])
+      })
 
-    expect(hasCorrectSessions).toBe(true)
+      expect(hasCorrectSessions).toBe(true)
+    }
 
     await toNextPage('conversion')
   })
