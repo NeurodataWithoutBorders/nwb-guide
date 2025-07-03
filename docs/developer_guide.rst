@@ -368,10 +368,13 @@ To make a release, follow these steps:
          git tag v1.0.0
          git push origin v1.0.0
 
-9. Manually trigger the `build_and_deploy_mac` and `build_and_deploy_win` GitHub Actions to build the application.
+9. Check the ReadTheDocs build and ensure https://nwb-guide.readthedocs.io/ points to the new version.
+10. Check the install links on the main page of the documentation point to the new application files.
+11. Manually trigger all tests. Ensure they pass.
+12. Manually trigger the `build_and_deploy_mac` and `build_and_deploy_win` GitHub Actions to build the application.
    This will update the draft release on GitHub created in Step 5.
-10. Once the builds are complete, review the draft release to ensure everything is correct. Publish the release when
-    ready.
-11. Check the ReadTheDocs build and ensure https://nwb-guide.readthedocs.io/ points to the new version.
-12. Check the install links on the main page of the documentation point to the new application files.
+13. Once the builds are complete, test installing the built application files on Mac and Windows.
+14. Update the changelog in the draft release and publish the release.
+15. Merge the ``main`` branch into the ``linux-dev`` branch.
+
 
