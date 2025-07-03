@@ -352,28 +352,30 @@ that are too old, label a particular version as stable in the name, and identify
 Making a Release
 ----------------
 To make a release, follow these steps:
+
 1. Ensure that all changes are committed to the ``main`` branch.
 2. Update the version number in the ``package.json`` file.
 3. Add a new entry for the new version in the ``docs/_static/switcher.json`` file.
 4. Make a pull request to merge these changes to the ``main`` branch.
-5. Manually trigger the `build_and_deploy_mac` and `build_and_deploy_win` GitHub Actions to build the application.
-  This will create a new draft release on GitHub with the updated version number and the built application files.
+5. Manually trigger the ``build_and_deploy_mac`` and ``build_and_deploy_win`` GitHub Actions to build the application.
+   This will create a new draft release on GitHub with the updated version number and the built application files.
 6. Ensure all tests and workflows pass and request a review.
 7. Once the pull request is approved, merge it into the ``main`` branch.
 8. Create a new tag for the release using the format "v" followed by the version number in the ``package.json`` file.
-  For example, if the version number is ``1.0.0``, you would create a tag called ``v1.0.0``. Push the changes.
-  You can do this using the following command:
+   For example, if the version number is ``1.0.0``, you would create a tag called ``v1.0.0``. Push the changes.
+   You can do this using the following command:
 
-    .. code-block:: bash
+.. code-block:: bash
 
-         git tag -s v1.0.0
-         git push origin v1.0.0
+    git tag -s v1.0.0
+    git push origin v1.0.0
 
-9. Check the ReadTheDocs build and ensure https://nwb-guide.readthedocs.io/ points to the new version.
+9. Check the `ReadTheDocs build <https://app.readthedocs.org/projects/nwb-guide/>`_ and ensure the
+   `NWB GUIDE docs page <https://nwb-guide.readthedocs.io/>`_ points to the new version.
 10. Check the install links on the main page of the documentation point to the new application files.
 11. Manually trigger all tests. Ensure they pass.
 12. Manually trigger the ``build_and_deploy_mac`` and ``build_and_deploy_win`` GitHub Actions to build the application.
-  This will update the draft release on GitHub created in Step 5.
+    This will update the draft release on GitHub created in Step 5.
 13. Once the builds are complete, test installing the built application files on Mac and Windows.
 14. Update the changelog in the draft release and publish the release.
 15. Merge the ``main`` branch into the ``linux-dev`` branch.
