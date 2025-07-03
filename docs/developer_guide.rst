@@ -374,4 +374,3 @@ To make a release, follow these steps:
     ready.
 11. Check the ReadTheDocs build and ensure https://nwb-guide.readthedocs.io/ points to the new version.
 12. Check the install links on the main page of the documentation point to the new application files.
-
