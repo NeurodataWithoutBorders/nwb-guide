@@ -366,7 +366,7 @@ This will create a new draft release on GitHub with the updated version number a
 
     .. code-block:: bash
 
-         git tag v1.0.0
+         git tag -s v1.0.0
          git push origin v1.0.0
 
 9. Check the ReadTheDocs build and ensure https://nwb-guide.readthedocs.io/ points to the new version.
