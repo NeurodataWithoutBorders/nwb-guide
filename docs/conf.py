@@ -20,6 +20,7 @@ extensions = [
     "sphinx_search.extension",  # Allows for auto search function the documentation
     "sphinx.ext.viewcode",  # Shows source code in the documentation
     "sphinx.ext.extlinks",  # Allows to use shorter external links defined in the extlinks variable.
+    "sphinx.ext.autosectionlabel",  # Allows to link to sections in the documentation using their titles
     "sphinx_favicon",  # Allows to set a favicon for the documentation
 ]
 
