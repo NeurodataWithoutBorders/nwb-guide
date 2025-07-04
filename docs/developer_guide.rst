@@ -355,7 +355,7 @@ To make a release, follow these steps:
 1. Ensure that all changes are committed to the ``main`` branch.
 2. Update the version number in the ``package.json`` file.
 3. Add a new entry for the new version in the ``docs/_static/switcher.json`` file.
-4. Update the tutorial screenshots as described in :ref:`Updating Tutorial Screenshots <updating_tutorial_screenshots>`.
+4. Update the tutorial screenshots as described in :ref:`Updating Tutorial Screenshots <Updating Tutorial Screenshots>`.
 5. Make a pull request to merge these changes to the ``main`` branch.
 6. Manually trigger the ``build_and_deploy_mac`` and ``build_and_deploy_win`` GitHub Actions to build the application.
    This will create a new draft release on GitHub with the updated version number and the built application files.
