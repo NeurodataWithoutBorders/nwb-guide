@@ -1,8 +1,8 @@
 numpy
-jsonschema==3.2.0
-Jinja2<3.1
-sphinx==5.1.1
-pydata-sphinx-theme==0.15.2
-readthedocs-sphinx-search==0.3.2
-sphinx-copybutton==0.5.0
-sphinx-favicon==1.0.1
+jsonschema
+Jinja2
+sphinx
+pydata-sphinx-theme
+readthedocs-sphinx-search
+sphinx-copybutton
+sphinx-favicon

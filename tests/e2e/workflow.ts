@@ -467,7 +467,7 @@ export default async function runWorkflow(name, workflow, identifier) {
   })
 
   test('Review Neurosift visualization', async () => {
-    await takeScreenshot(join(identifier, 'preview-page'), 1000) // Allow full load of Neurosift page
+    await takeScreenshot(join(identifier, 'preview-page'), 5000) // Allow full load of Neurosift page
 
     // If there are multiple subjects, est subject and session order in instance manager
     if (willProvideSubjectInfo) {
