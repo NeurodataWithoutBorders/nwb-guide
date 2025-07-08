@@ -23,7 +23,7 @@ dependencies:
       - werkzeug < 3.0 # werkzeug 3.0 deprecates features used by flask 2.3.2. Remove this when updating flask.
       # NOTE: the NeuroConv wheel on PyPI includes sonpy which is not compatible with arm64, so build and install
       # NeuroConv from GitHub, which will remove the sonpy dependency when building from Mac arm64
-      - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.6.0
+      - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.6.1
       - scikit-learn == 1.4.0 # Tutorial data generation
       - tqdm_publisher >= 0.0.1 # Progress bars
       - tzlocal >= 5.2 # Frontend timezone handling

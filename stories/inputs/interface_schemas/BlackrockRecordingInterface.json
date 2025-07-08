@@ -2,28 +2,36 @@
     "required": [],
     "properties": {
         "BlackrockRecordingInterface": {
+            "properties": {
+                "file_path": {
+                    "format": "file-path",
+                    "type": "string",
+                    "description": "Path to the Blackrock file with suffix being .ns1, .ns2, .ns3, .ns4m .ns4, or .ns6."
+                },
+                "nsx_override": {
+                    "anyOf": [
+                        {
+                            "format": "file-path",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "verbose": {
+                    "default": true,
+                    "type": "boolean"
+                },
+                "es_key": {
+                    "default": "ElectricalSeries",
+                    "type": "string"
+                }
+            },
             "required": [
                 "file_path"
             ],
-            "properties": {
-                "file_path": {
-                    "format": "file",
-                    "description": "Path to the Blackrock file with suffix being .ns1, .ns2, .ns3, .ns4m .ns4, or .ns6.",
-                    "type": "string"
-                },
-                "nsx_override": {
-                    "format": "file",
-                    "type": "string"
-                },
-                "verbose": {
-                    "type": "boolean",
-                    "default": true
-                },
-                "es_key": {
-                    "type": "string",
-                    "default": "ElectricalSeries"
-                }
-            },
             "type": "object",
             "additionalProperties": false
         }

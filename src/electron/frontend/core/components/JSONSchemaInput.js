@@ -314,8 +314,8 @@ const isFilesystemSelector = (name = "", format) => {
     if (Array.isArray(format)) return format.map((f) => isFilesystemSelector(name, f)).every(Boolean) ? format : null;
 
     const matched = name.match(/(.+_)?(.+)_paths?/);
-    if (!format && matched) format = matched[2] === "folder" ? "directory" : matched[2];
-    return ["file", "directory"].includes(format) ? format : null; // Handle file and directory formats
+    if (!format && matched) format = matched[2] === "folder" ? "directory-path" : matched[2];
+    return ["file-path", "directory-path"].includes(format) ? format : null; // Handle file and directory formats
 };
 
 function getFirstFocusableElement(element) {

@@ -30,7 +30,7 @@ export async function autocompleteFormatString(path) {
     const schema = getSchema(path, this.info.globalState.schema.source_data);
 
     const isFile = "file_path" in schema.properties;
-    const pathType = isFile ? "file" : "directory";
+    const pathType = isFile ? "file-path" : "directory-path";
 
     const description = isFile ? schema.properties.file_path.description : schema.properties.folder_path.description;
 

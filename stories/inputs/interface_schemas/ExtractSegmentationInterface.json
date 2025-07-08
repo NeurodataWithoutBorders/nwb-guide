@@ -2,26 +2,34 @@
     "required": [],
     "properties": {
         "ExtractSegmentationInterface": {
-            "required": [
-                "file_path",
-                "sampling_frequency"
-            ],
             "properties": {
                 "file_path": {
-                    "format": "file",
+                    "format": "file-path",
                     "type": "string"
                 },
                 "sampling_frequency": {
                     "type": "number"
                 },
                 "output_struct_name": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                 }
             },
+            "required": [
+                "file_path",
+                "sampling_frequency"
+            ],
             "type": "object",
             "additionalProperties": false
         }

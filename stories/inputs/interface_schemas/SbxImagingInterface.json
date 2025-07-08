@@ -2,22 +2,31 @@
     "required": [],
     "properties": {
         "SbxImagingInterface": {
-            "required": [
-                "file_path"
-            ],
             "properties": {
                 "file_path": {
-                    "format": "file",
+                    "format": "file-path",
                     "type": "string"
                 },
                 "sampling_frequency": {
+                    "default": null,
                     "type": "number"
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
+                },
+                "photon_series_type": {
+                    "default": "TwoPhotonSeries",
+                    "enum": [
+                        "OnePhotonSeries",
+                        "TwoPhotonSeries"
+                    ],
+                    "type": "string"
                 }
             },
+            "required": [
+                "file_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

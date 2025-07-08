@@ -2,18 +2,22 @@
     "required": [],
     "properties": {
         "AudioInterface": {
-            "required": [
-                "file_paths"
-            ],
             "properties": {
                 "file_paths": {
+                    "items": {
+                        "format": "file-path",
+                        "type": "string"
+                    },
                     "type": "array"
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": false
+                    "default": false,
+                    "type": "boolean"
                 }
             },
+            "required": [
+                "file_paths"
+            ],
             "type": "object",
             "additionalProperties": false
         }

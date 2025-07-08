@@ -2,27 +2,39 @@
     "required": [],
     "properties": {
         "IntanRecordingInterface": {
-            "required": [
-                "file_path"
-            ],
             "properties": {
                 "file_path": {
-                    "format": "file",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to either a .rhd or a .rhs file"
                 },
                 "stream_id": {
-                    "type": "string"
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 },
                 "verbose": {
-                    "type": "boolean",
-                    "default": true
+                    "default": true,
+                    "type": "boolean"
                 },
                 "es_key": {
-                    "type": "string",
-                    "default": "ElectricalSeries"
+                    "default": "ElectricalSeries",
+                    "type": "string"
+                },
+                "ignore_integrity_checks": {
+                    "default": false,
+                    "type": "boolean"
                 }
             },
+            "required": [
+                "file_path"
+            ],
             "type": "object",
             "additionalProperties": false
         }

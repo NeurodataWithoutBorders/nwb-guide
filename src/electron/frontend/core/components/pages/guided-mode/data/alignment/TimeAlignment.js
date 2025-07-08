@@ -15,7 +15,7 @@ const options = {
         name: "Upload Timestamps",
         schema: {
             type: "string",
-            format: "file",
+            format: "file-path",
             description: "A CSV file containing the timestamps of the recording.",
         },
     },

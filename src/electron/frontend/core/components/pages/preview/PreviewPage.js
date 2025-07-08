@@ -34,7 +34,7 @@ export class PreviewPage extends Page {
         path: ["file_path"],
         schema: {
             type: "string",
-            format: "file",
+            format: "file-path",
             description:
                 "Please provide a file path that you'd like to visualize using Neurosift. The GUIDE will serve this file and access the appropriate URL automatically.",
         },

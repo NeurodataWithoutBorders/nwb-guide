@@ -2,27 +2,35 @@
     "required": [],
     "properties": {
         "NeuralynxRecordingInterface": {
+            "properties": {
+                "folder_path": {
+                    "format": "directory-path",
+                    "type": "string",
+                    "description": "Path to Neuralynx directory containing \".ncs\", \".nse\", \".ntt\", \".nse\", or \".nev\" files."
+                },
+                "stream_name": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "verbose": {
+                    "default": false,
+                    "type": "boolean"
+                },
+                "es_key": {
+                    "default": "ElectricalSeries",
+                    "type": "string"
+                }
+            },
             "required": [
                 "folder_path"
             ],
-            "properties": {
-                "folder_path": {
-                    "format": "directory",
-                    "type": "string",
-                    "description": "Path to Neuralynx directory containing \".nse\", \".ntt\", \".nse\", or \".nev\" files."
-                },
-                "stream_name": {
-                    "type": "string"
-                },
-                "verbose": {
-                    "type": "boolean",
-                    "default": false
-                },
-                "es_key": {
-                    "type": "string",
-                    "default": "ElectricalSeries"
-                }
-            },
             "type": "object",
             "additionalProperties": false
         }

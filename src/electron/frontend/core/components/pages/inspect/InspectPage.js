@@ -132,7 +132,7 @@ export class InspectPage extends Page {
                     type: "array",
                     items: {
                         type: "string",
-                        format: ["file", "directory"],
+                        format: ["file-path", "directory-path"],
                         multiple: true,
                     },
                 },
