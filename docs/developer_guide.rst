@@ -365,19 +365,21 @@ To make a release, follow these steps:
 8. Once the pull request is approved, merge it into the ``main`` branch.
 9. Create a new tag for the release using the format "v" followed by the version number in the ``package.json`` file.
    For example, if the version number is ``1.0.0``, you would create a tag called ``v1.0.0``. Push the changes.
-   You can do this using the following command:
+   You can create an unsigned tag on GitHub or a signed tag in a terminal using the following command:
 
 .. code-block:: bash
 
+    git pull origin main
     git tag -s v1.0.0
     git push origin v1.0.0
 
-10. Check the `ReadTheDocs build <https://app.readthedocs.org/projects/nwb-guide/>`_ and ensure the
+10. Check the `ReadTheDocs "stable" build <https://app.readthedocs.org/projects/nwb-guide/>`_ succeeds and ensure the
     `NWB GUIDE docs page <https://nwb-guide.readthedocs.io/>`_ points to the new version.
-11. Check the install links on the main page of the documentation point to the new application files.
-12. Manually trigger all tests. Ensure they pass.
-13. Manually trigger the ``build_and_deploy_mac`` and ``build_and_deploy_win`` GitHub Actions to build the application.
+11. Manually trigger all tests. Ensure they pass.
+12. Manually trigger the ``build_and_deploy_mac`` and ``build_and_deploy_win`` GitHub Actions to build the application.
     This will update the draft release on GitHub created in Step 6.
-14. Once the builds are complete, test installing the built application files on Mac and Windows.
-15. Update the changelog in the draft release and publish the release.
+13. Once the builds are complete, test installing the built application files on Mac and Windows.
+14. Update the changelog in the draft release and publish the release.
+15. Check that the installed NWB GUIDE app correctly detects that it matches the latest release
+    (as opposed to saying the previous version is the latest release).
 16. Merge the ``main`` branch into the ``linux-dev`` branch.
