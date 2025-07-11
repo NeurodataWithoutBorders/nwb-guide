@@ -10,9 +10,8 @@ NWB GUIDE documentation
 
 |
 
-The **NWB Graphical User Interface for Data Entry (GUIDE)** is a cross-platform desktop application that walks neuroscientists
-through the requirements of converting their data from common proprietary formats to the :nwb-overview:`Neurodata Without Borders (NWB) <>` standard
-and uploading data to the :dandi-archive:`DANDI Archive <>`.
+The **NWB Graphical User Interface for Data Entry (GUIDE)** is a desktop application that converts data from common proprietary formats to the :nwb-overview:`Neurodata Without Borders (NWB) <>` standard
+and uploads data to the :dandi-archive:`DANDI Archive <>`.
 
 .. note::
   Watch a tutorial video of NWB GUIDE `here <https://www.youtube.com/watch?v=EhhdDVuHAZ0>`_.
