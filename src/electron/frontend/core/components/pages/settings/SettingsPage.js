@@ -38,7 +38,7 @@ import { humanReadableBytes } from "../../../../utils/bytes";
 const DATA_OUTPUT_PATH = joinPath(testDataFolderPath, "single_session_data");
 const DATASET_OUTPUT_PATH = joinPath(testDataFolderPath, "multi_session_dataset");
 
-const propertiesToTransform = ["folder_path", "file_path", "config_file_path"];
+const propertiesToTransform = ["folder_path", "file_path", "config_file_path", "video_file_path"];
 
 const deleteIfExists = (path) => (fs.existsSync(path) ? fs.rmSync(path, { recursive: true }) : "");
 
