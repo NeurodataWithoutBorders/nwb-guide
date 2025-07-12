@@ -86,7 +86,7 @@ export class DocumentationPage extends Page {
                     >.
                 </p>
                 <p>
-                    To learn more about NWB, please visit the 
+                    To learn more about NWB, please visit the
                     <a target="_blank" href="https://nwb.org">NWB Website</a>.
                 </p>
 
