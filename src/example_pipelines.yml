@@ -14,6 +14,7 @@
 #       AdditionalDataInterface: ...
 
 # NOTE: Can also just provide interfaces directly below pipeline name
+# testGINPath (from pipelines.test.ts) is prepended to each path listed here (see SettingsPage.js)
 
 SpikeGLX-Phy:
   metadata:

@@ -239,14 +239,15 @@ useful to search for third-party packages (e.g. Handsontable) that implement the
 Documentation
 -------------
 
+.. _updating_tutorial_screenshots:
+
 Updating Tutorial Screenshots
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Before a release, you'll want to update the tutorial screenshots to reflect the latest changes in the application.
 
 #. To regenerate the dataset, you'll need to change ``regenerateTestData`` in the ``tests/e2e/config.ts`` to ``true`` or delete the test dataset directory ``rm -rf ~/NWB_GUIDE/.test``.
 #. Create a ``.env`` file with the following content: ``DANDI_STAGING_API_KEY={your_dandi_staging_api_key}`` where ``{your_dandi_staging_api_key}`` is your DANDI staging API key from https://gui-staging.dandiarchive.org.
-#. Run the End-to-End Tests locally using ``npm test:tutorial``.
-    - This will generate new screenshots in the ``docs/assets/tutorials`` directory.
+#. Run the End-to-End Tests locally using ``npm run test:tutorial``. This will generate new screenshots in the ``docs/assets/tutorials`` directory.
 #. Review the new screenshots to ensure they are accurate.
 #. If the screenshots are accurate, commit them to the repository. Their paths should be consistent across runs—allowing the new versions to show up on the tutorial.
 
@@ -348,3 +349,37 @@ switcher. ``docs/_static/switcher.json`` must be manually updated to specify new
 that are too old, label a particular version as stable in the name, and identify which version is
 "preferred" for use in version warning banners. See
 :pydata-sphinx-theme:`PyData Sphinx theme user guide <user_guide>` for instructions and more information.
+
+Making a Release
+----------------
+To make a release, follow these steps:
+
+1. Ensure that all changes are committed to the ``main`` branch.
+2. Update the version number in the ``package.json`` file.
+3. Add a new entry for the new version in the ``docs/_static/switcher.json`` file.
+4. Update the tutorial screenshots as described in :ref:`Updating Tutorial Screenshots <updating_tutorial_screenshots>`.
+5. Make a pull request to merge these changes to the ``main`` branch.
+6. Manually trigger the ``build_and_deploy_mac`` and ``build_and_deploy_win`` GitHub Actions to build the application.
+   This will create a new draft release on GitHub with the updated version number and the built application files.
+7. Ensure all tests and workflows pass and request a review.
+8. Once the pull request is approved, merge it into the ``main`` branch.
+9. Create a new tag for the release using the format "v" followed by the version number in the ``package.json`` file.
+   For example, if the version number is ``1.0.0``, you would create a tag called ``v1.0.0``. Push the changes.
+   You can create an unsigned tag on GitHub or a signed tag in a terminal using the following command:
+
+.. code-block:: bash
+
+    git pull origin main
+    git tag -s v1.0.0
+    git push origin v1.0.0
+
+10. Check the `ReadTheDocs "stable" build <https://app.readthedocs.org/projects/nwb-guide/>`_ succeeds and ensure the
+    `NWB GUIDE docs page <https://nwb-guide.readthedocs.io/>`_ points to the new version.
+11. Manually trigger all tests. Ensure they pass.
+12. Manually trigger the ``build_and_deploy_mac`` and ``build_and_deploy_win`` GitHub Actions to build the application.
+    This will update the draft release on GitHub created in Step 6.
+13. Once the builds are complete, test installing the built application files on Mac and Windows.
+14. Update the changelog in the draft release and publish the release.
+15. Check that the installed NWB GUIDE app correctly detects that it matches the latest release
+    (as opposed to saying the previous version is the latest release).
+16. Merge the ``main`` branch into the ``linux-dev`` branch.

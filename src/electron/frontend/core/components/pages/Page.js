@@ -244,10 +244,11 @@ export class Page extends LitElement {
                     this.notify(message, "error");
                     throw error;
                 });
+                console.log("Conversion results:", results);
 
                 results.forEach((info) => {
                     const { file } = info;
-                    const fileName = file.split("/").pop();
+                    const fileName = file.replace(/\\/g, "/").split("/").pop();
                     const [subject, session] = fileName.match(/sub-(.+)_ses-(.+)\.nwb/).slice(1);
                     const subRef = conversionOutput[subject] ?? (conversionOutput[subject] = {});
                     subRef[session] = info;
