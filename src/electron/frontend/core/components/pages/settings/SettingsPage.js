@@ -330,7 +330,7 @@ export class SettingsPage extends Page {
             onUpdate: () => (this.unsavedUpdates = true),
             validateOnChange: async (name, parent) => {
                 const value = parent[name];
-                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+                if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("sandbox"));
                 return true;
             },
             onThrow,
