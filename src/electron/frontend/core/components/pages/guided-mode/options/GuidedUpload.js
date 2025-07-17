@@ -89,7 +89,7 @@ export class GuidedUploadPage extends Page {
             formProps: {
                 validateOnChange: async (name, parent) => {
                     const value = parent[name];
-                    if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+                    if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("sandbox"));
                 },
             },
         });

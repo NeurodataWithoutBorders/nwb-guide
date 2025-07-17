@@ -23,10 +23,10 @@
         "archive": {
             "type": "string",
             "enumLabels": {
-                "staging": "Sandbox Server",
+                "sandbox": "Sandbox Server",
                 "main": "Main Archive"
             },
-            "enum": ["main", "staging"],
+            "enum": ["main", "sandbox"],
             "description": "Which DANDI server to upload to. <br><small><b>Note:</b> The Sandbox Server is recommended for developers, or users learning to use DANDI</small>",
             "strict": true
         },

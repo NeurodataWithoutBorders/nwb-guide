@@ -34,7 +34,7 @@ import keyIcon from "../../../../assets/icons/key.svg?raw";
 import {
     AWARD_VALIDATION_FAIL_MESSAGE,
     awardNumberValidator,
-    isStaging,
+    isSandbox,
     validate,
     getAPIKey,
 } from "../../../../utils/upload";
@@ -120,13 +120,13 @@ export function createDandiset(results = {}) {
                 });
 
                 const uploadToMain = form.resolved.archive === "main";
-                const staging = !uploadToMain;
+                const sandbox = !uploadToMain;
 
-                const api_key = await getAPIKey.call(this, staging);
+                const api_key = await getAPIKey.call(this, sandbox);
 
                 const api = new dandi.API({
                     token: api_key,
-                    type: staging ? "staging" : undefined,
+                    type: sandbox ? "staging" : undefined,
                 });
 
                 await api.authorize();
@@ -185,14 +185,14 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
 
     const dandiset_id = dandiset;
 
-    const staging = isStaging(dandiset_id); // Automatically detect staging IDs
+    const sandbox = isSandbox(dandiset_id); // Automatically detect sandbox IDs
 
-    const api_key = await getAPIKey.call(this, staging);
+    const api_key = await getAPIKey.call(this, sandbox);
 
     const payload = {
         dandiset_id,
         ...info.additional_settings,
-        staging,
+        staging: sandbox,
         api_key,
     };
 
@@ -269,7 +269,7 @@ export class UploadsPage extends Page {
             formProps: {
                 validateOnChange: async (name, parent) => {
                     const value = parent[name];
-                    if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("staging"));
+                    if (name.includes("api_key")) return await validateDANDIApiKey(value, name.includes("sandbox"));
                 },
             },
         }));

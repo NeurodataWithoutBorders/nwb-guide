@@ -18,7 +18,7 @@ import { NotyfNotification } from "notyf";
 import dandiGlobalSchema from "../../../schemas/json/dandi/global.json";
 import { isNumericString } from "./typecheck";
 
-export const isStaging = (id: string) => parseInt(id) >= 100000;
+export const isSandbox = (id: string) => parseInt(id) >= 100000;
 
 type NotificationType = {
     type: string;
@@ -51,9 +51,9 @@ export async function validate(
                 message: `<b>Invalid ID –</b> Dandiset ID must be 6 digits.`
             }]
 
-            const staging = isStaging(value)
-            const type = staging ? "staging" : undefined;
-            const token = await getAPIKey.call(this, staging);
+            const sandbox = isSandbox(value)
+            const type = sandbox ? "staging" : undefined;
+            const token = await getAPIKey.call(this, sandbox);
 
             const dandiset = await get(value, {
                 type,
@@ -106,14 +106,14 @@ export const AWARD_VALIDATION_FAIL_MESSAGE = 'Award number must be properly spac
 // this:
 export async function getAPIKey(
     this: Page,
-    staging = false
+    sandbox = false
 ) {
 
-    const whichAPIKey = staging ? "development_api_key" : "main_api_key";
+    const whichAPIKey = sandbox ? "sandbox_api_key" : "main_api_key";
     const DANDI = global.data.DANDI;
     let api_key = DANDI?.api_keys?.[whichAPIKey];
 
-    const errors = await validateDANDIApiKey(api_key, staging);
+    const errors = await validateDANDIApiKey(api_key, sandbox);
 
     const isInvalid = Array.isArray(errors) ? errors.length : !errors;
 
@@ -154,7 +154,7 @@ export async function getAPIKey(
                 onClick: async () => {
                     const value = input.value;
                     if (value) {
-                        const errors = await validateDANDIApiKey(input.value, staging);
+                        const errors = await validateDANDIApiKey(input.value, sandbox);
                         if (!errors || !errors.length) {
                             modal.remove();
 

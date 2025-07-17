@@ -2,7 +2,7 @@ import { Dandiset, getMine } from 'dandi'
 
 import { global } from '../electron/frontend/core/progress'
 import upload from './json/dandi/upload.json' assert { type: "json" }
-import { isStaging } from '../electron/frontend/utils/upload'
+import { isSandbox } from '../electron/frontend/utils/upload'
 import { baseUrl, onServerOpen } from '../electron/frontend/core/server/globals'
 import { isStorybook } from '../electron/frontend/core/globals'
 
@@ -54,16 +54,16 @@ export const regenerateDandisets = async () => {
 
 export const updateDandisets = async (main = true) => {
 
-    const staging = !main
+    const sandbox = !main
 
     // Fetch My Dandisets
-    const whichAPIKey = staging ? "development_api_key" : "main_api_key";
+    const whichAPIKey = sandbox ? "sandbox_api_key" : "main_api_key";
     const DANDI = global.data.DANDI;
     let token = DANDI?.api_keys?.[whichAPIKey];
 
     if (!token) return []
 
-    return await getMine({ token, type: staging ? 'staging' : undefined }, { embargoed: true })
+    return await getMine({ token, type: sandbox ? 'staging' : undefined }, { embargoed: true })
         .then((results) => results ? Promise.all(results.map(addDandiset)) : [])
         .catch(() => {
             return []
@@ -85,22 +85,22 @@ export const addDandiset = async (info) => {
     enumSet.add(id)
     idSchema.enum = Array.from(enumSet)
 
-    const staging = isStaging(id)
+    const sandbox = isSandbox(id)
 
     if (!idSchema.enumLabels) idSchema.enumLabels = {}
     if (!idSchema.enumKeywords) idSchema.enumKeywords = {}
     if (!idSchema.enumCategories) idSchema.enumCategories = {}
 
 
-    const token = global.data.DANDI.api_keys[staging ? "development_api_key" : "main_api_key"];
+    const token = global.data.DANDI.api_keys[sandbox ? "sandbox_api_key" : "main_api_key"];
 
-    info = new Dandiset(info, { type: staging ? "staging" : undefined, token })
+    info = new Dandiset(info, { type: sandbox ? "staging" : undefined, token })
 
     const latestVersionInfo = (info.most_recent_published_version ?? info.draft_version)!
     const enumLabels = `${id} — ${latestVersionInfo.name}`
 
     const isDraft = latestVersionInfo.version === 'draft'
-    const enumCategories = (isDraft ? 'Unpublished' : '') + (staging ? `${isDraft ? ` - ` : ''}Staging` : '')
+    const enumCategories = (isDraft ? 'Unpublished' : '') + (sandbox ? `${isDraft ? ` - ` : ''}Sandbox` : '')
 
     const fullInfo = await info.getInfo({ version: latestVersionInfo.version });
 
