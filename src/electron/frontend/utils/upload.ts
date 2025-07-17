@@ -52,7 +52,7 @@ export async function validate(
             }]
 
             const sandbox = isSandbox(value)
-            const type = sandbox ? "staging" : undefined;
+            const type = sandbox ? "sandbox" : undefined;
             const token = await getAPIKey.call(this, sandbox);
 
             const dandiset = await get(value, {

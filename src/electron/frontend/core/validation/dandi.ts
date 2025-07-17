@@ -10,7 +10,7 @@ export const validateDANDIApiKey = async (apiKey: string, sandbox = false) => {
 
         const authFailedError = {type: 'error', message: `Authorization failed. Make sure you're providing an API key for the <a href='https://${sandbox ? 'sandbox.' : ''}dandiarchive.org' target='_blank'>${sandbox ? 'sandbox' : 'main'} archive</a>.`}
 
-        const isValid = validateToken({ token: apiKey, type: sandbox ? 'staging' : undefined }).catch(e => false)
+        const isValid = validateToken({ token: apiKey, type: sandbox ? 'sandbox' : undefined }).catch(e => false)
         if (!isValid) return [ authFailedError ]
         return true
     }

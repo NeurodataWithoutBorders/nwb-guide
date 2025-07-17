@@ -39,7 +39,7 @@ export class DandiResults extends LitElement {
         const otherElIds = ["embargo_status"];
 
         const sandbox = isSandbox(this.id);
-        const type = sandbox ? "staging" : undefined;
+        const type = sandbox ? "sandbox" : undefined;
         const api_key = await getAPIKey.call(this, sandbox);
 
         const dandiset = await get(this.id, {

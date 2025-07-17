@@ -126,7 +126,7 @@ export function createDandiset(results = {}) {
 
                 const api = new dandi.API({
                     token: api_key,
-                    type: sandbox ? "staging" : undefined,
+                    type: sandbox ? "sandbox" : undefined,
                 });
 
                 await api.authorize();
@@ -192,7 +192,7 @@ export async function uploadToDandi(info, type = "project" in info ? "project" :
     const payload = {
         dandiset_id,
         ...info.additional_settings,
-        staging: sandbox,
+        sandbox: sandbox,
         api_key,
     };
 

@@ -63,7 +63,7 @@ export const updateDandisets = async (main = true) => {
 
     if (!token) return []
 
-    return await getMine({ token, type: sandbox ? 'staging' : undefined }, { embargoed: true })
+    return await getMine({ token, type: sandbox ? 'sandbox' : undefined }, { embargoed: true })
         .then((results) => results ? Promise.all(results.map(addDandiset)) : [])
         .catch(() => {
             return []
@@ -94,7 +94,7 @@ export const addDandiset = async (info) => {
 
     const token = global.data.DANDI.api_keys[sandbox ? "sandbox_api_key" : "main_api_key"];
 
-    info = new Dandiset(info, { type: sandbox ? "staging" : undefined, token })
+    info = new Dandiset(info, { type: sandbox ? "sandbox" : undefined, token })
 
     const latestVersionInfo = (info.most_recent_published_version ?? info.draft_version)!
     const enumLabels = `${id} — ${latestVersionInfo.name}`
