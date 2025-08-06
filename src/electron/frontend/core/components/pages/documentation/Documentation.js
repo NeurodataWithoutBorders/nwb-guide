@@ -86,10 +86,8 @@ export class DocumentationPage extends Page {
                     >.
                 </p>
                 <p>
-                    To learn more about NWB, please see the
-                    <a target="_blank" href="https://nwb-overview.readthedocs.io/"
-                        >NWB Overview Documentation</a
-                    >.
+                    To learn more about NWB, please visit the
+                    <a target="_blank" href="https://nwb.org">NWB Website</a>.
                 </p>
 
                 <h3 style="padding: 0; margin-top: 25px;">Acknowledgments</h3>
