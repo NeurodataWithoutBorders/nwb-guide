@@ -671,19 +671,15 @@ export class Table extends LitElement {
             let theme = "";
             if (warnings.length > 0) {
                 theme = "warning";
-                message = warnings
-                    .map(error => error.message)
-                    .join("\n");
+                message = warnings.map((error) => error.message).join("\n");
             } else {
                 cell.removeAttribute("warning");
             }
 
             if (errors.length > 0) {
                 theme = "error";
-                 // Class switching handled automatically
-                message = errors
-                    .map(error => error.message)
-                    .join("\n");
+                // Class switching handled automatically
+                message = errors.map((error) => error.message).join("\n");
             } else {
                 cell.removeAttribute("error");
             }
@@ -742,4 +738,3 @@ export class Table extends LitElement {
 }
 
 customElements.get("nwb-table") || customElements.define("nwb-table", Table);
-
