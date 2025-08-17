@@ -8,7 +8,7 @@ extlinks = {
     "guide-issues": ("https://github.com/NeurodataWithoutBorders/nwb-guide/issues/%s", "%s"),
     "request-format-support": ("https://github.com/catalystneuro/neuroconv/issues/new?assignees=&labels=enhancement%%2Cdata+interfaces&projects=&template=format_request.yml&title=%%5BNew+Format%%5D%%3A+%s", "%s"),
     "path-expansion-guide": ("https://neuroconv.readthedocs.io/en/main/user_guide/expand_path.html%s", "%s"),
-    "dandi-staging": ("https://gui-staging.dandiarchive.org/%s", "%s"),
+    "dandi-sandbox": ("https://sandbox.dandiarchive.org/%s", "%s"),
     "dandi-archive": ("https://dandiarchive.org/%s", "%s"),
     "conda-install": (
         "https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation%s",
@@ -19,7 +19,6 @@ extlinks = {
         "https://github.com/NeurodataWithoutBorders/nwbinspector/blob/dev/.github/CONTRIBUTING.md%s",
         None,
     ),
-    "dandi-archive": ("https://dandiarchive.org/%s", "%s"),
     "ros3-tutorial": (
         "https://pynwb.readthedocs.io/en/stable/tutorials/advanced_io/streaming.html#streaming-method-2-ros3%s",
         None,
