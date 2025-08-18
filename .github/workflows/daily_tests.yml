@@ -25,7 +25,7 @@ jobs:
     uses: ./.github/workflows/testing_dev_e2e_with_live_services.yml
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-      DANDI_STAGING_API_KEY: ${{ secrets.DANDI_STAGING_API_KEY }}
+      DANDI_SANDBOX_API_KEY: ${{ secrets.DANDI_SANDBOX_API_KEY }}
 
   BuildTests:
     uses: ./.github/workflows/testing_flask_build_and_dist.yml
