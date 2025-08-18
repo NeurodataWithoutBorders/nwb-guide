@@ -1,0 +1,57 @@
+{
+    "required": [],
+    "properties": {
+        "MedPCInterface": {
+            "properties": {
+                "file_path": {
+                    "format": "file-path",
+                    "type": "string"
+                },
+                "session_conditions": {
+                    "additionalProperties": true,
+                    "type": "object"
+                },
+                "start_variable": {
+                    "type": "string"
+                },
+                "metadata_medpc_name_to_info_dict": {
+                    "additionalProperties": true,
+                    "type": "object"
+                },
+                "aligned_timestamp_names": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "verbose": {
+                    "default": true,
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "file_path",
+                "session_conditions",
+                "start_variable",
+                "metadata_medpc_name_to_info_dict"
+            ],
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "source.schema.json",
+    "title": "Source data schema",
+    "description": "Schema for the source data, files and directories",
+    "version": "0.1.0"
+}
