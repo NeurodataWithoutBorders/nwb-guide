@@ -9,17 +9,17 @@ In these tutorials, you'll follow along on a :doc:`local installation of the GUI
     Watch a video walkthrough of these tutorials `here <https://www.youtube.com/watch?v=EhhdDVuHAZ0>`_.
 
 .. note::
-    This tutorial focuses on uploading to the DANDI Development server.
+    This tutorial focuses on uploading to the DANDI Sandbox server.
 
-    **When working with real data, you'll want to publish to the Main Archive**. In this case, follow the same steps outlined here—except replace the Development server with the Main Archive.
+    **When working with real data, you'll want to publish to the Main Archive**. In this case, follow the same steps outlined here—except replace the Sandbox server with the Main Archive.
 
 .. note::
 
-    If you intend to complete the Dataset Publication section of this tutorial, you'll need to create an account on the DANDI Archive. This will need to be approved by the archive administrators and will require separate approval for both the main archive and the development server.
+    If you intend to complete the Dataset Publication section of this tutorial, you'll need to create an account on the DANDI Archive. This will need to be approved by the archive administrators and will require separate approval for both the main archive and the sandbox server.
 
-    **This tutorial requires an account on the** :dandi-staging:`DANDI Development server <>`.
+    **This tutorial requires an account on the** :dandi-sandbox:`DANDI Sandbox server <>`.
 
-    We recommend that you create an account on the Development server before you begin the tutorials.
+    We recommend that you create an account on the Sandbox server before you begin the tutorials.
 
 Before you begin these tutorials, **you'll need to generate the tutorial dataset** using the instructions on the Dataset page.
 

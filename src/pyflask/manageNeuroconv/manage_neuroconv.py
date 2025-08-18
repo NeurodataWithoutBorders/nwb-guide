@@ -1346,7 +1346,7 @@ def upload_folder_to_dandi(
     dandiset_id: str,
     api_key: str,
     nwb_folder_path: Optional[str] = None,
-    staging: Optional[bool] = None,  # Override default staging=True
+    sandbox: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
@@ -1364,7 +1364,7 @@ def upload_folder_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=Path(nwb_folder_path),
-        staging=staging,
+        staging=sandbox,  # Map sandbox parameter to staging for external API
         cleanup=cleanup,
         number_of_jobs=number_of_jobs or 1,
         number_of_threads=number_of_threads or 1,
@@ -1375,7 +1375,7 @@ def upload_project_to_dandi(
     dandiset_id: str,
     api_key: str,
     project: Optional[str] = None,
-    staging: Optional[bool] = None,  # Override default staging=True
+    sandbox: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
@@ -1395,7 +1395,7 @@ def upload_project_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
-        staging=staging,
+        staging=sandbox,  # Map sandbox parameter to staging for external API
         cleanup=cleanup,
         number_of_jobs=number_of_jobs,
         number_of_threads=number_of_threads,
