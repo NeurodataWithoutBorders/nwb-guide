@@ -45,6 +45,7 @@ modules_to_collect = [
     'elephant',
     'ScanImageTiffReader',
     'deprecated',
+    'probeinterface',
 ]
 for module_name in modules_to_collect:
     collection = collect_all(module_name)
