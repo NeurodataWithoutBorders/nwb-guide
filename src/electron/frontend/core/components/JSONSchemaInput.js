@@ -1213,6 +1213,7 @@ export class JSONSchemaInput extends LitElement {
                     category: schema.enumCategories?.[v],
                     label: schema.enumLabels?.[v] ?? v,
                     keywords: schema.enumKeywords?.[v],
+                    recommended: schema.enumRecommended?.[v],
                     description: schema.enumDescriptions?.[v],
                     link: schema.enumLinks?.[v],
                 };

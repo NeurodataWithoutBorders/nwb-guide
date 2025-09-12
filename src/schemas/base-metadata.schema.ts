@@ -39,6 +39,14 @@ function getSpeciesInfo(species: any[][] = []) {
             return acc
         }, {}),
 
+        enumRecommended: species.reduce((acc, arr) => {
+            const info = getSpeciesNameComponents(arr)
+            if (info.name === "Macaca mulatta") {
+                acc[info.name] = true
+            }
+            return acc
+        }, {}),
+
         enum: species.map(arr => getSpeciesNameComponents(arr).name), // Remove common names so this passes the validator
     }
 

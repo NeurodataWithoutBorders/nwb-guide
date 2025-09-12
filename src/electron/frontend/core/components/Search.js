@@ -365,7 +365,10 @@ export class Search extends LitElement {
                 };
             });
 
-            const itemEls = options
+            // Only sort by recommended if at least one option has 'recommended'
+            const hasRecommended = options.some(opt => opt.recommended);
+
+            let sortedOptions = options
                 .sort((a, b) => {
                     if (a.label < b.label) return -1;
                     if (a.label > b.label) return 1;
@@ -375,7 +378,18 @@ export class Search extends LitElement {
                     if (a.disabled && b.disabled) return 0;
                     else if (a.disabled) return 1;
                     else if (b.disabled) return -1;
-                }) // Sort with the disabled options at the bottom
+                }); // Sort with the disabled options at the bottom
+
+            if (hasRecommended) {
+                sortedOptions = sortedOptions.sort((a, b) => {
+                    if (a.recommended && b.recommended) return 0;
+                    else if (a.recommended) return -1;
+                    else if (b.recommended) return 1;
+                    return 0;
+                }); // Sort with the recommended options at the top
+            }
+
+            const itemEls = sortedOptions
                 .map((option) => {
                     const listItemElement = document.createElement("li");
                     listItemElement.classList.add("option");
@@ -445,6 +459,13 @@ export class Search extends LitElement {
                         });
 
                         container.appendChild(div);
+                    }
+
+                    if (option.recommended) {
+                        const recommendedElement = document.createElement("div");
+                        listItemElement.classList.add("recommended");
+                        recommendedElement.innerHTML = "👍 Recommended based on your papers";
+                        container.appendChild(recommendedElement);
                     }
 
                     listItemElement.append(container);

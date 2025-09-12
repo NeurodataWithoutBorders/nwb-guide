@@ -72,6 +72,13 @@ button:focus {
     justify-content: space-between;
 }
 
+.recommended {
+    color: var(--color-light-green);
+    font-weight: 600;
+    margin-top: 5px;
+    font-size: 12px;
+}
+
 .input-name {
     color: black;
     align-self: center;
