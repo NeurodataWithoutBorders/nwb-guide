@@ -355,7 +355,8 @@ Making a Release
 To make a release, follow these steps:
 
 1. Ensure that all changes are committed to the ``main`` branch.
-2. Update the version number in the ``package.json`` file.
+2. Update the version number in the ``package.json`` file. The version number should follow semantic versioning
+   (e.g. ``1.0.0``). Run `npm install` to update the ``package-lock.json`` file as well.
 3. Add a new entry for the new version in the ``docs/_static/switcher.json`` file.
 4. Update the tutorial screenshots as described in :ref:`Updating Tutorial Screenshots <updating_tutorial_screenshots>`.
 5. Make a pull request to merge these changes to the ``main`` branch.
