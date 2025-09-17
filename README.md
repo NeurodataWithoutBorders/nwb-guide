@@ -5,7 +5,8 @@
     <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/daily_tests.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/daily_tests.yml/badge.svg" alt="All Tests"></a>
     <a href="https://codecov.io/github/NeurodataWithoutBorders/nwb-guide?branch=main"><img src="https://codecov.io/github/NeurodataWithoutBorders/nwb-guide/coverage.svg?branch=main" alt="codecov"></a>
     <a href="https://nwb-guide.readthedocs.io/en/latest/"><img src="https://readthedocs.org/projects/nwb-guide/badge/?version=latest" alt="Documentation"></a>
-      <a href="https://github.com/catalystneuro/nwb-guide/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License: MIT"></a>
+    <a href="https://github.com/catalystneuro/nwb-guide/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow.svg" alt="License: MIT"></a>
+    <a href="https://doi.org/10.5281/zenodo.10637074"><img src="https://zenodo.org/badge/568789936.svg" alt="DOI"></a>
   </p>
   <p align="center">
      <a href="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/build_and_deploy_mac.yml"><img src="https://github.com/NeurodataWithoutBorders/nwb-guide/actions/workflows/build_and_deploy_mac.yml/badge.svg" alt="Mac Build"></a>
