@@ -29,3 +29,4 @@ dependencies:
       - h5py == 3.12.1 # 3.13.0 uses features in hdf5 1.14.4 that is not available in earlier hdf5 libs packaged
                        # with tables==3.9.1 (latest that can be used by neuroconv 0.6.0).
                        # h5py and tables need to be consistent for electron build for unknown reason
+      - ruamel.yaml.clib != 0.2.13 # 0.2.13 throws a build error on intel Mac -- see https://github.com/catalystneuro/roiextractors/issues/489
