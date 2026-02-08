@@ -76,15 +76,17 @@ def list_sessions() -> list[dict]:
             record = json.loads(path.read_text())
             # Support both old (data_dir) and new (data_dirs) format
             data_dirs = record.get("data_dirs") or ([record["data_dir"]] if record.get("data_dir") else [])
-            sessions.append({
-                "session_id": record["session_id"],
-                "title": record["title"],
-                "data_dirs": data_dirs,
-                "data_dir": data_dirs[0] if data_dirs else "",
-                "created_at": record["created_at"],
-                "updated_at": record["updated_at"],
-                "message_count": len(record["messages"]),
-            })
+            sessions.append(
+                {
+                    "session_id": record["session_id"],
+                    "title": record["title"],
+                    "data_dirs": data_dirs,
+                    "data_dir": data_dirs[0] if data_dirs else "",
+                    "created_at": record["created_at"],
+                    "updated_at": record["updated_at"],
+                    "message_count": len(record["messages"]),
+                }
+            )
         except Exception:
             continue
 

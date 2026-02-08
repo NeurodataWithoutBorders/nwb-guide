@@ -101,9 +101,7 @@ export class AIAssistantPage extends Page {
     _renderSessionList() {
         return html`
             <style>
-                ${this._sharedStyles()}
-
-                .session-list-container {
+                ${this._sharedStyles()} .session-list-container {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
@@ -153,7 +151,9 @@ export class AIAssistantPage extends Page {
                     border-radius: 8px;
                     margin-bottom: 8px;
                     cursor: pointer;
-                    transition: background 0.15s, border-color 0.15s;
+                    transition:
+                        background 0.15s,
+                        border-color 0.15s;
                 }
 
                 .session-card:hover {
@@ -254,9 +254,7 @@ export class AIAssistantPage extends Page {
                 <div class="session-list-header">
                     <h3>Conversations</h3>
                     <div style="display: flex; gap: 8px;">
-                        <button class="new-chat-btn" @click=${this._showNewChat}>
-                            + New Conversation
-                        </button>
+                        <button class="new-chat-btn" @click=${this._showNewChat}>+ New Conversation</button>
                         <button
                             style="padding: 8px 14px; border: 1px solid #ccc; border-radius: 8px; background: white; cursor: pointer; font-size: 0.85em;"
                             @click=${() => (this.settingsOpen = !this.settingsOpen)}
@@ -272,32 +270,26 @@ export class AIAssistantPage extends Page {
                               <div class="empty-state">
                                   <h3>NWB Conversion Assistant</h3>
                                   <p>
-                                      I'll help you convert your neurophysiology data to NWB format
-                                      and publish it on DANDI Archive.
+                                      I'll help you convert your neurophysiology data to NWB format and publish it on
+                                      DANDI Archive.
                                   </p>
-                                  <p>
-                                      Click <b>+ New Conversation</b> to get started.
-                                  </p>
+                                  <p>Click <b>+ New Conversation</b> to get started.</p>
                               </div>
                           `
                         : this.savedSessions.map(
                               (s) => html`
                                   <div class="session-card" @click=${() => this._viewSession(s.session_id)}>
-                                      <div class="session-card-icon">
-                                          ${s.message_count > 0 ? "..." : ""}
-                                      </div>
+                                      <div class="session-card-icon">${s.message_count > 0 ? "..." : ""}</div>
                                       <div class="session-card-body">
                                           <div class="session-card-title">${s.title}</div>
                                           <div class="session-card-meta">
-                                              ${this._formatDate(s.updated_at)}
-                                              &middot; ${s.message_count} messages
-                                              &middot; ${(s.data_dirs || [s.data_dir]).map((d) => this._shortDir(d)).join(", ")}
+                                              ${this._formatDate(s.updated_at)} &middot; ${s.message_count} messages
+                                              &middot;
+                                              ${(s.data_dirs || [s.data_dir]).map((d) => this._shortDir(d)).join(", ")}
                                           </div>
                                       </div>
                                       <div class="session-card-actions">
-                                          <button @click=${(e) => this._deleteSession(e, s.session_id)}>
-                                              Delete
-                                          </button>
+                                          <button @click=${(e) => this._deleteSession(e, s.session_id)}>Delete</button>
                                       </div>
                                   </div>
                               `
@@ -322,9 +314,7 @@ export class AIAssistantPage extends Page {
 
         return html`
             <style>
-                ${this._sharedStyles()}
-
-                .ai-page {
+                ${this._sharedStyles()} .ai-page {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
@@ -612,7 +602,9 @@ export class AIAssistantPage extends Page {
                 }
 
                 @keyframes spin {
-                    to { transform: rotate(360deg); }
+                    to {
+                        transform: rotate(360deg);
+                    }
                 }
             </style>
 
@@ -634,8 +626,16 @@ export class AIAssistantPage extends Page {
                                 <input
                                     type="text"
                                     .value=${this._dirInput}
-                                    @input=${(e) => { this._dirInput = e.target.value; this.requestUpdate(); }}
-                                    @keydown=${(e) => { if (e.key === "Enter") { e.preventDefault(); this._addFolder(); } }}
+                                    @input=${(e) => {
+                                        this._dirInput = e.target.value;
+                                        this.requestUpdate();
+                                    }}
+                                    @keydown=${(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            this._addFolder();
+                                        }
+                                    }}
                                     placeholder="/path/to/your/data"
                                 />
                                 <button @click=${this._browseFolder}>Browse</button>
@@ -649,12 +649,8 @@ export class AIAssistantPage extends Page {
                                 </button>
                             `
                           : html`<span style="font-size: 0.85em; color: #555;">Connected</span>`}
-                    ${this.connected
-                        ? html`<button @click=${this._newConversation}>New</button>`
-                        : ""}
-                    <button @click=${() => (this.settingsOpen = !this.settingsOpen)}>
-                        Settings
-                    </button>
+                    ${this.connected ? html`<button @click=${this._newConversation}>New</button>` : ""}
+                    <button @click=${() => (this.settingsOpen = !this.settingsOpen)}>Settings</button>
                 </div>
 
                 ${this.isReadOnly
@@ -664,7 +660,6 @@ export class AIAssistantPage extends Page {
                           </div>
                       `
                     : ""}
-
                 ${this.dataDirs.length > 0 && !this.isReadOnly
                     ? html`
                           <div class="dir-chips">
@@ -673,7 +668,12 @@ export class AIAssistantPage extends Page {
                                       <span class="dir-chip">
                                           <span class="dir-chip-text" title=${dir}>${this._shortDir(dir)}</span>
                                           ${!this.connected
-                                              ? html`<button class="dir-chip-remove" @click=${() => this._removeFolder(i)}>&times;</button>`
+                                              ? html`<button
+                                                    class="dir-chip-remove"
+                                                    @click=${() => this._removeFolder(i)}
+                                                >
+                                                    &times;
+                                                </button>`
                                               : ""}
                                       </span>
                                   `
@@ -681,13 +681,11 @@ export class AIAssistantPage extends Page {
                           </div>
                       `
                     : ""}
-
                 ${!this.connected && !this.isReadOnly
                     ? html`
                           <div class="consent-notice">
-                              By using the AI Assistant, you agree that conversation transcripts and
-                              generated code will be shared with CatalystNeuro for quality monitoring.
-                              Your data files are never uploaded.
+                              By using the AI Assistant, you agree that conversation transcripts and generated code will
+                              be shared with CatalystNeuro for quality monitoring. Your data files are never uploaded.
                           </div>
                       `
                     : ""}
@@ -699,17 +697,20 @@ export class AIAssistantPage extends Page {
                         <div class="ai-messages" id="ai-messages">
                             ${this.messages.length === 0 && !this.connected && !this.isReadOnly
                                 ? html`
-                                      <div style="text-align: center; color: #888; padding: 40px 20px; font-size: 0.95em; line-height: 1.6;">
+                                      <div
+                                          style="text-align: center; color: #888; padding: 40px 20px; font-size: 0.95em; line-height: 1.6;"
+                                      >
                                           <h3 style="color: #555; margin-bottom: 8px;">NWB Conversion Assistant</h3>
                                           <p>Select your data folder above and click <b>Start</b> to begin.</p>
                                       </div>
                                   `
                                 : ""}
                             ${this.messages.map(
-                                (msg) => html`<nwbguide-chat-message
-                                    .message=${msg}
-                                    @choice-selected=${this._onChoiceSelected}
-                                ></nwbguide-chat-message>`
+                                (msg) =>
+                                    html`<nwbguide-chat-message
+                                        .message=${msg}
+                                        @choice-selected=${this._onChoiceSelected}
+                                    ></nwbguide-chat-message>`
                             )}
                         </div>
 
@@ -735,7 +736,9 @@ export class AIAssistantPage extends Page {
                                                     class="interrupt-btn"
                                                     @click=${this._interrupt}
                                                     title="Stop the agent"
-                                                >Stop</button>`
+                                                >
+                                                    Stop
+                                                </button>`
                                               : ""}
                                       </div>
                                   </div>
@@ -750,17 +753,11 @@ export class AIAssistantPage extends Page {
                             ${PHASES.map((name, i) => {
                                 const num = i + 1;
                                 const status =
-                                    num < this.currentPhase
-                                        ? "completed"
-                                        : num === this.currentPhase
-                                          ? "active"
-                                          : "";
+                                    num < this.currentPhase ? "completed" : num === this.currentPhase ? "active" : "";
                                 const phaseTodos = this.todos.filter((t) => t.phase === num);
                                 return html`
                                     <li class="phase-item ${status}">
-                                        <span class="phase-dot">
-                                            ${status === "completed" ? "\u2713" : num}
-                                        </span>
+                                        <span class="phase-dot"> ${status === "completed" ? "\u2713" : num} </span>
                                         <span>${name}</span>
                                     </li>
                                     ${phaseTodos.length > 0
@@ -769,7 +766,9 @@ export class AIAssistantPage extends Page {
                                                   ${phaseTodos.map(
                                                       (t) => html`
                                                           <div class="todo-item ${t.done ? "done" : ""}">
-                                                              <span class="todo-check">${t.done ? "\u2611" : "\u2610"}</span>
+                                                              <span class="todo-check"
+                                                                  >${t.done ? "\u2611" : "\u2610"}</span
+                                                              >
                                                               <span>${t.text}</span>
                                                           </div>
                                                       `
