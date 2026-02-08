@@ -71,14 +71,16 @@ def list_sessions() -> list[dict]:
     for path in SESSIONS_DIR.glob("*.json"):
         try:
             record = json.loads(path.read_text())
-            sessions.append({
-                "session_id": record["session_id"],
-                "title": record["title"],
-                "data_dir": record["data_dir"],
-                "created_at": record["created_at"],
-                "updated_at": record["updated_at"],
-                "message_count": len(record["messages"]),
-            })
+            sessions.append(
+                {
+                    "session_id": record["session_id"],
+                    "title": record["title"],
+                    "data_dir": record["data_dir"],
+                    "created_at": record["created_at"],
+                    "updated_at": record["updated_at"],
+                    "message_count": len(record["messages"]),
+                }
+            )
         except Exception:
             continue
 

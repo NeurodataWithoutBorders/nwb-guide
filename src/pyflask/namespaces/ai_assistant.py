@@ -9,15 +9,14 @@ import os
 import time
 from pathlib import Path
 
-from flask import Response, request
-from flask_restx import Namespace, Resource
-
 from ai.agent import create_session, get_session, remove_session
 from ai.session_store import (
     delete_session_record,
     get_session_history,
-    list_sessions as list_saved_sessions,
 )
+from ai.session_store import list_sessions as list_saved_sessions
+from flask import Response, request
+from flask_restx import Namespace, Resource
 from manageNeuroconv.info import CONVERSION_SAVE_FOLDER_PATH
 
 ai_namespace = Namespace("ai", description="AI conversion assistant")

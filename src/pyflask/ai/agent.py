@@ -24,7 +24,7 @@ from claude_agent_sdk import (
     UserMessage,
 )
 
-from .api_config import APIConfig, DEFAULT_MODEL
+from .api_config import DEFAULT_MODEL, APIConfig
 from .monitoring import Monitor
 from .session_store import append_message, create_session_record
 from .skill_loader import load_skill
@@ -80,10 +80,12 @@ class ConversionAgent:
             self._loop.run_forever()
         except Exception as e:
             logger.error(f"Agent loop error: {e}", exc_info=True)
-            self.message_queue.put({
-                "type": "error",
-                "content": f"Agent initialization failed: {str(e)}",
-            })
+            self.message_queue.put(
+                {
+                    "type": "error",
+                    "content": f"Agent initialization failed: {str(e)}",
+                }
+            )
 
     async def _connect(self):
         """Connect the ClaudeSDKClient."""
@@ -115,11 +117,13 @@ class ConversionAgent:
 
     async def _on_post_tool_use(self, input_data, tool_use_id, context):
         """Hook: capture tool results for monitoring."""
-        self.monitor.upload_chunk({
-            "type": "tool_result",
-            "tool_name": input_data.get("tool_name"),
-            "tool_input": input_data.get("tool_input"),
-        })
+        self.monitor.upload_chunk(
+            {
+                "type": "tool_result",
+                "tool_name": input_data.get("tool_name"),
+                "tool_input": input_data.get("tool_input"),
+            }
+        )
         return {}
 
     async def _on_stop(self, input_data, tool_use_id, context):
@@ -139,23 +143,25 @@ class ConversionAgent:
         to the agent's event loop.
         """
         if not self._connected or not self._loop:
-            self.message_queue.put({
-                "type": "error",
-                "content": "Agent not connected yet. Please wait.",
-            })
+            self.message_queue.put(
+                {
+                    "type": "error",
+                    "content": "Agent not connected yet. Please wait.",
+                }
+            )
             return
 
         # Upload user message to monitoring and persist
-        self.monitor.upload_chunk({
-            "type": "user_message",
-            "content": content,
-        })
+        self.monitor.upload_chunk(
+            {
+                "type": "user_message",
+                "content": content,
+            }
+        )
         append_message(self.session_id, "user", content)
 
         # Schedule the async work on the agent's event loop
-        future = asyncio.run_coroutine_threadsafe(
-            self._process_message(content), self._loop
-        )
+        future = asyncio.run_coroutine_threadsafe(self._process_message(content), self._loop)
         # Don't block — the SSE stream will pick up messages from the queue
 
     async def _process_message(self, content):
@@ -173,10 +179,12 @@ class ConversionAgent:
 
         except Exception as e:
             logger.error(f"Agent message error: {e}", exc_info=True)
-            self.message_queue.put({
-                "type": "error",
-                "content": str(e),
-            })
+            self.message_queue.put(
+                {
+                    "type": "error",
+                    "content": str(e),
+                }
+            )
 
     def _message_to_event(self, message):
         """Convert a Claude SDK message to a serializable event dict."""
@@ -186,19 +194,23 @@ class ConversionAgent:
                 if isinstance(block, TextBlock):
                     blocks.append({"type": "text", "text": block.text})
                 elif isinstance(block, ToolUseBlock):
-                    blocks.append({
-                        "type": "tool_use",
-                        "id": block.id,
-                        "name": block.name,
-                        "input": block.input,
-                    })
+                    blocks.append(
+                        {
+                            "type": "tool_use",
+                            "id": block.id,
+                            "name": block.name,
+                            "input": block.input,
+                        }
+                    )
                 elif isinstance(block, ToolResultBlock):
-                    blocks.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.tool_use_id,
-                        "content": block.content if isinstance(block.content, str) else str(block.content),
-                        "is_error": block.is_error,
-                    })
+                    blocks.append(
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": block.tool_use_id,
+                            "content": block.content if isinstance(block.content, str) else str(block.content),
+                            "is_error": block.is_error,
+                        }
+                    )
             return {"type": "assistant", "content": blocks}
 
         elif isinstance(message, UserMessage):
@@ -206,12 +218,14 @@ class ConversionAgent:
             blocks = []
             for block in message.content:
                 if isinstance(block, ToolResultBlock):
-                    blocks.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.tool_use_id,
-                        "content": block.content if isinstance(block.content, str) else str(block.content),
-                        "is_error": block.is_error,
-                    })
+                    blocks.append(
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": block.tool_use_id,
+                            "content": block.content if isinstance(block.content, str) else str(block.content),
+                            "is_error": block.is_error,
+                        }
+                    )
             if blocks:
                 return {"type": "assistant", "content": blocks}
 
@@ -230,9 +244,7 @@ class ConversionAgent:
     def stop(self):
         """Disconnect the agent and stop the event loop."""
         if self._loop and self._client:
-            asyncio.run_coroutine_threadsafe(
-                self._client.disconnect(), self._loop
-            )
+            asyncio.run_coroutine_threadsafe(self._client.disconnect(), self._loop)
         if self._loop:
             self._loop.call_soon_threadsafe(self._loop.stop)
 

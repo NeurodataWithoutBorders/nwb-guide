@@ -120,14 +120,31 @@ export class ChatMessage extends LitElement {
             overflow-y: auto;
         }
 
-        .tool-code .hl-kw { color: #8839ef; }
-        .tool-code .hl-bi { color: #d20f39; }
-        .tool-code .hl-str { color: #40a02b; }
-        .tool-code .hl-num { color: #fe640b; }
-        .tool-code .hl-cmt { color: #8c8fa1; font-style: italic; }
-        .tool-code .hl-op { color: #1a1a1a; }
-        .tool-code .hl-dec { color: #e64553; }
-        .tool-code .hl-cls { color: #1e66f5; }
+        .tool-code .hl-kw {
+            color: #8839ef;
+        }
+        .tool-code .hl-bi {
+            color: #d20f39;
+        }
+        .tool-code .hl-str {
+            color: #40a02b;
+        }
+        .tool-code .hl-num {
+            color: #fe640b;
+        }
+        .tool-code .hl-cmt {
+            color: #8c8fa1;
+            font-style: italic;
+        }
+        .tool-code .hl-op {
+            color: #1a1a1a;
+        }
+        .tool-code .hl-dec {
+            color: #e64553;
+        }
+        .tool-code .hl-cls {
+            color: #1e66f5;
+        }
 
         .tool-diff {
             display: flex;
@@ -206,7 +223,8 @@ export class ChatMessage extends LitElement {
             padding: 0;
         }
 
-        .text-block ul, .text-block ol {
+        .text-block ul,
+        .text-block ol {
             margin: 0.4em 0;
             padding-left: 1.5em;
         }
@@ -215,14 +233,23 @@ export class ChatMessage extends LitElement {
             margin: 0.2em 0;
         }
 
-        .text-block h1, .text-block h2, .text-block h3, .text-block h4 {
+        .text-block h1,
+        .text-block h2,
+        .text-block h3,
+        .text-block h4 {
             margin: 0.6em 0 0.3em;
             line-height: 1.3;
         }
 
-        .text-block h1 { font-size: 1.2em; }
-        .text-block h2 { font-size: 1.1em; }
-        .text-block h3 { font-size: 1.0em; }
+        .text-block h1 {
+            font-size: 1.2em;
+        }
+        .text-block h2 {
+            font-size: 1.1em;
+        }
+        .text-block h3 {
+            font-size: 1em;
+        }
 
         .text-block blockquote {
             border-left: 3px solid #ccc;
@@ -237,7 +264,8 @@ export class ChatMessage extends LitElement {
             font-size: 0.9em;
         }
 
-        .text-block th, .text-block td {
+        .text-block th,
+        .text-block td {
             border: 1px solid #ddd;
             padding: 4px 8px;
         }
@@ -278,7 +306,9 @@ export class ChatMessage extends LitElement {
             cursor: pointer;
             font-size: 0.88em;
             line-height: 1.4;
-            transition: background 0.15s, border-color 0.15s;
+            transition:
+                background 0.15s,
+                border-color 0.15s;
             text-align: left;
         }
 
@@ -320,9 +350,7 @@ export class ChatMessage extends LitElement {
         }
 
         if (role === "user") {
-            return html`
-                <div class="message user">${content}</div>
-            `;
+            return html` <div class="message user">${content}</div> `;
         }
 
         // Assistant message — content is an array of blocks
@@ -344,9 +372,7 @@ export class ChatMessage extends LitElement {
         }
 
         // Fallback for plain text assistant
-        return html`
-            <div class="message assistant">${content}</div>
-        `;
+        return html` <div class="message assistant">${content}</div> `;
     }
 
     _renderBlock(block, resultMap = {}) {
@@ -359,18 +385,24 @@ export class ChatMessage extends LitElement {
                 const options = this._parseChoices(choicesMatch[1]);
 
                 return html`
-                    ${textBefore ? html`<div class="text-block">${unsafeHTML(this._renderMarkdown(textBefore))}</div>` : ""}
+                    ${textBefore
+                        ? html`<div class="text-block">${unsafeHTML(this._renderMarkdown(textBefore))}</div>`
+                        : ""}
                     <div class="choices ${block._answered ? "choices-answered" : ""}">
                         ${options.map(
                             (opt) => html`
                                 <button
                                     class="choice-btn ${block._selectedChoice === opt ? "selected" : ""}"
                                     @click=${() => this._onChoiceClick(opt, block)}
-                                >${opt}</button>
+                                >
+                                    ${opt}
+                                </button>
                             `
                         )}
                     </div>
-                    ${textAfter ? html`<div class="text-block">${unsafeHTML(this._renderMarkdown(textAfter))}</div>` : ""}
+                    ${textAfter
+                        ? html`<div class="text-block">${unsafeHTML(this._renderMarkdown(textAfter))}</div>`
+                        : ""}
                 `;
             }
 
@@ -413,13 +445,22 @@ export class ChatMessage extends LitElement {
             const cmd = input.command || "";
             // Show first line or first 80 chars
             const firstLine = cmd.split("\n")[0].slice(0, 80);
-            return html`<span class="tool-name">$</span> <span class="tool-summary">${firstLine}${cmd.length > 80 || cmd.includes("\n") ? "..." : ""}</span>`;
+            return html`<span class="tool-name">$</span>
+                <span class="tool-summary">${firstLine}${cmd.length > 80 || cmd.includes("\n") ? "..." : ""}</span>`;
         }
-        if (name === "Read") return html`<span class="tool-name">Read</span> <span class="tool-summary">${this._shortPath(input.file_path)}</span>`;
-        if (name === "Write") return html`<span class="tool-name">Write</span> <span class="tool-summary">${this._shortPath(input.file_path)}</span>`;
-        if (name === "Edit") return html`<span class="tool-name">Edit</span> <span class="tool-summary">${this._shortPath(input.file_path)}</span>`;
-        if (name === "Glob") return html`<span class="tool-name">Glob</span> <span class="tool-summary">${input.pattern}</span>`;
-        if (name === "Grep") return html`<span class="tool-name">Grep</span> <span class="tool-summary">${input.pattern}</span>`;
+        if (name === "Read")
+            return html`<span class="tool-name">Read</span>
+                <span class="tool-summary">${this._shortPath(input.file_path)}</span>`;
+        if (name === "Write")
+            return html`<span class="tool-name">Write</span>
+                <span class="tool-summary">${this._shortPath(input.file_path)}</span>`;
+        if (name === "Edit")
+            return html`<span class="tool-name">Edit</span>
+                <span class="tool-summary">${this._shortPath(input.file_path)}</span>`;
+        if (name === "Glob")
+            return html`<span class="tool-name">Glob</span> <span class="tool-summary">${input.pattern}</span>`;
+        if (name === "Grep")
+            return html`<span class="tool-name">Grep</span> <span class="tool-summary">${input.pattern}</span>`;
         return name;
     }
 
@@ -480,11 +521,190 @@ export class ChatMessage extends LitElement {
     }
 
     _tokenize(code, lang) {
-        const PY_KW = new Set(["False","None","True","and","as","assert","async","await","break","class","continue","def","del","elif","else","except","finally","for","from","global","if","import","in","is","lambda","nonlocal","not","or","pass","raise","return","try","while","with","yield"]);
-        const PY_BI = new Set(["print","len","range","type","int","str","float","list","dict","set","tuple","open","super","isinstance","hasattr","getattr","setattr","enumerate","zip","map","filter","sorted","reversed","any","all","min","max","sum","abs","round","input","format","id","hex","oct","bin","chr","ord","repr","hash","dir","vars","globals","locals","staticmethod","classmethod","property","Path","Union"]);
-        const JS_KW = new Set(["const","let","var","function","return","if","else","for","while","do","switch","case","break","continue","new","this","class","extends","import","export","from","default","async","await","try","catch","finally","throw","typeof","instanceof","of","in","yield"]);
-        const JS_BI = new Set(["console","document","window","Array","Object","String","Number","Boolean","Map","Set","Promise","JSON","Math","Date","Error","RegExp","parseInt","parseFloat","setTimeout","setInterval","fetch","require"]);
-        const SH_KW = new Set(["if","then","else","elif","fi","for","do","done","while","until","case","esac","function","in","export","source","alias","cd","echo","exit","pwd","read","set","unset","local","readonly","declare","eval","exec","trap","wait","kill","test","true","false"]);
+        const PY_KW = new Set([
+            "False",
+            "None",
+            "True",
+            "and",
+            "as",
+            "assert",
+            "async",
+            "await",
+            "break",
+            "class",
+            "continue",
+            "def",
+            "del",
+            "elif",
+            "else",
+            "except",
+            "finally",
+            "for",
+            "from",
+            "global",
+            "if",
+            "import",
+            "in",
+            "is",
+            "lambda",
+            "nonlocal",
+            "not",
+            "or",
+            "pass",
+            "raise",
+            "return",
+            "try",
+            "while",
+            "with",
+            "yield",
+        ]);
+        const PY_BI = new Set([
+            "print",
+            "len",
+            "range",
+            "type",
+            "int",
+            "str",
+            "float",
+            "list",
+            "dict",
+            "set",
+            "tuple",
+            "open",
+            "super",
+            "isinstance",
+            "hasattr",
+            "getattr",
+            "setattr",
+            "enumerate",
+            "zip",
+            "map",
+            "filter",
+            "sorted",
+            "reversed",
+            "any",
+            "all",
+            "min",
+            "max",
+            "sum",
+            "abs",
+            "round",
+            "input",
+            "format",
+            "id",
+            "hex",
+            "oct",
+            "bin",
+            "chr",
+            "ord",
+            "repr",
+            "hash",
+            "dir",
+            "vars",
+            "globals",
+            "locals",
+            "staticmethod",
+            "classmethod",
+            "property",
+            "Path",
+            "Union",
+        ]);
+        const JS_KW = new Set([
+            "const",
+            "let",
+            "var",
+            "function",
+            "return",
+            "if",
+            "else",
+            "for",
+            "while",
+            "do",
+            "switch",
+            "case",
+            "break",
+            "continue",
+            "new",
+            "this",
+            "class",
+            "extends",
+            "import",
+            "export",
+            "from",
+            "default",
+            "async",
+            "await",
+            "try",
+            "catch",
+            "finally",
+            "throw",
+            "typeof",
+            "instanceof",
+            "of",
+            "in",
+            "yield",
+        ]);
+        const JS_BI = new Set([
+            "console",
+            "document",
+            "window",
+            "Array",
+            "Object",
+            "String",
+            "Number",
+            "Boolean",
+            "Map",
+            "Set",
+            "Promise",
+            "JSON",
+            "Math",
+            "Date",
+            "Error",
+            "RegExp",
+            "parseInt",
+            "parseFloat",
+            "setTimeout",
+            "setInterval",
+            "fetch",
+            "require",
+        ]);
+        const SH_KW = new Set([
+            "if",
+            "then",
+            "else",
+            "elif",
+            "fi",
+            "for",
+            "do",
+            "done",
+            "while",
+            "until",
+            "case",
+            "esac",
+            "function",
+            "in",
+            "export",
+            "source",
+            "alias",
+            "cd",
+            "echo",
+            "exit",
+            "pwd",
+            "read",
+            "set",
+            "unset",
+            "local",
+            "readonly",
+            "declare",
+            "eval",
+            "exec",
+            "trap",
+            "wait",
+            "kill",
+            "test",
+            "true",
+            "false",
+        ]);
 
         const kw = lang === "python" ? PY_KW : lang === "js" ? JS_KW : SH_KW;
         const bi = lang === "python" ? PY_BI : lang === "js" ? JS_BI : new Set();
@@ -540,8 +760,14 @@ export class ChatMessage extends LitElement {
                 const quote = ch;
                 let j = i + 1;
                 while (j < len) {
-                    if (code[j] === "\\") { j += 2; continue; }
-                    if (code[j] === quote) { j++; break; }
+                    if (code[j] === "\\") {
+                        j += 2;
+                        continue;
+                    }
+                    if (code[j] === quote) {
+                        j++;
+                        break;
+                    }
                     j++;
                 }
                 tokens.push(["str", code.slice(i, j)]);
@@ -550,7 +776,12 @@ export class ChatMessage extends LitElement {
             }
 
             // f/r/b string prefixes (Python)
-            if (lang === "python" && (ch === "f" || ch === "r" || ch === "b") && i + 1 < len && (code[i + 1] === '"' || code[i + 1] === "'")) {
+            if (
+                lang === "python" &&
+                (ch === "f" || ch === "r" || ch === "b") &&
+                i + 1 < len &&
+                (code[i + 1] === '"' || code[i + 1] === "'")
+            ) {
                 const quote = code[i + 1];
                 // Check triple
                 if (i + 3 < len && code[i + 2] === quote && code[i + 3] === quote) {
@@ -558,8 +789,14 @@ export class ChatMessage extends LitElement {
                 }
                 let j = i + 2;
                 while (j < len) {
-                    if (code[j] === "\\") { j += 2; continue; }
-                    if (code[j] === quote) { j++; break; }
+                    if (code[j] === "\\") {
+                        j += 2;
+                        continue;
+                    }
+                    if (code[j] === quote) {
+                        j++;
+                        break;
+                    }
                     j++;
                 }
                 tokens.push(["str", code.slice(i, j)]);

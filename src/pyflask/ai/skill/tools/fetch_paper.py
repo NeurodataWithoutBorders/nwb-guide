@@ -21,9 +21,9 @@ import argparse
 import json
 import re
 import sys
-from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
+from urllib.request import Request, urlopen
 
 
 def parse_identifier(raw: str) -> dict:
