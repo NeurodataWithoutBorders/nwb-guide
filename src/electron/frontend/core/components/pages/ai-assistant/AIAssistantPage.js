@@ -26,7 +26,7 @@ export class AIAssistantPage extends Page {
         ...super.properties,
         messages: { type: Array, state: true },
         sessionId: { type: String, state: true },
-        dataDir: { type: String, state: true },
+        dataDirs: { type: Array, state: true },
         isStreaming: { type: Boolean, state: true },
         settingsOpen: { type: Boolean, state: true },
         connected: { type: Boolean, state: true },
@@ -46,7 +46,8 @@ export class AIAssistantPage extends Page {
         super(...args);
         this.messages = [];
         this.sessionId = null;
-        this.dataDir = "";
+        this.dataDirs = [];
+        this._dirInput = "";
         this.isStreaming = false;
         this.settingsOpen = false;
         this.connected = false;
@@ -57,6 +58,7 @@ export class AIAssistantPage extends Page {
         this.todos = [];
         this._eventSource = null;
         this._starting = false;
+        this._todoIdMap = new Map(); // TodoWrite id -> text
 
         this.style.height = "100%";
     }
@@ -99,7 +101,9 @@ export class AIAssistantPage extends Page {
     _renderSessionList() {
         return html`
             <style>
-                ${this._sharedStyles()} .session-list-container {
+                ${this._sharedStyles()}
+
+                .session-list-container {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
@@ -149,9 +153,7 @@ export class AIAssistantPage extends Page {
                     border-radius: 8px;
                     margin-bottom: 8px;
                     cursor: pointer;
-                    transition:
-                        background 0.15s,
-                        border-color 0.15s;
+                    transition: background 0.15s, border-color 0.15s;
                 }
 
                 .session-card:hover {
@@ -252,7 +254,9 @@ export class AIAssistantPage extends Page {
                 <div class="session-list-header">
                     <h3>Conversations</h3>
                     <div style="display: flex; gap: 8px;">
-                        <button class="new-chat-btn" @click=${this._showNewChat}>+ New Conversation</button>
+                        <button class="new-chat-btn" @click=${this._showNewChat}>
+                            + New Conversation
+                        </button>
                         <button
                             style="padding: 8px 14px; border: 1px solid #ccc; border-radius: 8px; background: white; cursor: pointer; font-size: 0.85em;"
                             @click=${() => (this.settingsOpen = !this.settingsOpen)}
@@ -268,25 +272,32 @@ export class AIAssistantPage extends Page {
                               <div class="empty-state">
                                   <h3>NWB Conversion Assistant</h3>
                                   <p>
-                                      I'll help you convert your neurophysiology data to NWB format and publish it on
-                                      DANDI Archive.
+                                      I'll help you convert your neurophysiology data to NWB format
+                                      and publish it on DANDI Archive.
                                   </p>
-                                  <p>Click <b>+ New Conversation</b> to get started.</p>
+                                  <p>
+                                      Click <b>+ New Conversation</b> to get started.
+                                  </p>
                               </div>
                           `
                         : this.savedSessions.map(
                               (s) => html`
                                   <div class="session-card" @click=${() => this._viewSession(s.session_id)}>
-                                      <div class="session-card-icon">${s.message_count > 0 ? "..." : ""}</div>
+                                      <div class="session-card-icon">
+                                          ${s.message_count > 0 ? "..." : ""}
+                                      </div>
                                       <div class="session-card-body">
                                           <div class="session-card-title">${s.title}</div>
                                           <div class="session-card-meta">
-                                              ${this._formatDate(s.updated_at)} &middot; ${s.message_count} messages
-                                              &middot; ${this._shortDir(s.data_dir)}
+                                              ${this._formatDate(s.updated_at)}
+                                              &middot; ${s.message_count} messages
+                                              &middot; ${(s.data_dirs || [s.data_dir]).map((d) => this._shortDir(d)).join(", ")}
                                           </div>
                                       </div>
                                       <div class="session-card-actions">
-                                          <button @click=${(e) => this._deleteSession(e, s.session_id)}>Delete</button>
+                                          <button @click=${(e) => this._deleteSession(e, s.session_id)}>
+                                              Delete
+                                          </button>
                                       </div>
                                   </div>
                               `
@@ -311,7 +322,9 @@ export class AIAssistantPage extends Page {
 
         return html`
             <style>
-                ${this._sharedStyles()} .ai-page {
+                ${this._sharedStyles()}
+
+                .ai-page {
                     display: flex;
                     flex-direction: column;
                     height: 100%;
@@ -544,6 +557,63 @@ export class AIAssistantPage extends Page {
                     margin-left: 26px;
                     padding: 2px 0 4px;
                 }
+
+                .dir-chips {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 6px;
+                    padding: 6px 0;
+                    flex-shrink: 0;
+                }
+
+                .dir-chip {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    background: #e3f2fd;
+                    border: 1px solid #90caf9;
+                    border-radius: 16px;
+                    padding: 4px 10px;
+                    font-size: 0.82em;
+                    color: #1565c0;
+                    max-width: 350px;
+                }
+
+                .dir-chip-text {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                .dir-chip-remove {
+                    background: none;
+                    border: none;
+                    color: #1565c0;
+                    cursor: pointer;
+                    font-size: 1.1em;
+                    padding: 0 2px;
+                    line-height: 1;
+                    border-radius: 50%;
+                }
+
+                .dir-chip-remove:hover {
+                    background: #bbdefb;
+                }
+
+                .thinking-spinner {
+                    width: 20px;
+                    height: 20px;
+                    border: 2.5px solid #e0e0e0;
+                    border-top-color: #1976d2;
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                    flex-shrink: 0;
+                    margin-bottom: 10px;
+                }
+
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
             </style>
 
             <div class="ai-page">
@@ -556,27 +626,35 @@ export class AIAssistantPage extends Page {
 
                     ${this.isReadOnly
                         ? ""
-                        : html`
-                              <label style="font-size: 0.85em; font-weight: 500; white-space: nowrap;">
-                                  Data folder:
-                              </label>
-                              <input
-                                  type="text"
-                                  .value=${this.dataDir}
-                                  @input=${(e) => (this.dataDir = e.target.value)}
-                                  placeholder="/path/to/your/data"
-                              />
-                              <button @click=${this._browseFolder}>Browse</button>
-                              <button
-                                  class="primary"
-                                  ?disabled=${!this.dataDir || this.connected || this._starting}
-                                  @click=${this._startSession}
-                              >
-                                  ${this.connected ? "Connected" : this._starting ? "Connecting..." : "Start"}
-                              </button>
-                          `}
-                    ${this.connected ? html`<button @click=${this._newConversation}>New</button>` : ""}
-                    <button @click=${() => (this.settingsOpen = !this.settingsOpen)}>Settings</button>
+                        : !this.connected
+                          ? html`
+                                <label style="font-size: 0.85em; font-weight: 500; white-space: nowrap;">
+                                    Data folders:
+                                </label>
+                                <input
+                                    type="text"
+                                    .value=${this._dirInput}
+                                    @input=${(e) => { this._dirInput = e.target.value; this.requestUpdate(); }}
+                                    @keydown=${(e) => { if (e.key === "Enter") { e.preventDefault(); this._addFolder(); } }}
+                                    placeholder="/path/to/your/data"
+                                />
+                                <button @click=${this._browseFolder}>Browse</button>
+                                <button @click=${this._addFolder} ?disabled=${!this._dirInput}>Add</button>
+                                <button
+                                    class="primary"
+                                    ?disabled=${this.dataDirs.length === 0 || this._starting}
+                                    @click=${this._startSession}
+                                >
+                                    ${this._starting ? "Connecting..." : "Start"}
+                                </button>
+                            `
+                          : html`<span style="font-size: 0.85em; color: #555;">Connected</span>`}
+                    ${this.connected
+                        ? html`<button @click=${this._newConversation}>New</button>`
+                        : ""}
+                    <button @click=${() => (this.settingsOpen = !this.settingsOpen)}>
+                        Settings
+                    </button>
                 </div>
 
                 ${this.isReadOnly
@@ -586,11 +664,30 @@ export class AIAssistantPage extends Page {
                           </div>
                       `
                     : ""}
+
+                ${this.dataDirs.length > 0 && !this.isReadOnly
+                    ? html`
+                          <div class="dir-chips">
+                              ${this.dataDirs.map(
+                                  (dir, i) => html`
+                                      <span class="dir-chip">
+                                          <span class="dir-chip-text" title=${dir}>${this._shortDir(dir)}</span>
+                                          ${!this.connected
+                                              ? html`<button class="dir-chip-remove" @click=${() => this._removeFolder(i)}>&times;</button>`
+                                              : ""}
+                                      </span>
+                                  `
+                              )}
+                          </div>
+                      `
+                    : ""}
+
                 ${!this.connected && !this.isReadOnly
                     ? html`
                           <div class="consent-notice">
-                              By using the AI Assistant, you agree that conversation transcripts and generated code will
-                              be shared with CatalystNeuro for quality monitoring. Your data files are never uploaded.
+                              By using the AI Assistant, you agree that conversation transcripts and
+                              generated code will be shared with CatalystNeuro for quality monitoring.
+                              Your data files are never uploaded.
                           </div>
                       `
                     : ""}
@@ -602,27 +699,27 @@ export class AIAssistantPage extends Page {
                         <div class="ai-messages" id="ai-messages">
                             ${this.messages.length === 0 && !this.connected && !this.isReadOnly
                                 ? html`
-                                      <div
-                                          style="text-align: center; color: #888; padding: 40px 20px; font-size: 0.95em; line-height: 1.6;"
-                                      >
+                                      <div style="text-align: center; color: #888; padding: 40px 20px; font-size: 0.95em; line-height: 1.6;">
                                           <h3 style="color: #555; margin-bottom: 8px;">NWB Conversion Assistant</h3>
                                           <p>Select your data folder above and click <b>Start</b> to begin.</p>
                                       </div>
                                   `
                                 : ""}
                             ${this.messages.map(
-                                (msg) =>
-                                    html`<nwbguide-chat-message
-                                        .message=${msg}
-                                        @choice-selected=${this._onChoiceSelected}
-                                    ></nwbguide-chat-message>`
+                                (msg) => html`<nwbguide-chat-message
+                                    .message=${msg}
+                                    @choice-selected=${this._onChoiceSelected}
+                                ></nwbguide-chat-message>`
                             )}
                         </div>
 
                         ${!this.isReadOnly
                             ? html`
                                   <div class="ai-input-area">
-                                      <div style="display: flex; align-items: center; gap: 8px;">
+                                      <div style="display: flex; align-items: flex-end; gap: 8px;">
+                                          ${this.isStreaming
+                                              ? html`<div class="thinking-spinner" title="Agent is working..."></div>`
+                                              : ""}
                                           <nwbguide-chat-input
                                               style="flex: 1;"
                                               ?disabled=${!this.connected}
@@ -638,9 +735,7 @@ export class AIAssistantPage extends Page {
                                                     class="interrupt-btn"
                                                     @click=${this._interrupt}
                                                     title="Stop the agent"
-                                                >
-                                                    Stop
-                                                </button>`
+                                                >Stop</button>`
                                               : ""}
                                       </div>
                                   </div>
@@ -655,11 +750,17 @@ export class AIAssistantPage extends Page {
                             ${PHASES.map((name, i) => {
                                 const num = i + 1;
                                 const status =
-                                    num < this.currentPhase ? "completed" : num === this.currentPhase ? "active" : "";
+                                    num < this.currentPhase
+                                        ? "completed"
+                                        : num === this.currentPhase
+                                          ? "active"
+                                          : "";
                                 const phaseTodos = this.todos.filter((t) => t.phase === num);
                                 return html`
                                     <li class="phase-item ${status}">
-                                        <span class="phase-dot"> ${status === "completed" ? "\u2713" : num} </span>
+                                        <span class="phase-dot">
+                                            ${status === "completed" ? "\u2713" : num}
+                                        </span>
                                         <span>${name}</span>
                                     </li>
                                     ${phaseTodos.length > 0
@@ -668,9 +769,7 @@ export class AIAssistantPage extends Page {
                                                   ${phaseTodos.map(
                                                       (t) => html`
                                                           <div class="todo-item ${t.done ? "done" : ""}">
-                                                              <span class="todo-check"
-                                                                  >${t.done ? "\u2611" : "\u2610"}</span
-                                                              >
+                                                              <span class="todo-check">${t.done ? "\u2611" : "\u2610"}</span>
                                                               <span>${t.text}</span>
                                                           </div>
                                                       `
@@ -714,13 +813,15 @@ export class AIAssistantPage extends Page {
     _showNewChat() {
         this.messages = [];
         this.sessionId = null;
-        this.dataDir = "";
+        this.dataDirs = [];
+        this._dirInput = "";
         this.connected = false;
         this.isStreaming = false;
         this.isReadOnly = false;
         this.currentPhase = 0;
         this.todos = [];
         this._starting = false;
+        this._todoIdMap = new Map();
         this.viewMode = "chat";
     }
 
@@ -730,10 +831,11 @@ export class AIAssistantPage extends Page {
             if (!resp.ok) return;
 
             const data = await resp.json();
+            const dirs = data.data_dirs || (data.data_dir ? [data.data_dir] : []);
             if (data.connected) {
                 // This is an active session — reconnect to it
                 this.sessionId = sessionId;
-                this.dataDir = data.data_dir || "";
+                this.dataDirs = dirs;
                 this.connected = true;
                 this.isReadOnly = false;
                 this.messages = [];
@@ -744,7 +846,7 @@ export class AIAssistantPage extends Page {
             } else if (data.messages) {
                 // Saved session — show read-only
                 this.sessionId = sessionId;
-                this.dataDir = data.data_dir || "";
+                this.dataDirs = dirs;
                 this.connected = false;
                 this.isReadOnly = true;
                 this.messages = data.messages;
@@ -789,8 +891,10 @@ export class AIAssistantPage extends Page {
                     title: "Select Data Folder",
                 });
                 if (result && !result.canceled && result.filePaths?.length) {
-                    this.dataDir = result.filePaths[0];
-                    this.requestUpdate();
+                    const dir = result.filePaths[0];
+                    if (!this.dataDirs.includes(dir)) {
+                        this.dataDirs = [...this.dataDirs, dir];
+                    }
                 }
             }
         } catch {
@@ -798,8 +902,22 @@ export class AIAssistantPage extends Page {
         }
     }
 
+    _addFolder() {
+        const dir = this._dirInput.trim();
+        if (!dir) return;
+        if (!this.dataDirs.includes(dir)) {
+            this.dataDirs = [...this.dataDirs, dir];
+        }
+        this._dirInput = "";
+        this.requestUpdate();
+    }
+
+    _removeFolder(index) {
+        this.dataDirs = this.dataDirs.filter((_, i) => i !== index);
+    }
+
     async _startSession() {
-        if (!this.dataDir || this.connected || this._starting) return;
+        if (this.dataDirs.length === 0 || this.connected || this._starting) return;
         this._starting = true;
         this.requestUpdate();
 
@@ -811,7 +929,7 @@ export class AIAssistantPage extends Page {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    data_dir: this.dataDir,
+                    data_dirs: this.dataDirs,
                     api_key: settings.apiKey,
                     model: settings.model,
                 }),
@@ -837,12 +955,13 @@ export class AIAssistantPage extends Page {
             this._addMessage("assistant", [
                 {
                     type: "text",
-                    text: "Connected! I'm ready to help you convert your data to NWB. Let me start by inspecting your data directory...",
+                    text: "Connected! I'm ready to help you convert your data to NWB. Let me start by inspecting your data...",
                 },
             ]);
 
+            const dirList = this.dataDirs.map((d) => `  - ${d}`).join("\n");
             this._sendToAgent(
-                `I'd like to convert my neurophysiology data to NWB format. My data is located at: ${this.dataDir}`
+                `I'd like to convert my neurophysiology data to NWB format. My data is located at:\n${dirList}`
             );
         } catch (e) {
             this._starting = false;
@@ -908,19 +1027,59 @@ export class AIAssistantPage extends Page {
         this._scrollToBottom();
     }
 
+    // Phase keyword patterns for inferring which phase a task belongs to
+    static PHASE_KEYWORDS = [
+        /* 1 */ /\b(experiment|intake|discover|species|modality|modalities|publication|lab\b|what.*record)/i,
+        /* 2 */ /\b(inspect|scan|file.?format|interface|neuroconv|data.?inspection|directory|file.?type)/i,
+        /* 3 */ /\b(metadata|subject|session.?info|electrode|age|sex|genotype|experimenter)/i,
+        /* 4 */ /\b(sync|clock|timestamp|alignment|synchroniz)/i,
+        /* 5 */ /\b(code.?gen|convert|script|pip.?install|converter|write.*code|generate.*code)/i,
+        /* 6 */ /\b(test|valid|inspector|nwbinspector|stub|verif)/i,
+        /* 7 */ /\b(dandi|upload|dandiset|publish|archive)/i,
+    ];
+
+    _inferPhase(text, metadata) {
+        // 1. Explicit phase in metadata (e.g., TaskCreate with metadata.phase)
+        if (metadata?.phase) {
+            const p = parseInt(metadata.phase, 10);
+            if (p >= 1 && p <= 7) return p;
+        }
+
+        // 2. Explicit "Phase N" in the text itself
+        const explicitMatch = text.match(/\bphase\s+(\d)\b/i);
+        if (explicitMatch) {
+            const p = parseInt(explicitMatch[1], 10);
+            if (p >= 1 && p <= 7) return p;
+        }
+
+        // 3. Keyword matching against phase themes
+        const lower = text.toLowerCase();
+        for (let i = 0; i < AIAssistantPage.PHASE_KEYWORDS.length; i++) {
+            if (AIAssistantPage.PHASE_KEYWORDS[i].test(lower)) {
+                return i + 1;
+            }
+        }
+
+        // 4. Fall back to current phase
+        return this.currentPhase;
+    }
+
     _detectPhaseTransition(content) {
         if (!Array.isArray(content)) return;
 
         for (const block of content) {
             // Detect phase headers from text
             if (block.type === "text") {
-                const phaseMatch = block.text.match(/(?:Phase|phase)\s+(\d)[:.\s]+(.+?)(?:\n|$)/);
-                if (phaseMatch) {
+                // Match various phase header patterns:
+                //   "Phase 2: Data Inspection", "### Phase 3 — Metadata", "Moving to Phase 4"
+                const phaseRegex = /(?:^#+\s*)?(?:Phase|phase)\s+(\d)\s*[:.—\-–\s]+(.+?)(?:\n|$)/gm;
+                let phaseMatch;
+                while ((phaseMatch = phaseRegex.exec(block.text)) !== null) {
                     const phaseNum = parseInt(phaseMatch[1], 10);
-                    if (phaseNum > this.currentPhase) {
+                    if (phaseNum >= 1 && phaseNum <= 7 && phaseNum > this.currentPhase) {
                         this.currentPhase = phaseNum;
+                        this._addMessage("phase", `Phase ${phaseMatch[1]}: ${phaseMatch[2].trim()}`);
                     }
-                    this._addMessage("phase", `Phase ${phaseMatch[1]}: ${phaseMatch[2].trim()}`);
                 }
 
                 // Parse checklist items: - [ ] todo or - [x] done
@@ -929,30 +1088,51 @@ export class AIAssistantPage extends Page {
                 while ((match = todoRegex.exec(block.text)) !== null) {
                     const done = match[1].toLowerCase() === "x";
                     const text = match[2].trim();
-                    this._upsertTodo(text, done, this.currentPhase);
+                    this._upsertTodo(text, done, this._inferPhase(text, null));
                 }
             }
 
-            // Detect TaskCreate / TodoWrite tool calls
-            if (block.type === "tool_use" && (block.name === "TaskCreate" || block.name === "TodoWrite")) {
+            if (block.type !== "tool_use") continue;
+
+            // TodoWrite: input.todos is an array of {id, content, status}
+            if (block.name === "TodoWrite") {
+                const todos = block.input?.todos;
+                if (Array.isArray(todos)) {
+                    for (const item of todos) {
+                        const text = item.content || item.subject || item.task || "";
+                        if (!text) continue;
+                        const done = item.status === "completed";
+                        this._upsertTodo(text, done, this._inferPhase(text, item.metadata));
+                        if (item.id) this._todoIdMap.set(item.id, text);
+                    }
+                }
+            }
+
+            // TaskCreate: input.subject is the task title
+            if (block.name === "TaskCreate") {
                 const subject = block.input?.subject || block.input?.task || "";
                 if (subject) {
-                    this._upsertTodo(subject, false, this.currentPhase);
+                    const desc = block.input?.description || "";
+                    const phase = this._inferPhase(`${subject} ${desc}`, block.input?.metadata);
+                    this._upsertTodo(subject, false, phase);
                 }
             }
 
-            // Detect TaskUpdate / TodoWrite status changes
-            if (block.type === "tool_use" && (block.name === "TaskUpdate" || block.name === "TodoUpdate")) {
+            // TaskUpdate: match by taskId to mark done
+            if (block.name === "TaskUpdate") {
                 const status = block.input?.status;
                 const taskId = block.input?.taskId || block.input?.id;
                 if (status === "completed" && taskId) {
-                    // Try to mark a todo as done by matching the taskId or subject
-                    // Since we don't track IDs, mark by index if it matches
-                    const idx = parseInt(taskId, 10) - 1;
-                    if (idx >= 0 && idx < this.todos.length) {
-                        const updated = [...this.todos];
-                        updated[idx] = { ...updated[idx], done: true };
-                        this.todos = updated;
+                    const mappedText = this._todoIdMap.get(taskId);
+                    if (mappedText) {
+                        this._upsertTodo(mappedText, true, null);
+                    } else {
+                        const idx = parseInt(taskId, 10) - 1;
+                        if (idx >= 0 && idx < this.todos.length) {
+                            const updated = [...this.todos];
+                            updated[idx] = { ...updated[idx], done: true };
+                            this.todos = updated;
+                        }
                     }
                 }
             }
@@ -963,7 +1143,10 @@ export class AIAssistantPage extends Page {
         const existing = this.todos.findIndex((t) => t.text === text);
         if (existing >= 0) {
             const updated = [...this.todos];
-            updated[existing] = { ...updated[existing], done, phase: updated[existing].phase || phase };
+            // Keep existing phase unless a more specific one is provided
+            const existingPhase = updated[existing].phase;
+            const newPhase = phase || existingPhase;
+            updated[existing] = { ...updated[existing], done, phase: newPhase };
             this.todos = updated;
         } else {
             this.todos = [...this.todos, { text, done, phase }];
@@ -1073,12 +1256,15 @@ export class AIAssistantPage extends Page {
 
         this.messages = [];
         this.sessionId = null;
+        this.dataDirs = [];
+        this._dirInput = "";
         this.connected = false;
         this.isStreaming = false;
         this.isReadOnly = false;
         this.currentPhase = 0;
         this.todos = [];
         this._starting = false;
+        this._todoIdMap = new Map();
         this.viewMode = "list";
         this._loadSessions();
     }
@@ -1093,17 +1279,37 @@ export class AIAssistantPage extends Page {
     _rebuildTodoState(messages) {
         let phase = 1; // Phase 1 is active from the start
         const todoMap = new Map(); // text -> { done, phase }
+        const idMap = new Map(); // TodoWrite id -> text
+
+        // Local version of _inferPhase that uses `phase` variable instead of this.currentPhase
+        const inferPhase = (text, metadata) => {
+            if (metadata?.phase) {
+                const p = parseInt(metadata.phase, 10);
+                if (p >= 1 && p <= 7) return p;
+            }
+            const explicitMatch = text.match(/\bphase\s+(\d)\b/i);
+            if (explicitMatch) {
+                const p = parseInt(explicitMatch[1], 10);
+                if (p >= 1 && p <= 7) return p;
+            }
+            const lower = text.toLowerCase();
+            for (let i = 0; i < AIAssistantPage.PHASE_KEYWORDS.length; i++) {
+                if (AIAssistantPage.PHASE_KEYWORDS[i].test(lower)) return i + 1;
+            }
+            return phase;
+        };
 
         for (const msg of messages) {
             if (msg.role !== "assistant" || !Array.isArray(msg.content)) continue;
 
             for (const block of msg.content) {
                 if (block.type === "text") {
-                    // Phases
-                    const phaseMatch = block.text.match(/(?:Phase|phase)\s+(\d)[:.\s]+(.+?)(?:\n|$)/);
-                    if (phaseMatch) {
+                    // Phases — broader regex
+                    const phaseRegex = /(?:^#+\s*)?(?:Phase|phase)\s+(\d)\s*[:.—\-–\s]+(.+?)(?:\n|$)/gm;
+                    let phaseMatch;
+                    while ((phaseMatch = phaseRegex.exec(block.text)) !== null) {
                         const num = parseInt(phaseMatch[1], 10);
-                        if (num > phase) phase = num;
+                        if (num >= 1 && num <= 7 && num > phase) phase = num;
                     }
 
                     // Checklist items
@@ -1113,22 +1319,57 @@ export class AIAssistantPage extends Page {
                         const done = m[1].toLowerCase() === "x";
                         const text = m[2].trim();
                         const prev = todoMap.get(text);
-                        todoMap.set(text, { done, phase: prev?.phase || phase });
+                        todoMap.set(text, { done, phase: prev?.phase || inferPhase(text, null) });
                     }
                 }
 
-                // TaskCreate / TodoWrite tool calls
-                if (block.type === "tool_use" && (block.name === "TaskCreate" || block.name === "TodoWrite")) {
+                if (block.type !== "tool_use") continue;
+
+                // `TodoWrite`: `input.todos` is an array of `{id, content, status}`
+                if (block.name === "TodoWrite") {
+                    const todos = block.input?.todos;
+                    if (Array.isArray(todos)) {
+                        for (const item of todos) {
+                            const text = item.content || item.subject || item.task || "";
+                            if (!text) continue;
+                            const done = item.status === "completed";
+                            const prev = todoMap.get(text);
+                            todoMap.set(text, { done, phase: prev?.phase || inferPhase(text, item.metadata) });
+                            if (item.id) idMap.set(item.id, text);
+                        }
+                    }
+                }
+
+                // `TaskCreate`: `input.subject` is the task title
+                if (block.name === "TaskCreate") {
                     const subject = block.input?.subject || block.input?.task || "";
                     if (subject) {
+                        const desc = block.input?.description || "";
                         const prev = todoMap.get(subject);
-                        todoMap.set(subject, { done: prev?.done || false, phase: prev?.phase || phase });
+                        todoMap.set(subject, {
+                            done: prev?.done || false,
+                            phase: prev?.phase || inferPhase(`${subject} ${desc}`, block.input?.metadata),
+                        });
+                    }
+                }
+
+                // `TaskUpdate`: match by `taskId`
+                if (block.name === "TaskUpdate") {
+                    const status = block.input?.status;
+                    const taskId = block.input?.taskId || block.input?.id;
+                    if (status === "completed" && taskId) {
+                        const mappedText = idMap.get(taskId);
+                        if (mappedText) {
+                            const prev = todoMap.get(mappedText);
+                            todoMap.set(mappedText, { ...prev, done: true });
+                        }
                     }
                 }
             }
         }
 
         this.currentPhase = phase;
+        this._todoIdMap = idMap;
         this.todos = [...todoMap.entries()].map(([text, { done, phase: p }]) => ({ text, done, phase: p }));
     }
 

@@ -9,15 +9,16 @@ import os
 import time
 from pathlib import Path
 
-from ai.agent import create_session, get_session, remove_session
-from ai.session_store import (
-    delete_session_record,
-    get_session_history,
-)
-from ai.session_store import list_sessions as list_saved_sessions
 from flask import Response, request
 from flask_restx import Namespace, Resource
-from manageNeuroconv.info import CONVERSION_SAVE_FOLDER_PATH
+
+from ai.agent import create_session, get_session, remove_session
+from ai.session_store import (
+    SESSIONS_DIR,
+    delete_session_record,
+    get_session_history,
+    list_sessions as list_saved_sessions,
+)
 
 ai_namespace = Namespace("ai", description="AI conversion assistant")
 
@@ -40,32 +41,48 @@ class Sessions(Resource):
         """Create a new agent session.
 
         Payload:
-            data_dir (str): Path to the data directory to convert.
+            data_dirs (list[str]): Paths to data directories to convert.
+            data_dir (str): Legacy single path (used if data_dirs not provided).
             api_key (str, optional): Anthropic API key.
             model (str, optional): Model to use.
             lab_name (str, optional): Lab name for monitoring.
         """
         payload = ai_namespace.payload or {}
-        data_dir = payload.get("data_dir")
 
-        if not data_dir:
-            return {"message": "data_dir is required"}, 400
+        # Support both data_dirs (list) and legacy data_dir (string)
+        data_dirs = payload.get("data_dirs") or []
+        if not data_dirs:
+            single = payload.get("data_dir")
+            if single:
+                data_dirs = [single]
 
-        if not os.path.isdir(data_dir):
-            return {"message": f"data_dir does not exist: {data_dir}"}, 400
+        if not data_dirs:
+            return {"message": "At least one data directory is required"}, 400
 
-        # Create a repo directory inside GUIDE's conversions folder
-        lab_name = payload.get("lab_name", "lab")
-        repo_name = f"{lab_name}-to-nwb"
-        repo_dir = str(CONVERSION_SAVE_FOLDER_PATH / repo_name)
+        for d in data_dirs:
+            if not os.path.isdir(d):
+                return {"message": f"data_dir does not exist: {d}"}, 400
+
+        # Derive a label from the first data directory name
+        label = Path(data_dirs[0]).name.replace(" ", "-").lower()
+        repo_name = f"{label}-to-nwb"
+
+        # create_session generates the session_id — we need it for the path,
+        # so generate it here and pass it through
+        import uuid
+        session_id = str(uuid.uuid4())
+
+        # Repo lives at [NWB_GUIDE_DIR]/ai-sessions/<session_id>/<label>-to-nwb
+        session_dir = SESSIONS_DIR / session_id
+        repo_dir = str(session_dir / repo_name)
         os.makedirs(repo_dir, exist_ok=True)
 
-        session_id = create_session(
-            data_dir=data_dir,
+        create_session(
+            session_id=session_id,
+            data_dirs=data_dirs,
             repo_dir=repo_dir,
             api_key=payload.get("api_key"),
             model=payload.get("model"),
-            lab_name=lab_name,
         )
 
         return {"session_id": session_id, "repo_dir": repo_dir}
@@ -84,7 +101,7 @@ class Session(Resource):
         if agent:
             return {
                 "session_id": session_id,
-                "data_dir": agent.data_dir,
+                "data_dirs": agent.data_dirs,
                 "repo_dir": agent.repo_dir,
                 "connected": agent._connected,
             }
@@ -92,9 +109,11 @@ class Session(Resource):
         # Fall back to saved session history
         history = get_session_history(session_id)
         if history:
+            # Support both old (data_dir) and new (data_dirs) format
+            data_dirs = history.get("data_dirs") or ([history["data_dir"]] if history.get("data_dir") else [])
             return {
                 "session_id": session_id,
-                "data_dir": history["data_dir"],
+                "data_dirs": data_dirs,
                 "title": history["title"],
                 "created_at": history["created_at"],
                 "updated_at": history["updated_at"],

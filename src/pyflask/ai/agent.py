@@ -9,7 +9,6 @@ import asyncio
 import logging
 import queue
 import threading
-import uuid
 
 from claude_agent_sdk import (
     AssistantMessage,
@@ -39,9 +38,9 @@ class ConversionAgent:
     Messages are put on a thread-safe queue and consumed by the SSE endpoint.
     """
 
-    def __init__(self, session_id, data_dir, repo_dir, api_config=None, lab_name=None):
+    def __init__(self, session_id, data_dirs, repo_dir, api_config=None, lab_name=None):
         self.session_id = session_id
-        self.data_dir = data_dir
+        self.data_dirs = data_dirs
         self.repo_dir = repo_dir
         self.api_config = api_config or APIConfig()
         self.lab_name = lab_name
@@ -96,7 +95,7 @@ class ConversionAgent:
             allowed_tools=["Bash", "Read", "Write", "Edit", "Glob", "Grep"],
             permission_mode="bypassPermissions",
             cwd=self.repo_dir,
-            add_dirs=[self.data_dir],
+            add_dirs=self.data_dirs,
             env=env,
             model=self.api_config.model or DEFAULT_MODEL,
             include_partial_messages=True,
@@ -253,20 +252,17 @@ class ConversionAgent:
 _sessions = {}
 
 
-def create_session(data_dir, repo_dir, api_key=None, model=None, lab_name=None):
-    """Create a new agent session and return its ID."""
-    session_id = str(uuid.uuid4())
-
+def create_session(session_id, data_dirs, repo_dir, api_key=None, model=None):
+    """Create a new agent session with the given ID."""
     # Persist session metadata to disk
-    create_session_record(session_id, data_dir)
+    create_session_record(session_id, data_dirs)
 
     api_config = APIConfig(api_key=api_key, model=model)
     agent = ConversionAgent(
         session_id=session_id,
-        data_dir=data_dir,
+        data_dirs=data_dirs,
         repo_dir=repo_dir,
         api_config=api_config,
-        lab_name=lab_name,
     )
     agent.start()
     _sessions[session_id] = agent

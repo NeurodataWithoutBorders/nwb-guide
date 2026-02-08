@@ -3,8 +3,8 @@
 Sessions are stored as JSON files in ~/NWB_GUIDE/ai-sessions/<session_id>.json.
 Each file contains:
   - session_id
-  - title (derived from first user message or data_dir)
-  - data_dir
+  - title (derived from first user message or data_dirs)
+  - data_dirs (list of directory paths)
   - created_at (ISO timestamp)
   - updated_at (ISO timestamp)
   - messages (list of {role, content} dicts)
@@ -24,16 +24,19 @@ SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _session_path(session_id: str) -> Path:
-    return SESSIONS_DIR / f"{session_id}.json"
+    session_dir = SESSIONS_DIR / session_id
+    session_dir.mkdir(parents=True, exist_ok=True)
+    return session_dir / "session.json"
 
 
-def create_session_record(session_id: str, data_dir: str, title: str = "") -> dict:
+def create_session_record(session_id: str, data_dirs: list[str], title: str = "") -> dict:
     """Create a new session record on disk."""
     now = datetime.now(timezone.utc).isoformat()
+    dir_name = Path(data_dirs[0]).name if data_dirs else "data"
     record = {
         "session_id": session_id,
-        "title": title or f"Conversion — {Path(data_dir).name}",
-        "data_dir": data_dir,
+        "title": title or f"Conversion — {dir_name}",
+        "data_dirs": data_dirs,
         "created_at": now,
         "updated_at": now,
         "messages": [],
@@ -68,19 +71,20 @@ def append_message(session_id: str, role: str, content) -> None:
 def list_sessions() -> list[dict]:
     """List all saved sessions, sorted by most recently updated."""
     sessions = []
-    for path in SESSIONS_DIR.glob("*.json"):
+    for path in SESSIONS_DIR.glob("*/session.json"):
         try:
             record = json.loads(path.read_text())
-            sessions.append(
-                {
-                    "session_id": record["session_id"],
-                    "title": record["title"],
-                    "data_dir": record["data_dir"],
-                    "created_at": record["created_at"],
-                    "updated_at": record["updated_at"],
-                    "message_count": len(record["messages"]),
-                }
-            )
+            # Support both old (data_dir) and new (data_dirs) format
+            data_dirs = record.get("data_dirs") or ([record["data_dir"]] if record.get("data_dir") else [])
+            sessions.append({
+                "session_id": record["session_id"],
+                "title": record["title"],
+                "data_dirs": data_dirs,
+                "data_dir": data_dirs[0] if data_dirs else "",
+                "created_at": record["created_at"],
+                "updated_at": record["updated_at"],
+                "message_count": len(record["messages"]),
+            })
         except Exception:
             continue
 
@@ -101,9 +105,11 @@ def get_session_history(session_id: str) -> dict | None:
 
 
 def delete_session_record(session_id: str) -> bool:
-    """Delete a session record from disk."""
-    path = _session_path(session_id)
-    if path.exists():
-        path.unlink()
+    """Delete a session directory (JSON + conversion repo) from disk."""
+    import shutil
+
+    session_dir = SESSIONS_DIR / session_id
+    if session_dir.exists():
+        shutil.rmtree(session_dir)
         return True
     return False
