@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 SESSIONS_DIR = Path(GUIDE_ROOT_FOLDER) / "ai-sessions"
 SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
 
+CONVERSIONS_DIR = Path(GUIDE_ROOT_FOLDER) / "conversions"
+CONVERSIONS_DIR.mkdir(parents=True, exist_ok=True)
+
 
 def _session_path(session_id: str) -> Path:
     session_dir = SESSIONS_DIR / session_id

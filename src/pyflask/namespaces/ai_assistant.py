@@ -9,15 +9,17 @@ import os
 import time
 from pathlib import Path
 
+from flask import Response, request
+from flask_restx import Namespace, Resource
+
 from ai.agent import create_session, get_session, remove_session
 from ai.session_store import (
+    CONVERSIONS_DIR,
     SESSIONS_DIR,
     delete_session_record,
     get_session_history,
+    list_sessions as list_saved_sessions,
 )
-from ai.session_store import list_sessions as list_saved_sessions
-from flask import Response, request
-from flask_restx import Namespace, Resource
 
 ai_namespace = Namespace("ai", description="AI conversion assistant")
 
@@ -66,26 +68,29 @@ class Sessions(Resource):
         label = Path(data_dirs[0]).name.replace(" ", "-").lower()
         repo_name = f"{label}-to-nwb"
 
-        # create_session generates the session_id — we need it for the path,
-        # so generate it here and pass it through
-        import uuid
+        # Use datetime as session ID (filesystem-safe, sortable)
+        from datetime import datetime, timezone
+        session_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
-        session_id = str(uuid.uuid4())
-
-        # Repo lives at [NWB_GUIDE_DIR]/ai-sessions/<session_id>/<label>-to-nwb
+        # Code repo lives at [NWB_GUIDE_DIR]/ai-sessions/<session_id>/<label>-to-nwb
         session_dir = SESSIONS_DIR / session_id
         repo_dir = str(session_dir / repo_name)
         os.makedirs(repo_dir, exist_ok=True)
+
+        # NWB output lives at [NWB_GUIDE_DIR]/conversions/<session_id>/<label>-to-nwb
+        output_dir = str(CONVERSIONS_DIR / session_id / repo_name)
+        os.makedirs(output_dir, exist_ok=True)
 
         create_session(
             session_id=session_id,
             data_dirs=data_dirs,
             repo_dir=repo_dir,
+            output_dir=output_dir,
             api_key=payload.get("api_key"),
             model=payload.get("model"),
         )
 
-        return {"session_id": session_id, "repo_dir": repo_dir}
+        return {"session_id": session_id, "repo_dir": repo_dir, "output_dir": output_dir}
 
 
 @ai_namespace.route("/sessions/<string:session_id>")

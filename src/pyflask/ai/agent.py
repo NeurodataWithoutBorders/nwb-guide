@@ -38,10 +38,11 @@ class ConversionAgent:
     Messages are put on a thread-safe queue and consumed by the SSE endpoint.
     """
 
-    def __init__(self, session_id, data_dirs, repo_dir, api_config=None, lab_name=None):
+    def __init__(self, session_id, data_dirs, repo_dir, output_dir, api_config=None, lab_name=None):
         self.session_id = session_id
         self.data_dirs = data_dirs
         self.repo_dir = repo_dir
+        self.output_dir = output_dir
         self.api_config = api_config or APIConfig()
         self.lab_name = lab_name
 
@@ -90,8 +91,16 @@ class ConversionAgent:
         """Connect the ClaudeSDKClient."""
         env = self.api_config.to_env()
 
+        # Build system prompt with write-restriction reminder
+        prompt = self.skill_prompt + (
+            f"\n\nIMPORTANT: Your working directory is {self.repo_dir}. "
+            "Write all conversion code (scripts, configs, metadata YAML) here. "
+            f"Write all NWB output files to {self.output_dir}. "
+            "The data directories are READ-ONLY — never write, edit, or delete files there."
+        )
+
         options = ClaudeAgentOptions(
-            system_prompt=self.skill_prompt,
+            system_prompt=prompt,
             allowed_tools=["Bash", "Read", "Write", "Edit", "Glob", "Grep"],
             permission_mode="bypassPermissions",
             cwd=self.repo_dir,
@@ -100,6 +109,9 @@ class ConversionAgent:
             model=self.api_config.model or DEFAULT_MODEL,
             include_partial_messages=True,
             hooks={
+                "PreToolUse": [
+                    HookMatcher(hooks=[self._enforce_write_restriction]),
+                ],
                 "PostToolUse": [
                     HookMatcher(hooks=[self._on_post_tool_use]),
                 ],
@@ -113,6 +125,35 @@ class ConversionAgent:
         await self._client.connect()
         self._connected = True
         logger.info(f"Agent {self.session_id} connected")
+
+    async def _enforce_write_restriction(self, input_data, tool_use_id, context):
+        """PreToolUse hook: block writes outside the conversion repo directory."""
+        tool_name = input_data.get("tool_name", "")
+        tool_input = input_data.get("tool_input", {})
+
+        # Only check file-writing tools
+        if tool_name in ("Write", "Edit"):
+            file_path = tool_input.get("file_path", "")
+            if file_path:
+                from os.path import realpath
+                resolved = realpath(file_path)
+                allowed = [realpath(self.repo_dir), realpath(self.output_dir)]
+                if not any(
+                    resolved == d or resolved.startswith(d + "/") for d in allowed
+                ):
+                    return {
+                        "hookSpecificOutput": {
+                            "hookEventName": input_data.get("hook_event_name", "PreToolUse"),
+                            "permissionDecision": "deny",
+                            "permissionDecisionReason": (
+                                f"Write blocked: files can only be written inside the code "
+                                f"directory ({self.repo_dir}) or the output directory "
+                                f"({self.output_dir}). Attempted to write to: {file_path}"
+                            ),
+                        }
+                    }
+
+        return {}
 
     async def _on_post_tool_use(self, input_data, tool_use_id, context):
         """Hook: capture tool results for monitoring."""
@@ -252,7 +293,7 @@ class ConversionAgent:
 _sessions = {}
 
 
-def create_session(session_id, data_dirs, repo_dir, api_key=None, model=None):
+def create_session(session_id, data_dirs, repo_dir, output_dir, api_key=None, model=None):
     """Create a new agent session with the given ID."""
     # Persist session metadata to disk
     create_session_record(session_id, data_dirs)
@@ -262,6 +303,7 @@ def create_session(session_id, data_dirs, repo_dir, api_key=None, model=None):
         session_id=session_id,
         data_dirs=data_dirs,
         repo_dir=repo_dir,
+        output_dir=output_dir,
         api_config=api_config,
     )
     agent.start()
