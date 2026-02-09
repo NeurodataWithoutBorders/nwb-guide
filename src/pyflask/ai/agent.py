@@ -136,11 +136,10 @@ class ConversionAgent:
             file_path = tool_input.get("file_path", "")
             if file_path:
                 from os.path import realpath
+
                 resolved = realpath(file_path)
                 allowed = [realpath(self.repo_dir), realpath(self.output_dir)]
-                if not any(
-                    resolved == d or resolved.startswith(d + "/") for d in allowed
-                ):
+                if not any(resolved == d or resolved.startswith(d + "/") for d in allowed):
                     return {
                         "hookSpecificOutput": {
                             "hookEventName": input_data.get("hook_event_name", "PreToolUse"),

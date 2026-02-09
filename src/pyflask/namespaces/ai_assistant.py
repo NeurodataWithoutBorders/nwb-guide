@@ -9,17 +9,16 @@ import os
 import time
 from pathlib import Path
 
-from flask import Response, request
-from flask_restx import Namespace, Resource
-
 from ai.agent import create_session, get_session, remove_session
 from ai.session_store import (
     CONVERSIONS_DIR,
     SESSIONS_DIR,
     delete_session_record,
     get_session_history,
-    list_sessions as list_saved_sessions,
 )
+from ai.session_store import list_sessions as list_saved_sessions
+from flask import Response, request
+from flask_restx import Namespace, Resource
 
 ai_namespace = Namespace("ai", description="AI conversion assistant")
 
@@ -70,6 +69,7 @@ class Sessions(Resource):
 
         # Use datetime as session ID (filesystem-safe, sortable)
         from datetime import datetime, timezone
+
         session_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
         # Code repo lives at [NWB_GUIDE_DIR]/ai-sessions/<session_id>/<label>-to-nwb
