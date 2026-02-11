@@ -87,9 +87,14 @@ class ConversionAgent:
                 }
             )
 
+    @property
+    def auth_mode(self):
+        """Return the detected billing mode (subscription / api_key / proxy)."""
+        return self.api_config.auth_mode
+
     async def _connect(self):
         """Connect the ClaudeSDKClient."""
-        env = self.api_config.to_env()
+        env = self.api_config.to_env(session_id=self.session_id)
 
         # Build system prompt with write-restriction reminder
         prompt = self.skill_prompt + (
@@ -293,7 +298,10 @@ _sessions = {}
 
 
 def create_session(session_id, data_dirs, repo_dir, output_dir, api_key=None, model=None):
-    """Create a new agent session with the given ID."""
+    """Create a new agent session with the given ID.
+
+    Returns a dict with session_id and auth_mode.
+    """
     # Persist session metadata to disk
     create_session_record(session_id, data_dirs)
 
@@ -307,7 +315,7 @@ def create_session(session_id, data_dirs, repo_dir, output_dir, api_key=None, mo
     )
     agent.start()
     _sessions[session_id] = agent
-    return session_id
+    return {"session_id": session_id, "auth_mode": api_config.auth_mode}
 
 
 def get_session(session_id):

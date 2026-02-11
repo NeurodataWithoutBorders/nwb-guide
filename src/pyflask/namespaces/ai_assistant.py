@@ -81,7 +81,7 @@ class Sessions(Resource):
         output_dir = str(CONVERSIONS_DIR / session_id / repo_name)
         os.makedirs(output_dir, exist_ok=True)
 
-        create_session(
+        result = create_session(
             session_id=session_id,
             data_dirs=data_dirs,
             repo_dir=repo_dir,
@@ -90,7 +90,12 @@ class Sessions(Resource):
             model=payload.get("model"),
         )
 
-        return {"session_id": session_id, "repo_dir": repo_dir, "output_dir": output_dir}
+        return {
+            "session_id": session_id,
+            "repo_dir": repo_dir,
+            "output_dir": output_dir,
+            "auth_mode": result["auth_mode"],
+        }
 
 
 @ai_namespace.route("/sessions/<string:session_id>")
@@ -109,6 +114,7 @@ class Session(Resource):
                 "data_dirs": agent.data_dirs,
                 "repo_dir": agent.repo_dir,
                 "connected": agent._connected,
+                "auth_mode": agent.auth_mode,
             }
 
         # Fall back to saved session history

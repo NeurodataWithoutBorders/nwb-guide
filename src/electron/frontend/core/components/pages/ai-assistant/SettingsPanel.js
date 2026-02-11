@@ -143,7 +143,8 @@ export class SettingsPanel extends LitElement {
                         placeholder="sk-ant-..."
                     />
                     <div class="hint">
-                        Get your API key from
+                        Leave blank to use your Claude subscription or free credits.
+                        Or get a key from
                         <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>
                     </div>
                 </div>

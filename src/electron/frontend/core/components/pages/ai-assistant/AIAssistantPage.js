@@ -33,6 +33,7 @@ export class AIAssistantPage extends Page {
         savedSessions: { type: Array, state: true },
         viewMode: { type: String, state: true }, // "list" or "chat"
         isReadOnly: { type: Boolean, state: true },
+        authMode: { type: String, state: true },
         currentPhase: { type: Number, state: true },
         todos: { type: Array, state: true },
     };
@@ -54,6 +55,7 @@ export class AIAssistantPage extends Page {
         this.savedSessions = [];
         this.viewMode = "list";
         this.isReadOnly = false;
+        this.authMode = null;
         this.currentPhase = 0;
         this.todos = [];
         this._eventSource = null;
@@ -648,7 +650,8 @@ export class AIAssistantPage extends Page {
                                     ${this._starting ? "Connecting..." : "Start"}
                                 </button>
                             `
-                          : html`<span style="font-size: 0.85em; color: #555;">Connected</span>`}
+                          : html`<span style="font-size: 0.85em; color: #555;">Connected</span>
+                                ${this.authMode ? html`<span style="font-size: 0.78em; padding: 3px 8px; border-radius: 10px; background: ${this.authMode === "proxy" ? "#fff3e0" : this.authMode === "subscription" ? "#e8f5e9" : "#e3f2fd"}; color: ${this.authMode === "proxy" ? "#e65100" : this.authMode === "subscription" ? "#2e7d32" : "#1565c0"};">${this.authMode === "proxy" ? "Free Credits" : this.authMode === "subscription" ? "Your Anthropic Account" : "Your API Key"}</span>` : ""}`}
                     ${this.connected ? html`<button @click=${this._newConversation}>New</button>` : ""}
                     <button @click=${() => (this.settingsOpen = !this.settingsOpen)}>Settings</button>
                 </div>
@@ -817,6 +820,7 @@ export class AIAssistantPage extends Page {
         this.connected = false;
         this.isStreaming = false;
         this.isReadOnly = false;
+        this.authMode = null;
         this.currentPhase = 0;
         this.todos = [];
         this._starting = false;
@@ -837,6 +841,7 @@ export class AIAssistantPage extends Page {
                 this.dataDirs = dirs;
                 this.connected = true;
                 this.isReadOnly = false;
+                this.authMode = data.auth_mode || null;
                 this.messages = [];
                 this.currentPhase = 0;
                 this.todos = [];
@@ -943,6 +948,7 @@ export class AIAssistantPage extends Page {
 
             const data = await resp.json();
             this.sessionId = data.session_id;
+            this.authMode = data.auth_mode || null;
 
             this._connectSSE();
 
@@ -1012,7 +1018,15 @@ export class AIAssistantPage extends Page {
             this._mergeAssistantContent(data.content);
             this._detectPhaseTransition(data.content);
         } else if (data.type === "error") {
-            this._addMessage("error", data.content);
+            const content = data.content || "";
+            if (content.includes("429") || content.toLowerCase().includes("budget exceeded")) {
+                this._addMessage(
+                    "error",
+                    "Free credits for this session have been used. Enter an API key in Settings to continue."
+                );
+            } else {
+                this._addMessage("error", content);
+            }
             this.isStreaming = false;
         } else if (data.type === "result") {
             this.isStreaming = false;
@@ -1260,6 +1274,7 @@ export class AIAssistantPage extends Page {
         this.connected = false;
         this.isStreaming = false;
         this.isReadOnly = false;
+        this.authMode = null;
         this.currentPhase = 0;
         this.todos = [];
         this._starting = false;
