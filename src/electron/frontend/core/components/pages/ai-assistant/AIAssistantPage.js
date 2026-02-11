@@ -650,8 +650,25 @@ export class AIAssistantPage extends Page {
                                     ${this._starting ? "Connecting..." : "Start"}
                                 </button>
                             `
-                          : html`<span style="font-size: 0.85em; color: #555;">Connected</span>
-                                ${this.authMode ? html`<span style="font-size: 0.78em; padding: 3px 8px; border-radius: 10px; background: ${this.authMode === "proxy" ? "#fff3e0" : this.authMode === "subscription" ? "#e8f5e9" : "#e3f2fd"}; color: ${this.authMode === "proxy" ? "#e65100" : this.authMode === "subscription" ? "#2e7d32" : "#1565c0"};">${this.authMode === "proxy" ? "Free Credits" : this.authMode === "subscription" ? "Your Anthropic Account" : "Your API Key"}</span>` : ""}`}
+                          : html`<span style="font-size: 0.85em; color: #555;">Connected</span> ${this.authMode
+                                    ? html`<span
+                                          style="font-size: 0.78em; padding: 3px 8px; border-radius: 10px; background: ${this
+                                              .authMode === "proxy"
+                                              ? "#fff3e0"
+                                              : this.authMode === "subscription"
+                                                ? "#e8f5e9"
+                                                : "#e3f2fd"}; color: ${this.authMode === "proxy"
+                                              ? "#e65100"
+                                              : this.authMode === "subscription"
+                                                ? "#2e7d32"
+                                                : "#1565c0"};"
+                                          >${this.authMode === "proxy"
+                                              ? "Free Credits"
+                                              : this.authMode === "subscription"
+                                                ? "Your Anthropic Account"
+                                                : "Your API Key"}</span
+                                      >`
+                                    : ""}`}
                     ${this.connected ? html`<button @click=${this._newConversation}>New</button>` : ""}
                     <button @click=${() => (this.settingsOpen = !this.settingsOpen)}>Settings</button>
                 </div>
