@@ -617,9 +617,8 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             # NOTE: Update to output from NeuroConv
             unitprops_def["properties"]["data_type"] = DTYPE_SCHEMA
 
-            # Configure electrode columns
+            # Configure unit columns (required fields are set per-interface at line 487)
             defs["UnitColumn"] = unitprops_def
-            defs["UnitColumn"]["required"] = list(unitprops_def["properties"].keys())
 
             new_units_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
