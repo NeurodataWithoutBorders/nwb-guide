@@ -18,7 +18,7 @@ dependencies:
       - flask-cors == 4.0.0
       - flask_restx == 1.1.0
       - werkzeug < 3.0 # werkzeug 3.0 deprecates features used by flask 2.3.2. Remove this when updating flask.
-      - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.6.1
+      - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.6.2
       - neo == 0.14.1 # 0.14.2 is not compatible with neuroconv < 0.7.5
       - scikit-learn == 1.4.0 # Tutorial data generation
       - tqdm_publisher >= 0.0.1 # Progress bars
