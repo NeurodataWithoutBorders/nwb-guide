@@ -1354,7 +1354,10 @@ def upload_folder_to_dandi(
 ) -> list[Path]:
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
-    os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+    # Set API key env var for both old (< 0.73.2) and new dandi versions
+    os.environ["DANDI_API_KEY"] = api_key
+    if sandbox:
+        os.environ["DANDI_SANDBOX_API_KEY"] = api_key
 
     if ignore_cache:
         os.environ["DANDI_CACHE"] = "ignore"
@@ -1385,7 +1388,10 @@ def upload_project_to_dandi(
 
     # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
 
-    os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+    # Set API key env var for both old (< 0.73.2) and new dandi versions
+    os.environ["DANDI_API_KEY"] = api_key
+    if sandbox:
+        os.environ["DANDI_SANDBOX_API_KEY"] = api_key
 
     if ignore_cache:
         os.environ["DANDI_CACHE"] = "ignore"
