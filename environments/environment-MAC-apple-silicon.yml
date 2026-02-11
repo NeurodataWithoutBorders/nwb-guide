@@ -25,6 +25,7 @@ dependencies:
       # NeuroConv from GitHub, which will remove the sonpy dependency when building from Mac arm64
       - neuroconv[dandi,compressors] == 0.6.2
       - spikeinterface >= 0.101.0 # Previously included via neuroconv[ecephys]; needed for tutorial data generation
+      - pandas < 3.0 # pandas 3.0 uses Arrow backend by default, returning read-only arrays that break spikeinterface Phy extractor
       - neo == 0.14.1 # 0.14.2 is not compatible with neuroconv < 0.7.5
       - scikit-learn == 1.4.0 # Tutorial data generation
       - tqdm_publisher >= 0.0.1 # Progress bars
