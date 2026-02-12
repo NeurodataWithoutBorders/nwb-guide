@@ -23,7 +23,7 @@ dependencies:
       - werkzeug < 3.0 # werkzeug 3.0 deprecates features used by flask 2.3.2. Remove this when updating flask.
       # NOTE: the NeuroConv wheel on PyPI includes sonpy which is not compatible with arm64, so build and install
       # NeuroConv from GitHub, which will remove the sonpy dependency when building from Mac arm64
-      - neuroconv[dandi,compressors] == 0.6.7
+      - neuroconv[dandi,compressors] == 0.7.0
       - dandi < 0.74.0  # 0.74.0 renamed dandi-staging to dandi-sandbox, breaking neuroconv 0.6.6
       - spikeinterface >= 0.101.0 # Previously included via neuroconv[ecephys]; needed for tutorial data generation
       - pandas < 3.0 # pandas 3.0 uses Arrow backend by default, returning read-only arrays that break spikeinterface Phy extractor
