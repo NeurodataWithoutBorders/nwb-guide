@@ -610,6 +610,19 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "additionalProperties": True,  # Allow for new columns
         }
 
+        # Ensure ElectrodeColumns includes entries for all Electrode schema properties
+        # (needed for frontend linked-table validation in neuroconv >= 0.7.5)
+        existing_electrode_columns = ecephys_metadata.get("ElectrodeColumns", [])
+        existing_ecol_names = {col["name"] for col in existing_electrode_columns}
+        for prop_name, prop_info in new_electrodes_properties.items():
+            if prop_name not in existing_ecol_names:
+                existing_electrode_columns.append(
+                    {
+                        "name": prop_name,
+                        "description": prop_info.get("description", "No description."),
+                    }
+                )
+
         if has_units:
 
             unitprops_def = defs["UnitProperties"]
