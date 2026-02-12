@@ -462,6 +462,21 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         unit_columns = get_unit_columns_json(sorting_interface)
 
+        units_data = get_unit_table_json(sorting_interface)
+
+        # Remove columns that have any null/None values — NWB cannot store sparse columns
+        if units_data:
+            all_columns = set(units_data[0].keys())
+            incomplete_columns = {
+                col for col in all_columns
+                if any(row.get(col) is None for row in units_data)
+            }
+            if incomplete_columns:
+                for row in units_data:
+                    for col in incomplete_columns:
+                        row.pop(col, None)
+                unit_columns = [uc for uc in unit_columns if uc["name"] not in incomplete_columns]
+
         # Aggregate unit column information across sorting interfaces
         existing_unit_columns = metadata["Ecephys"].get("UnitColumns")
         if existing_unit_columns:
@@ -473,7 +488,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         else:
             metadata["Ecephys"]["UnitColumns"] = unit_columns
 
-        units_data = resolved_units[name] = get_unit_table_json(sorting_interface)
+        resolved_units[name] = units_data
 
         n_units = len(units_data)
 
@@ -484,7 +499,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "items": {
                 "allOf": [
                     {"$ref": "#/properties/Ecephys/definitions/Unit"},
-                    {"required": ["unit_id"]},
+                    {"required": list(map(lambda info: info["name"], unit_columns))},
                 ]
             },
         }
