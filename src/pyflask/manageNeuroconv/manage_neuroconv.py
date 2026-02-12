@@ -474,7 +474,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 values = [row.get(col) for row in units_data]
                 null_count = sum(1 for v in values if v is None)
                 sample = values[:3]
-                print(f"[DEBUG]   {col}: nulls={null_count}/{n_rows}, sample={sample}, types={[type(v).__name__ for v in sample]}")
+                print(
+                    f"[DEBUG]   {col}: nulls={null_count}/{n_rows}, sample={sample}, types={[type(v).__name__ for v in sample]}"
+                )
 
         # Remove columns that have any null/None values — NWB cannot store sparse columns
         if units_data:
