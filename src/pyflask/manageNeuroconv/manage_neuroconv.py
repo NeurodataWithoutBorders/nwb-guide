@@ -632,6 +632,19 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "additionalProperties": True,  # Allow for new columns
             }
 
+            # Ensure UnitColumns includes entries for all Unit schema properties
+            # (needed for frontend linked-table validation in neuroconv >= 0.6.2)
+            existing_unit_columns = metadata["Ecephys"].get("UnitColumns", [])
+            existing_col_names = {col["name"] for col in existing_unit_columns}
+            for prop_name, prop_info in new_units_properties.items():
+                if prop_name not in existing_col_names:
+                    existing_unit_columns.append(
+                        {
+                            "name": prop_name,
+                            "description": prop_info.get("description", "No description."),
+                        }
+                    )
+
     # TODO: generalize logging stuff
     log_base = GUIDE_ROOT_FOLDER / "logs"
     log_base.mkdir(exist_ok=True)
