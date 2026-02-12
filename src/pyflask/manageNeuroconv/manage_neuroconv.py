@@ -363,7 +363,7 @@ def get_custom_converter(interface_class_dict: dict, alignment_info: Union[dict,
 
         # Handle temporal alignment inside the converter
         # TODO: this currently works off of cross-scoping injection of `alignment_info` - refactor to be more explicit
-        def temporally_align_data_interfaces(self):
+        def temporally_align_data_interfaces(self, metadata=None, conversion_options=None):
             set_interface_alignment(self, alignment_info=alignment_info)
 
         # From previous issue regarding SpikeGLX not generating previews of correct size
@@ -596,7 +596,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         # Configure electrode columns
         defs["ElectrodeColumn"] = electrode_def
-        defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
 
         new_electrodes_properties = {
             properties["name"]: {key: value for key, value in properties.items() if key != "name"}
@@ -609,6 +608,20 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "properties": new_electrodes_properties,
             "additionalProperties": True,  # Allow for new columns
         }
+
+        if has_electrodes:
+            # Ensure ElectrodeColumns includes entries for all Electrode schema properties
+            # (needed for frontend linked-table validation in neuroconv >= 0.6.2)
+            existing_electrode_columns = ecephys_metadata.get("ElectrodeColumns", [])
+            existing_col_names = {col["name"] for col in existing_electrode_columns}
+            for prop_name, prop_info in new_electrodes_properties.items():
+                if prop_name not in existing_col_names:
+                    existing_electrode_columns.append(
+                        {
+                            "name": prop_name,
+                            "description": prop_info.get("description", "No description."),
+                        }
+                    )
 
         if has_units:
 
