@@ -18,7 +18,7 @@ dependencies:
       - flask-cors == 4.0.0
       - flask_restx == 1.1.0
       - werkzeug < 3.0 # werkzeug 3.0 deprecates features used by flask 2.3.2. Remove this when updating flask.
-      - neuroconv[dandi,compressors] == 0.8.2
+      - neuroconv[dandi,compressors] == 0.8.3
       - dandi < 0.74.0  # 0.74.0 renamed dandi-staging to dandi-sandbox, breaking neuroconv 0.6.6
       - spikeinterface >= 0.101.0 # Previously included via neuroconv[ecephys]; needed for tutorial data generation
       - pandas < 3.0 # pandas 3.0 uses Arrow backend by default, returning read-only arrays that break spikeinterface Phy extractor
