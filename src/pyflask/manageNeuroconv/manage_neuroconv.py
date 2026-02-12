@@ -484,7 +484,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "items": {
                 "allOf": [
                     {"$ref": "#/properties/Ecephys/definitions/Unit"},
-                    {"required": list(map(lambda info: info["name"], unit_columns))},
+                    {"required": ["unit_id"]},
                 ]
             },
         }
