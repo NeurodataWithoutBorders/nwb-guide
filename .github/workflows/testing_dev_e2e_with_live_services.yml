@@ -79,6 +79,7 @@ jobs:
         run: |
           touch .env
           echo DANDI_SANDBOX_API_KEY=${{ secrets.DANDI_SANDBOX_API_KEY }} >> .env
+          echo DANDI_STAGING_API_KEY=${{ secrets.DANDI_SANDBOX_API_KEY }} >> .env
 
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests

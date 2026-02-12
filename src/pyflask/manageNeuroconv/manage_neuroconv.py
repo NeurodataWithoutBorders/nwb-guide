@@ -619,7 +619,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
             # Configure electrode columns
             defs["UnitColumn"] = unitprops_def
-            defs["UnitColumn"]["required"] = list(unitprops_def["properties"].keys())
 
             new_units_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
@@ -632,6 +631,19 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "properties": new_units_properties,
                 "additionalProperties": True,  # Allow for new columns
             }
+
+            # Ensure UnitColumns includes entries for all Unit schema properties
+            # (needed for frontend linked-table validation in neuroconv >= 0.6.2)
+            existing_unit_columns = metadata["Ecephys"].get("UnitColumns", [])
+            existing_col_names = {col["name"] for col in existing_unit_columns}
+            for prop_name, prop_info in new_units_properties.items():
+                if prop_name not in existing_col_names:
+                    existing_unit_columns.append(
+                        {
+                            "name": prop_name,
+                            "description": prop_info.get("description", "No description."),
+                        }
+                    )
 
     # TODO: generalize logging stuff
     log_base = GUIDE_ROOT_FOLDER / "logs"
