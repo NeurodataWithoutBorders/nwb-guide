@@ -343,7 +343,9 @@ export class Table extends LitElement {
 
                 // Clear empty values if not validated
                 if (!value && willValidate) {
-                    console.error(`[DEBUG-TABLE] Falsy value will be validated: col=${k}, row=${row}, value=${JSON.stringify(value)}, type=${typeof value}`);
+                    console.error(
+                        `[DEBUG-TABLE] Falsy value will be validated: col=${k}, row=${row}, value=${JSON.stringify(value)}, type=${typeof value}`
+                    );
                 }
                 if (!value && !willValidate) {
                     instanceThis.#handleValidationResult(
@@ -376,7 +378,9 @@ export class Table extends LitElement {
                 }
 
                 if (!(await runThisValidator(value, row, this.col))) {
-                    console.error(`[DEBUG-TABLE] Validator failed: col=${k}, row=${row}, value=${JSON.stringify(value)}, type=${typeof value}`);
+                    console.error(
+                        `[DEBUG-TABLE] Validator failed: col=${k}, row=${row}, value=${JSON.stringify(value)}, type=${typeof value}`
+                    );
                     callback(false);
                     return;
                 }
@@ -384,7 +388,9 @@ export class Table extends LitElement {
                 const isUndefined = value === "" || value == null;
 
                 if (isUndefined && required) {
-                    console.error(`[DEBUG-TABLE] Required field empty: col=${k}, row=${row}, value=${JSON.stringify(value)}, required=${required}`);
+                    console.error(
+                        `[DEBUG-TABLE] Required field empty: col=${k}, row=${row}, value=${JSON.stringify(value)}, required=${required}`
+                    );
                     instanceThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
                         row,
