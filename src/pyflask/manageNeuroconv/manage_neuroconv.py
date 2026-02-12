@@ -1367,6 +1367,18 @@ def upload_multiple_filesystem_objects_to_dandi(**kwargs) -> list[Path]:
     return results
 
 
+def _ensure_dandi_staging_alias():
+    """Ensure 'dandi-staging' exists in dandi's known_instances.
+
+    dandi >= 0.74.0 renamed 'dandi-staging' to 'dandi-sandbox', but
+    neuroconv < 0.9.0 uses 'dandi-staging' internally. Register the
+    old name as an alias pointing to the sandbox URLs.
+    """
+    from dandi.consts import known_instances
+    if "dandi-staging" not in known_instances and "dandi-sandbox" in known_instances:
+        known_instances["dandi-staging"] = known_instances["dandi-sandbox"]
+
+
 def upload_folder_to_dandi(
     dandiset_id: str,
     api_key: str,
@@ -1378,6 +1390,8 @@ def upload_folder_to_dandi(
     ignore_cache: bool = False,
 ) -> list[Path]:
     from neuroconv.tools.data_transfers import automatic_dandi_upload
+
+    _ensure_dandi_staging_alias()
 
     # Set API key env var for both old (< 0.73.2) and new dandi versions
     os.environ["DANDI_API_KEY"] = api_key
@@ -1410,6 +1424,8 @@ def upload_project_to_dandi(
     ignore_cache: bool = False,
 ) -> list[Path]:
     from neuroconv.tools.data_transfers import automatic_dandi_upload
+
+    _ensure_dandi_staging_alias()
 
     # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
     # Set API key env var for both old (< 0.73.2) and new dandi versions
