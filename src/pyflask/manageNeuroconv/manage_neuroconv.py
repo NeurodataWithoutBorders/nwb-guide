@@ -431,7 +431,7 @@ def map_interfaces(callback, converter, to_match: Union["BaseDataInterface", Non
 
 def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[str, dict]:
     """Function used to fetch the metadata schema from a CustomNWBConverter instantiated from the source_data."""
-    from neuroconv.utils import _NWBMetaDataEncoder as NWBMetaDataEncoder
+    from neuroconv.utils.json_schema import _NWBMetaDataEncoder as NWBMetaDataEncoder
 
     resolved_source_data = replace_none_with_nan(
         source_data, resolve_references(get_custom_converter(interfaces).get_source_schema())
@@ -1847,7 +1847,7 @@ def get_unit_table_json(interface) -> List[Dict[str, Any]]:
     A convenience function for collecting and organizing the property values of the underlying sorting extractor.
     """
 
-    from neuroconv.utils import _NWBMetaDataEncoder as NWBMetaDataEncoder
+    from neuroconv.utils.json_schema import _NWBMetaDataEncoder as NWBMetaDataEncoder
 
     sorting = interface.sorting_extractor
 
@@ -1948,7 +1948,7 @@ def get_electrode_table_json(interface) -> List[Dict[str, Any]]:
     A convenience function for collecting and organizing the property values of the underlying recording extractor.
     """
 
-    from neuroconv.utils import _NWBMetaDataEncoder as NWBMetaDataEncoder
+    from neuroconv.utils.json_schema import _NWBMetaDataEncoder as NWBMetaDataEncoder
 
     recording = interface.recording_extractor
 
