@@ -341,13 +341,10 @@ export class Table extends LitElement {
 
                 value = instanceThis.#getValue(value, colInfo);
 
+                const isEmpty = value === "" || value === null || value === undefined;
+
                 // Clear empty values if not validated
-                if (!value && willValidate) {
-                    console.error(
-                        `[DEBUG-TABLE] Falsy value will be validated: col=${k}, row=${row}, value=${JSON.stringify(value)}, type=${typeof value}`
-                    );
-                }
-                if (!value && !willValidate) {
+                if (isEmpty && !willValidate) {
                     instanceThis.#handleValidationResult(
                         [], // Clear errors
                         row,
@@ -357,7 +354,7 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (value && k === instanceThis.keyColumn) {
+                if (!isEmpty && k === instanceThis.keyColumn) {
                     if (value in instanceThis.data && instanceThis.data[value]?.[rowSymbol] !== row) {
                         // Convert previously valid value to unresolved
                         const previousKey = instanceThis.getRowName(row);
@@ -378,19 +375,11 @@ export class Table extends LitElement {
                 }
 
                 if (!(await runThisValidator(value, row, this.col))) {
-                    console.error(
-                        `[DEBUG-TABLE] Validator failed: col=${k}, row=${row}, value=${JSON.stringify(value)}, type=${typeof value}`
-                    );
                     callback(false);
                     return;
                 }
 
-                const isUndefined = value === "" || value == null;
-
-                if (isUndefined && required) {
-                    console.error(
-                        `[DEBUG-TABLE] Required field empty: col=${k}, row=${row}, value=${JSON.stringify(value)}, required=${required}`
-                    );
+                if (isEmpty && required) {
                     instanceThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
                         row,

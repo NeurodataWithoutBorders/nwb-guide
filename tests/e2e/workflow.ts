@@ -417,26 +417,6 @@ export default async function runWorkflow(name, workflow, identifier) {
 
     await takeScreenshot(join(identifier, 'metadata-ecephys'), 100)
 
-    // DEBUG: Dump table validation errors before navigating
-    const debugErrors = await evaluate(() => {
-      const dashboard = document.querySelector('nwb-dashboard') as any
-      const page = dashboard.page
-      const forms = page.forms
-      const errors: string[] = []
-      for (const formEntry of forms) {
-        const form = formEntry.form
-        for (const [tableName, table] of Object.entries(form.tables || {})) {
-          const errorEls = (table as any).querySelectorAll?.('[error]') || []
-          for (const el of errorEls) {
-            errors.push(`Table=${tableName} error=${el.getAttribute('data-message')} value=${el.textContent}`)
-          }
-        }
-      }
-      return errors
-    })
-    if (debugErrors && debugErrors.length > 0) {
-      console.error('[DEBUG-E2E] Validation errors:', JSON.stringify(debugErrors))
-    }
 
     await toNextPage('inspect')
 
