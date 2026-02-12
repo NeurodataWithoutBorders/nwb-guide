@@ -659,6 +659,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "properties": new_units_properties,
                 "additionalProperties": True,  # Allow for new columns
             }
+            print(f"[DEBUG] Unit definition properties: {json.dumps(new_units_properties, default=str)}")
+            print(f"[DEBUG] UnitColumn definition: {json.dumps(defs.get('UnitColumn', {}), default=str)}")
+            print(f"[DEBUG] resolved_units_schema: {json.dumps(resolved_units_schema, default=str)}")
 
     # TODO: generalize logging stuff
     log_base = GUIDE_ROOT_FOLDER / "logs"
