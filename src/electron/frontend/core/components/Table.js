@@ -341,10 +341,8 @@ export class Table extends LitElement {
 
                 value = instanceThis.#getValue(value, colInfo);
 
-                const isEmpty = value === "" || value === null || value === undefined;
-
                 // Clear empty values if not validated
-                if (isEmpty && !willValidate) {
+                if (!value && !willValidate) {
                     instanceThis.#handleValidationResult(
                         [], // Clear errors
                         row,
@@ -354,7 +352,7 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (!isEmpty && k === instanceThis.keyColumn) {
+                if (value && k === instanceThis.keyColumn) {
                     if (value in instanceThis.data && instanceThis.data[value]?.[rowSymbol] !== row) {
                         // Convert previously valid value to unresolved
                         const previousKey = instanceThis.getRowName(row);
@@ -379,7 +377,9 @@ export class Table extends LitElement {
                     return;
                 }
 
-                if (isEmpty && required) {
+                const isUndefined = value === "" || value == null;
+
+                if (isUndefined && required) {
                     instanceThis.#handleValidationResult(
                         [{ message: `${header(k)} is a required property.`, type: "error" }],
                         row,
