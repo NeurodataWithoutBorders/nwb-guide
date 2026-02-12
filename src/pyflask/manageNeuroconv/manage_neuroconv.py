@@ -462,18 +462,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         unit_columns = get_unit_columns_json(sorting_interface)
 
-        units_data = get_unit_table_json(sorting_interface)
-
-        # Remove columns that have any null/None values — NWB cannot store sparse columns
-        if units_data:
-            all_columns = set(units_data[0].keys())
-            incomplete_columns = {col for col in all_columns if any(row.get(col) is None for row in units_data)}
-            if incomplete_columns:
-                for row in units_data:
-                    for col in incomplete_columns:
-                        row.pop(col, None)
-                unit_columns = [uc for uc in unit_columns if uc["name"] not in incomplete_columns]
-
         # Aggregate unit column information across sorting interfaces
         existing_unit_columns = metadata["Ecephys"].get("UnitColumns")
         if existing_unit_columns:
@@ -485,7 +473,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         else:
             metadata["Ecephys"]["UnitColumns"] = unit_columns
 
-        resolved_units[name] = units_data
+        units_data = resolved_units[name] = get_unit_table_json(sorting_interface)
 
         n_units = len(units_data)
 
@@ -629,8 +617,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             # NOTE: Update to output from NeuroConv
             unitprops_def["properties"]["data_type"] = DTYPE_SCHEMA
 
-            # Configure unit columns (required fields are set per-interface at line 487)
+            # Configure electrode columns
             defs["UnitColumn"] = unitprops_def
+            defs["UnitColumn"]["required"] = list(unitprops_def["properties"].keys())
 
             new_units_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
