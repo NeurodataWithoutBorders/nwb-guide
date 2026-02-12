@@ -21,6 +21,7 @@ dependencies:
       - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.6.1
       - pandas < 3.0  # pandas 3.0 returns read-only arrays, breaking spikeinterface Phy extractor
       - neo == 0.14.1 # 0.14.2 is not compatible with neuroconv < 0.7.5
+      - dandi < 0.74.0 # 0.74.0 renamed dandi-staging to dandi-sandbox; neuroconv 0.6.1 uses dandi-staging
       - scikit-learn == 1.4.0 # Tutorial data generation
       - tqdm_publisher >= 0.0.1 # Progress bars
       - tzlocal >= 5.2 # Frontend timezone handling
