@@ -467,10 +467,7 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
         # Remove columns that have any null/None values — NWB cannot store sparse columns
         if units_data:
             all_columns = set(units_data[0].keys())
-            incomplete_columns = {
-                col for col in all_columns
-                if any(row.get(col) is None for row in units_data)
-            }
+            incomplete_columns = {col for col in all_columns if any(row.get(col) is None for row in units_data)}
             if incomplete_columns:
                 for row in units_data:
                     for col in incomplete_columns:
