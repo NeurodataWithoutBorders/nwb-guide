@@ -1380,7 +1380,7 @@ def upload_folder_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=Path(nwb_folder_path),
-        staging=sandbox,  # Map sandbox parameter to staging for external API
+        sandbox=sandbox,
         cleanup=cleanup,
         number_of_jobs=number_of_jobs or 1,
         number_of_threads=number_of_threads or 1,
@@ -1414,7 +1414,7 @@ def upload_project_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
-        staging=sandbox,  # Map sandbox parameter to staging for external API
+        sandbox=sandbox,
         cleanup=cleanup,
         number_of_jobs=number_of_jobs,
         number_of_threads=number_of_threads,
