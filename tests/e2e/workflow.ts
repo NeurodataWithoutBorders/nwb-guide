@@ -417,6 +417,18 @@ export default async function runWorkflow(name, workflow, identifier) {
 
     await takeScreenshot(join(identifier, 'metadata-ecephys'), 100)
 
+    // Debug: capture validation state before advancing
+    const debugInfo = await evaluate(() => {
+      const dashboard = document.querySelector('nwb-dashboard')
+      const page = dashboard.page
+      const errors = page.form?.getErrors?.() ?? page.getErrors?.() ?? 'no getErrors method'
+      const states = page.forms?.map((f, i) => ({
+        index: i,
+        errors: f.form?.getErrors?.() ?? 'no method'
+      })) ?? 'no forms'
+      return JSON.stringify({ errors, states }, null, 2)
+    })
+    console.error('[DEBUG-METADATA]', debugInfo)
 
     await toNextPage('inspect')
 
