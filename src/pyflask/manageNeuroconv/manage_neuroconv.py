@@ -464,6 +464,18 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         units_data = get_unit_table_json(sorting_interface)
 
+        # DEBUG: Log unit table structure to diagnose validation errors
+        if units_data:
+            n_rows = len(units_data)
+            all_cols = list(units_data[0].keys()) if units_data else []
+            print(f"\n[DEBUG] Unit table '{name}': {n_rows} units, {len(all_cols)} columns")
+            print(f"[DEBUG] Columns: {all_cols}")
+            for col in all_cols:
+                values = [row.get(col) for row in units_data]
+                null_count = sum(1 for v in values if v is None)
+                sample = values[:3]
+                print(f"[DEBUG]   {col}: nulls={null_count}/{n_rows}, sample={sample}, types={[type(v).__name__ for v in sample]}")
+
         # Remove columns that have any null/None values — NWB cannot store sparse columns
         if units_data:
             all_columns = set(units_data[0].keys())
@@ -473,6 +485,8 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                     for col in incomplete_columns:
                         row.pop(col, None)
                 unit_columns = [uc for uc in unit_columns if uc["name"] not in incomplete_columns]
+                print(f"[DEBUG] Removed {len(incomplete_columns)} incomplete columns: {incomplete_columns}")
+                print(f"[DEBUG] Remaining columns: {[uc['name'] for uc in unit_columns]}")
 
         # Aggregate unit column information across sorting interfaces
         existing_unit_columns = metadata["Ecephys"].get("UnitColumns")
