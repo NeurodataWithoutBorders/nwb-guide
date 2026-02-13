@@ -1,8 +1,9 @@
 """Tests for newly added interfaces that were previously excluded from selection."""
 
-import pytest
-import sys
 import os
+import sys
+
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -50,15 +51,15 @@ class TestNewInterfacesIncluded:
 
     @pytest.mark.parametrize("interface_name", NEW_INTERFACE_NAMES)
     def test_interface_present(self, interface_names, interface_name):
-        assert interface_name in interface_names, (
-            f"{interface_name} should be present in get_all_interface_info() but was not found"
-        )
+        assert (
+            interface_name in interface_names
+        ), f"{interface_name} should be present in get_all_interface_info() but was not found"
 
     @pytest.mark.parametrize("interface_name", SHOULD_REMAIN_EXCLUDED)
     def test_interface_still_excluded(self, interface_names, interface_name):
-        assert interface_name not in interface_names, (
-            f"{interface_name} should remain excluded but was found in get_all_interface_info()"
-        )
+        assert (
+            interface_name not in interface_names
+        ), f"{interface_name} should remain excluded but was found in get_all_interface_info()"
 
 
 class TestNewInterfaceSchemas:
