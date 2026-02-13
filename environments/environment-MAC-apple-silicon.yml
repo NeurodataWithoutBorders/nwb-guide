@@ -25,9 +25,9 @@ dependencies:
       # NeuroConv from GitHub, which will remove the sonpy dependency when building from Mac arm64
       - h5py < 3.13 # 3.13+ uses HDF5 1.14.4 features not in pytables 3.10.2's bundled HDF5 1.14.2
       - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.9.1
-      - scikit-learn == 1.4.0 # Tutorial data generation
-      - tqdm_publisher >= 0.0.1 # Progress bars
-      - tzlocal >= 5.2 # Frontend timezone handling
-      - ndx-pose >= 0.1.1
-      - nwbinspector >= 0.6.2
-      - numcodecs < 0.16.0  # numcodecs 0.16.0 is not compatible with zarr 2.18.5
+      - scikit-learn == 1.6.1 # Tutorial data generation
+      - tqdm_publisher == 0.1.1 # Progress bars
+      - tzlocal == 5.3.1 # Frontend timezone handling
+      - ndx-pose == 0.2.2
+      - nwbinspector == 0.6.5
+      - numcodecs == 0.15.1
