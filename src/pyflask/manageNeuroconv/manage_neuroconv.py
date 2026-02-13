@@ -363,7 +363,7 @@ def get_custom_converter(interface_class_dict: dict, alignment_info: Union[dict,
 
         # Handle temporal alignment inside the converter
         # TODO: this currently works off of cross-scoping injection of `alignment_info` - refactor to be more explicit
-        def temporally_align_data_interfaces(self):
+        def temporally_align_data_interfaces(self, metadata=None, conversion_options=None):
             set_interface_alignment(self, alignment_info=alignment_info)
 
         # From previous issue regarding SpikeGLX not generating previews of correct size
@@ -596,7 +596,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         # Configure electrode columns
         defs["ElectrodeColumn"] = electrode_def
-        defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
 
         new_electrodes_properties = {
             properties["name"]: {key: value for key, value in properties.items() if key != "name"}
@@ -610,6 +609,26 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "additionalProperties": True,  # Allow for new columns
         }
 
+        if has_electrodes:
+            # Ensure ElectrodeColumns includes entries for all Electrode schema properties
+            # (needed for frontend linked-table validation in neuroconv >= 0.6.2)
+            existing_electrode_columns = ecephys_metadata.get("ElectrodeColumns", [])
+            existing_col_names = {col["name"] for col in existing_electrode_columns}
+            for prop_name, prop_info in new_electrodes_properties.items():
+                if prop_name not in existing_col_names:
+                    # Infer data_type from schema type (required by update_recording_properties_from_table_as_json)
+                    schema_type = prop_info.get("type", "str")
+                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(
+                        schema_type, "str"
+                    )
+                    existing_electrode_columns.append(
+                        {
+                            "name": prop_name,
+                            "description": prop_info.get("description", "No description."),
+                            "data_type": data_type,
+                        }
+                    )
+
         if has_units:
 
             unitprops_def = defs["UnitProperties"]
@@ -619,7 +638,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
             # Configure electrode columns
             defs["UnitColumn"] = unitprops_def
-            defs["UnitColumn"]["required"] = list(unitprops_def["properties"].keys())
 
             new_units_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
@@ -632,6 +650,31 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "properties": new_units_properties,
                 "additionalProperties": True,  # Allow for new columns
             }
+
+            # Ensure UnitColumns includes entries for all Unit schema properties
+            # (needed for frontend linked-table validation in neuroconv >= 0.6.2)
+            existing_unit_columns = metadata["Ecephys"].get("UnitColumns", [])
+            existing_col_names = {col["name"] for col in existing_unit_columns}
+            for prop_name, prop_info in new_units_properties.items():
+                if prop_name not in existing_col_names:
+                    schema_type = prop_info.get("type", "str")
+                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(
+                        schema_type, "str"
+                    )
+                    existing_unit_columns.append(
+                        {
+                            "name": prop_name,
+                            "description": prop_info.get("description", "No description."),
+                            "data_type": data_type,
+                        }
+                    )
+
+    # Allow additional properties on Device definitions (e.g. manufacturer from neuroconv)
+    for modality_key in ("Ecephys", "Ophys"):
+        modality_schema = schema.get("properties", {}).get(modality_key, {})
+        device_def = modality_schema.get("definitions", {}).get("Device", {})
+        if device_def:
+            device_def["additionalProperties"] = True
 
     # TODO: generalize logging stuff
     log_base = GUIDE_ROOT_FOLDER / "logs"
@@ -1367,7 +1410,7 @@ def upload_folder_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=Path(nwb_folder_path),
-        staging=sandbox,  # Map sandbox parameter to staging for external API
+        sandbox=sandbox,
         cleanup=cleanup,
         number_of_jobs=number_of_jobs or 1,
         number_of_threads=number_of_threads or 1,
@@ -1400,7 +1443,7 @@ def upload_project_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
-        staging=sandbox,  # Map sandbox parameter to staging for external API
+        sandbox=sandbox,
         cleanup=cleanup,
         number_of_jobs=number_of_jobs,
         number_of_threads=number_of_threads,
