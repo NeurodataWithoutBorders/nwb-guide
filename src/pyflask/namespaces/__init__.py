@@ -1,3 +1,4 @@
+from .ai_assistant import ai_namespace
 from .dandi import dandi_namespace
 from .data import data_namespace
 from .neuroconv import neuroconv_namespace

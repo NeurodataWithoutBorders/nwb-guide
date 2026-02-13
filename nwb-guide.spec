@@ -10,7 +10,11 @@ import scipy
 from PyInstaller.utils.hooks import collect_data_files
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('./src/paths.config.json', '.'), ('./package.json', '.')]
+datas = [
+    ('./src/paths.config.json', '.'),
+    ('./package.json', '.'),
+    ('./src/pyflask/ai/skill', 'ai/skill'),  # Bundled NWB conversion skill
+]
 binaries = []
 hiddenimports = [
     'email_validator',
@@ -24,6 +28,7 @@ datas += collect_data_files('jsonschema_specifications')
 
 # Various consequences of lazy imports
 modules_to_collect = [
+    'claude_agent_sdk',
     'dandi',
     'keyrings',
     'unittest',

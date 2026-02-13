@@ -154,6 +154,7 @@
     "jsonschema": "^1.4.1",
     "lit": "^2.6.1",
     "lottie-web": "^5.9.5",
+    "marked": "^17.0.1",
     "notyf": "^3.9.0",
     "sweetalert2": "^11.6.13",
     "tippy.js": "^6.3.7",

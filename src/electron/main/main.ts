@@ -142,7 +142,8 @@ const createPyProc = async () => {
       .then(([freePort]: string[]) => {
         selectedPort = freePort;
 
-        pyflaskProcess = (serverFilePath.slice(-3) === '.py') ? child_process.spawn("python", [serverFilePath, freePort], {}) : child_process.spawn(`${serverFilePath}`, [freePort], {});
+        const pythonPath = process.env.NWB_GUIDE_PYTHON || "python";
+        pyflaskProcess = (serverFilePath.slice(-3) === '.py') ? child_process.spawn(pythonPath, [serverFilePath, freePort], {}) : child_process.spawn(`${serverFilePath}`, [freePort], {});
 
         if (pyflaskProcess != null) {
 
