@@ -7,9 +7,9 @@ on:
 
 jobs:
   deploy-on-mac:
-    runs-on: macos-13
+    runs-on: macos-latest
     # NOTE: macos-latest is an arm64 mac, and the dependency sonpy (Spike2RecordingInterface) has a .so file that
-    # works only on mac x64. This causes issues building and deploying on mac arm64. So we use macos-13 (x64)
+    # Mac runner
     # to build and deploy both the x64 and arm64 versions of the app.
     # NOTE: if changing this to macos-latest, make sure to use the apple-silicon conda environment.
 
