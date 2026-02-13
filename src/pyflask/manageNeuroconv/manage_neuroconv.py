@@ -1787,8 +1787,12 @@ def generate_test_data(output_path: str):
         return
 
     artificial_ap_band_in_uV, sorting = spikeinterface.generate_ground_truth_recording(
-        durations=[3.0], sampling_frequency=30_000.0, num_channels=385,
-        dtype="float32", num_units=50, seed=0,
+        durations=[3.0],
+        sampling_frequency=30_000.0,
+        num_channels=385,
+        dtype="float32",
+        num_units=50,
+        seed=0,
     )
 
     sorting_analyzer = spikeinterface.create_sorting_analyzer(
