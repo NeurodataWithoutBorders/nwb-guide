@@ -618,7 +618,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 if prop_name not in existing_col_names:
                     # Infer data_type from schema type (required by update_recording_properties_from_table_as_json)
                     schema_type = prop_info.get("type", "str")
-                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(schema_type, "str")
+                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(
+                        schema_type, "str"
+                    )
                     existing_electrode_columns.append(
                         {
                             "name": prop_name,
@@ -656,7 +658,9 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             for prop_name, prop_info in new_units_properties.items():
                 if prop_name not in existing_col_names:
                     schema_type = prop_info.get("type", "str")
-                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(schema_type, "str")
+                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(
+                        schema_type, "str"
+                    )
                     existing_unit_columns.append(
                         {
                             "name": prop_name,
@@ -1390,19 +1394,23 @@ def _ensure_dandi_staging_alias():
     the get_instance function to bypass the rejection.
     """
     from dandi.consts import known_instances
+
     if "dandi-staging" not in known_instances and "dandi-sandbox" in known_instances:
         known_instances["dandi-staging"] = known_instances["dandi-sandbox"]
 
     # Patch get_instance to not raise ValueError for dandi-staging
     try:
         import dandi.utils as _dandi_utils
-        _original_get_instance = getattr(_dandi_utils, '_original_get_instance_fn', None)
-        if _original_get_instance is None and hasattr(_dandi_utils, 'get_instance'):
+
+        _original_get_instance = getattr(_dandi_utils, "_original_get_instance_fn", None)
+        if _original_get_instance is None and hasattr(_dandi_utils, "get_instance"):
             _original = _dandi_utils.get_instance
+
             def _patched_get_instance(dandi_instance_id, *args, **kwargs):
                 if dandi_instance_id == "dandi-staging":
                     dandi_instance_id = "dandi-sandbox"
                 return _original(dandi_instance_id, *args, **kwargs)
+
             _dandi_utils._original_get_instance_fn = _original
             _dandi_utils.get_instance = _patched_get_instance
     except (ImportError, AttributeError):
