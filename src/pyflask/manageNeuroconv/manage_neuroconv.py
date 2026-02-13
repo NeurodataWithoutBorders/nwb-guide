@@ -1382,15 +1382,31 @@ def upload_multiple_filesystem_objects_to_dandi(**kwargs) -> list[Path]:
 
 
 def _ensure_dandi_staging_alias():
-    """Ensure 'dandi-staging' exists in dandi's known_instances.
+    """Ensure 'dandi-staging' works as an alias for 'dandi-sandbox'.
 
-    dandi >= 0.74.0 renamed 'dandi-staging' to 'dandi-sandbox', but
-    neuroconv < 0.9.0 uses 'dandi-staging' internally. Register the
-    old name as an alias pointing to the sandbox URLs.
+    dandi >= 0.74.0 renamed 'dandi-staging' to 'dandi-sandbox' and added an
+    explicit ValueError check rejecting the old name. neuroconv < 0.9.0 uses
+    'dandi-staging' internally. We patch both the known_instances dict and
+    the get_instance function to bypass the rejection.
     """
     from dandi.consts import known_instances
     if "dandi-staging" not in known_instances and "dandi-sandbox" in known_instances:
         known_instances["dandi-staging"] = known_instances["dandi-sandbox"]
+
+    # Patch get_instance to not raise ValueError for dandi-staging
+    try:
+        import dandi.utils as _dandi_utils
+        _original_get_instance = getattr(_dandi_utils, '_original_get_instance_fn', None)
+        if _original_get_instance is None and hasattr(_dandi_utils, 'get_instance'):
+            _original = _dandi_utils.get_instance
+            def _patched_get_instance(dandi_instance_id, *args, **kwargs):
+                if dandi_instance_id == "dandi-staging":
+                    dandi_instance_id = "dandi-sandbox"
+                return _original(dandi_instance_id, *args, **kwargs)
+            _dandi_utils._original_get_instance_fn = _original
+            _dandi_utils.get_instance = _patched_get_instance
+    except (ImportError, AttributeError):
+        pass
 
 
 def upload_folder_to_dandi(
