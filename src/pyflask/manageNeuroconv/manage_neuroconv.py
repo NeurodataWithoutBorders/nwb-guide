@@ -1691,22 +1691,6 @@ def _download_and_extract_tar_gz(url: str, output_path: Path):
         Path(tmp_path).unlink(missing_ok=True)
 
 
-def download_test_data(output_path: str):
-    """Generate SpikeGLX data locally (fast) and download pre-generated Phy data (avoids slow PCA fitting)."""
-    base_path = Path(output_path)
-    phy_output_folder = base_path / "phy"
-
-    # Generate SpikeGLX data locally -- fast (just writing binary files + meta)
-    generate_test_data(base_path)
-
-    # Download Phy data if not already present -- avoids the slow PCA/waveform computation
-    if not phy_output_folder.exists() or not any(phy_output_folder.iterdir()):
-        _download_and_extract_tar_gz(TUTORIAL_PHY_DATA_URL, phy_output_folder)
-
-
-TUTORIAL_PHY_DATA_URL = "https://github.com/NeurodataWithoutBorders/nwb-guide/releases/download/tutorial-test-data-v1/tutorial_phy_data.tar.gz"
-
-
 def _generate_spikeglx_data(base_path: Path):
     """Generate synthetic SpikeGLX recording data (AP + LF bands). Fast — just writes binary files + meta."""
     import spikeinterface
@@ -1771,10 +1755,6 @@ def _generate_spikeglx_data(base_path: Path):
 
 def download_test_data(output_path: str):
     """Generate SpikeGLX data locally (fast) and download pre-generated Phy data (avoids slow PCA fitting)."""
-    import tarfile
-    import urllib.request
-    import tempfile
-
     base_path = Path(output_path)
     phy_output_folder = base_path / "phy"
 
@@ -1783,17 +1763,7 @@ def download_test_data(output_path: str):
 
     # Download Phy data — avoids the slow PCA/waveform computation (~2 min)
     if not phy_output_folder.exists() or not any(phy_output_folder.iterdir()):
-        phy_output_folder.mkdir(parents=True, exist_ok=True)
-
-        with tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False) as tmp:
-            tmp_path = tmp.name
-
-        try:
-            urllib.request.urlretrieve(TUTORIAL_PHY_DATA_URL, tmp_path)
-            with tarfile.open(tmp_path, "r:gz") as tar:
-                tar.extractall(path=str(phy_output_folder))
-        finally:
-            Path(tmp_path).unlink(missing_ok=True)
+        _download_and_extract_tar_gz(TUTORIAL_PHY_DATA_URL, phy_output_folder)
 
 
 def generate_test_data(output_path: str):
