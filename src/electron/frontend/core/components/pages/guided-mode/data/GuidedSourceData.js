@@ -28,7 +28,7 @@ const propsToIgnore = {
         es_key: true,
         exclude_shanks: true,
         load_sync_channel: true,
-        stream_id: true, // NOTE: May be desired for other interfaces
+        // stream_id: true, // NOTE: Unhidden — required by SpikeGLX in neuroconv >= 0.9.0
         nsx_override: true,
         combined: true,
         plane_no: true,

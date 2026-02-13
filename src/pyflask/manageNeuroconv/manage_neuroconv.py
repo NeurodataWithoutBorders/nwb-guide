@@ -363,7 +363,7 @@ def get_custom_converter(interface_class_dict: dict, alignment_info: Union[dict,
 
         # Handle temporal alignment inside the converter
         # TODO: this currently works off of cross-scoping injection of `alignment_info` - refactor to be more explicit
-        def temporally_align_data_interfaces(self):
+        def temporally_align_data_interfaces(self, metadata=None, conversion_options=None):
             set_interface_alignment(self, alignment_info=alignment_info)
 
         # From previous issue regarding SpikeGLX not generating previews of correct size
@@ -596,7 +596,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
         # Configure electrode columns
         defs["ElectrodeColumn"] = electrode_def
-        defs["ElectrodeColumn"]["required"] = list(electrode_def["properties"].keys())
 
         new_electrodes_properties = {
             properties["name"]: {key: value for key, value in properties.items() if key != "name"}
@@ -610,6 +609,24 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             "additionalProperties": True,  # Allow for new columns
         }
 
+        if has_electrodes:
+            # Ensure ElectrodeColumns includes entries for all Electrode schema properties
+            # (needed for frontend linked-table validation in neuroconv >= 0.6.2)
+            existing_electrode_columns = ecephys_metadata.get("ElectrodeColumns", [])
+            existing_col_names = {col["name"] for col in existing_electrode_columns}
+            for prop_name, prop_info in new_electrodes_properties.items():
+                if prop_name not in existing_col_names:
+                    # Infer data_type from schema type (required by update_recording_properties_from_table_as_json)
+                    schema_type = prop_info.get("type", "str")
+                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(schema_type, "str")
+                    existing_electrode_columns.append(
+                        {
+                            "name": prop_name,
+                            "description": prop_info.get("description", "No description."),
+                            "data_type": data_type,
+                        }
+                    )
+
         if has_units:
 
             unitprops_def = defs["UnitProperties"]
@@ -619,7 +636,6 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
 
             # Configure electrode columns
             defs["UnitColumn"] = unitprops_def
-            defs["UnitColumn"]["required"] = list(unitprops_def["properties"].keys())
 
             new_units_properties = {
                 properties["name"]: {key: value for key, value in properties.items() if key != "name"}
@@ -632,6 +648,29 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                 "properties": new_units_properties,
                 "additionalProperties": True,  # Allow for new columns
             }
+
+            # Ensure UnitColumns includes entries for all Unit schema properties
+            # (needed for frontend linked-table validation in neuroconv >= 0.6.2)
+            existing_unit_columns = metadata["Ecephys"].get("UnitColumns", [])
+            existing_col_names = {col["name"] for col in existing_unit_columns}
+            for prop_name, prop_info in new_units_properties.items():
+                if prop_name not in existing_col_names:
+                    schema_type = prop_info.get("type", "str")
+                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(schema_type, "str")
+                    existing_unit_columns.append(
+                        {
+                            "name": prop_name,
+                            "description": prop_info.get("description", "No description."),
+                            "data_type": data_type,
+                        }
+                    )
+
+    # Allow additional properties on Device definitions (e.g. manufacturer from neuroconv)
+    for modality_key in ("Ecephys", "Ophys"):
+        modality_schema = schema.get("properties", {}).get(modality_key, {})
+        device_def = modality_schema.get("definitions", {}).get("Device", {})
+        if device_def:
+            device_def["additionalProperties"] = True
 
     # TODO: generalize logging stuff
     log_base = GUIDE_ROOT_FOLDER / "logs"
@@ -1342,6 +1381,34 @@ def upload_multiple_filesystem_objects_to_dandi(**kwargs) -> list[Path]:
     return results
 
 
+def _ensure_dandi_staging_alias():
+    """Ensure 'dandi-staging' works as an alias for 'dandi-sandbox'.
+
+    dandi >= 0.74.0 renamed 'dandi-staging' to 'dandi-sandbox' and added an
+    explicit ValueError check rejecting the old name. neuroconv < 0.9.0 uses
+    'dandi-staging' internally. We patch both the known_instances dict and
+    the get_instance function to bypass the rejection.
+    """
+    from dandi.consts import known_instances
+    if "dandi-staging" not in known_instances and "dandi-sandbox" in known_instances:
+        known_instances["dandi-staging"] = known_instances["dandi-sandbox"]
+
+    # Patch get_instance to not raise ValueError for dandi-staging
+    try:
+        import dandi.utils as _dandi_utils
+        _original_get_instance = getattr(_dandi_utils, '_original_get_instance_fn', None)
+        if _original_get_instance is None and hasattr(_dandi_utils, 'get_instance'):
+            _original = _dandi_utils.get_instance
+            def _patched_get_instance(dandi_instance_id, *args, **kwargs):
+                if dandi_instance_id == "dandi-staging":
+                    dandi_instance_id = "dandi-sandbox"
+                return _original(dandi_instance_id, *args, **kwargs)
+            _dandi_utils._original_get_instance_fn = _original
+            _dandi_utils.get_instance = _patched_get_instance
+    except (ImportError, AttributeError):
+        pass
+
+
 def upload_folder_to_dandi(
     dandiset_id: str,
     api_key: str,
@@ -1353,6 +1420,8 @@ def upload_folder_to_dandi(
     ignore_cache: bool = False,
 ) -> list[Path]:
     from neuroconv.tools.data_transfers import automatic_dandi_upload
+
+    _ensure_dandi_staging_alias()
 
     # Set API key env var for both old (< 0.73.2) and new dandi versions
     os.environ["DANDI_API_KEY"] = api_key
@@ -1367,7 +1436,7 @@ def upload_folder_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=Path(nwb_folder_path),
-        staging=sandbox,  # Map sandbox parameter to staging for external API
+        sandbox=sandbox,
         cleanup=cleanup,
         number_of_jobs=number_of_jobs or 1,
         number_of_threads=number_of_threads or 1,
@@ -1386,6 +1455,8 @@ def upload_project_to_dandi(
 ) -> list[Path]:
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
+    _ensure_dandi_staging_alias()
+
     # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
     # Set API key env var for both old (< 0.73.2) and new dandi versions
     os.environ["DANDI_API_KEY"] = api_key
@@ -1400,7 +1471,7 @@ def upload_project_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
-        staging=sandbox,  # Map sandbox parameter to staging for external API
+        sandbox=sandbox,
         cleanup=cleanup,
         number_of_jobs=number_of_jobs,
         number_of_threads=number_of_threads,
