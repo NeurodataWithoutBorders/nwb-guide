@@ -616,10 +616,14 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             existing_col_names = {col["name"] for col in existing_electrode_columns}
             for prop_name, prop_info in new_electrodes_properties.items():
                 if prop_name not in existing_col_names:
+                    # Infer data_type from schema type (required by update_recording_properties_from_table_as_json)
+                    schema_type = prop_info.get("type", "str")
+                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(schema_type, "str")
                     existing_electrode_columns.append(
                         {
                             "name": prop_name,
                             "description": prop_info.get("description", "No description."),
+                            "data_type": data_type,
                         }
                     )
 
@@ -651,10 +655,13 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
             existing_col_names = {col["name"] for col in existing_unit_columns}
             for prop_name, prop_info in new_units_properties.items():
                 if prop_name not in existing_col_names:
+                    schema_type = prop_info.get("type", "str")
+                    data_type = {"number": "float64", "integer": "int64", "boolean": "bool", "array": "object"}.get(schema_type, "str")
                     existing_unit_columns.append(
                         {
                             "name": prop_name,
                             "description": prop_info.get("description", "No description."),
+                            "data_type": data_type,
                         }
                     )
 
