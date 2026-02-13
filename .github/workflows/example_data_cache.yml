@@ -72,3 +72,35 @@ jobs:
         name: Download behavior dataset from S3
         run: |
           aws s3 cp --region=us-east-2 ${{ secrets.S3_GIN_BUCKET }}/behavior_testing_data ./behavior_testing_data --recursive
+
+      # Tutorial Phy data (pre-generated, avoids slow PCA fitting; SpikeGLX is generated locally)
+      - name: Cache tutorial Phy data
+        uses: actions/cache@v4
+        id: cache-tutorial-phy
+        with:
+          path: ./tutorial_phy_data
+          key: tutorial-phy-data-v1-${{ matrix.os }}
+
+      - if: steps.cache-tutorial-phy.outputs.cache-hit != 'true'
+        name: Download tutorial Phy data
+        run: |
+          curl -L -o tutorial_phy_data.tar.gz https://github.com/NeurodataWithoutBorders/nwb-guide/releases/download/tutorial-test-data-v1/tutorial_phy_data.tar.gz
+          mkdir -p tutorial_phy_data
+          tar xzf tutorial_phy_data.tar.gz -C tutorial_phy_data
+          rm tutorial_phy_data.tar.gz
+
+      # Tutorial Phy data (pre-generated, avoids slow PCA fitting; SpikeGLX is generated locally)
+      - name: Cache tutorial Phy data
+        uses: actions/cache@v4
+        id: cache-tutorial-phy
+        with:
+          path: ./tutorial_phy_data
+          key: tutorial-phy-data-v1-${{ matrix.os }}
+
+      - if: steps.cache-tutorial-phy.outputs.cache-hit != 'true'
+        name: Download tutorial Phy data
+        run: |
+          curl -L -o tutorial_phy_data.tar.gz https://github.com/NeurodataWithoutBorders/nwb-guide/releases/download/tutorial-test-data-v1/tutorial_phy_data.tar.gz
+          mkdir -p tutorial_phy_data
+          tar xzf tutorial_phy_data.tar.gz -C tutorial_phy_data
+          rm tutorial_phy_data.tar.gz

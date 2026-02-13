@@ -1669,39 +1669,71 @@ userNotes=
     return meta_structure
 
 
-def generate_test_data(output_path: str):
-    """
-    Autogenerate the data formats needed for the tutorial pipeline.
+TUTORIAL_PHY_DATA_URL = "https://github.com/NeurodataWithoutBorders/nwb-guide/releases/download/tutorial-test-data-v1/tutorial_phy_data.tar.gz"
 
-    Consists of a single-probe single-segment SpikeGLX recording (both AP and LF bands) as well as Phy sorting data.
-    """
+
+def _download_and_extract_tar_gz(url: str, output_path: Path):
+    """Download a tar.gz archive and extract it to the given path."""
+    import tarfile
+    import tempfile
+    import urllib.request
+
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    with tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False) as tmp:
+        tmp_path = tmp.name
+
+    try:
+        urllib.request.urlretrieve(url, tmp_path)
+        with tarfile.open(tmp_path, "r:gz") as tar:
+            tar.extractall(path=str(output_path))
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
+
+
+def download_test_data(output_path: str):
+    """Generate SpikeGLX data locally (fast) and download pre-generated Phy data (avoids slow PCA fitting)."""
+    base_path = Path(output_path)
+    phy_output_folder = base_path / "phy"
+
+    # Generate SpikeGLX data locally -- fast (just writing binary files + meta)
+    generate_test_data(base_path)
+
+    # Download Phy data if not already present -- avoids the slow PCA/waveform computation
+    if not phy_output_folder.exists() or not any(phy_output_folder.iterdir()):
+        _download_and_extract_tar_gz(TUTORIAL_PHY_DATA_URL, phy_output_folder)
+
+
+TUTORIAL_PHY_DATA_URL = "https://github.com/NeurodataWithoutBorders/nwb-guide/releases/download/tutorial-test-data-v1/tutorial_phy_data.tar.gz"
+
+
+def _generate_spikeglx_data(base_path: Path):
+    """Generate synthetic SpikeGLX recording data (AP + LF bands). Fast — just writes binary files + meta."""
     import spikeinterface
-    import spikeinterface.exporters
     import spikeinterface.preprocessing
 
     spikeinterface.set_global_job_kwargs(n_jobs=-1)
 
-    base_path = Path(output_path)
     spikeglx_output_folder = base_path / "spikeglx"
-    phy_output_folder = base_path / "phy"
 
-    # Define Neuropixels-like values for sampling rates and conversion factors
+    if spikeglx_output_folder.exists() and any(spikeglx_output_folder.rglob("*.bin")):
+        return  # Already exists
+
     duration_in_s = 3.0
     number_of_units = 50
-    number_of_channels = 385  # Have to include 'sync' channel to be proper SpikeGLX. TODO: artificiate sync pulses
+    number_of_channels = 385
     conversion_factor_to_uV = 2.34375
     ap_sampling_frequency = 30_000.0
     lf_sampling_frequency = 2_500.0
     downsample_factor = int(ap_sampling_frequency / lf_sampling_frequency)
 
-    # Generate synthetic sorting and voltage traces with waveforms around them
-    artificial_ap_band_in_uV, sorting = spikeinterface.generate_ground_truth_recording(
+    artificial_ap_band_in_uV, _sorting = spikeinterface.generate_ground_truth_recording(
         durations=[duration_in_s],
         sampling_frequency=ap_sampling_frequency,
         num_channels=number_of_channels,
         dtype="float32",
         num_units=number_of_units,
-        seed=0,  # Fixed seed for reproducibility
+        seed=0,
     )
 
     unscaled_artificial_ap_band = spikeinterface.preprocessing.scale(
@@ -1724,12 +1756,10 @@ def generate_test_data(output_path: str):
     lf_file_path = spikeglx_output_folder / "Session1_g0" / "Session1_g0_imec0" / "Session1_g0_t0.imec0.lf.bin"
     lf_meta_file_path = spikeglx_output_folder / "Session1_g0" / "Session1_g0_imec0" / "Session1_g0_t0.imec0.lf.meta"
 
-    # Make .bin files
     ap_file_path.parent.mkdir(parents=True, exist_ok=True)
     spikeinterface.write_binary_recording(recording=int16_artificial_ap_band, file_paths=[ap_file_path])
     spikeinterface.write_binary_recording(recording=int16_artificial_lf_band, file_paths=[lf_file_path])
 
-    # Make .meta files
     ap_meta_content = _format_spikeglx_meta_file(bin_file_path=ap_file_path)
     with open(file=ap_meta_file_path, mode="w") as io:
         io.write(ap_meta_content)
@@ -1738,7 +1768,59 @@ def generate_test_data(output_path: str):
     with open(file=lf_meta_file_path, mode="w") as io:
         io.write(lf_meta_content)
 
-    # Make Phy folder - see https://spikeinterface.readthedocs.io/en/latest/modules/exporters.html
+
+def download_test_data(output_path: str):
+    """Generate SpikeGLX data locally (fast) and download pre-generated Phy data (avoids slow PCA fitting)."""
+    import tarfile
+    import urllib.request
+    import tempfile
+
+    base_path = Path(output_path)
+    phy_output_folder = base_path / "phy"
+
+    # Generate SpikeGLX data locally — fast (just binary writes + meta)
+    _generate_spikeglx_data(base_path)
+
+    # Download Phy data — avoids the slow PCA/waveform computation (~2 min)
+    if not phy_output_folder.exists() or not any(phy_output_folder.iterdir()):
+        phy_output_folder.mkdir(parents=True, exist_ok=True)
+
+        with tempfile.NamedTemporaryFile(suffix=".tar.gz", delete=False) as tmp:
+            tmp_path = tmp.name
+
+        try:
+            urllib.request.urlretrieve(TUTORIAL_PHY_DATA_URL, tmp_path)
+            with tarfile.open(tmp_path, "r:gz") as tar:
+                tar.extractall(path=str(phy_output_folder))
+        finally:
+            Path(tmp_path).unlink(missing_ok=True)
+
+
+def generate_test_data(output_path: str):
+    """
+    Autogenerate the data formats needed for the tutorial pipeline.
+
+    Consists of a single-probe single-segment SpikeGLX recording (both AP and LF bands) as well as Phy sorting data.
+    This is the slow path — use download_test_data() for faster setup.
+    """
+    import spikeinterface
+    import spikeinterface.exporters
+
+    spikeinterface.set_global_job_kwargs(n_jobs=-1)
+
+    base_path = Path(output_path)
+    phy_output_folder = base_path / "phy"
+
+    _generate_spikeglx_data(base_path)
+
+    if phy_output_folder.exists() and any(phy_output_folder.iterdir()):
+        return
+
+    artificial_ap_band_in_uV, sorting = spikeinterface.generate_ground_truth_recording(
+        durations=[3.0], sampling_frequency=30_000.0, num_channels=385,
+        dtype="float32", num_units=50, seed=0,
+    )
+
     sorting_analyzer = spikeinterface.create_sorting_analyzer(
         sorting=sorting, recording=artificial_ap_band_in_uV, mode="memory", sparse=False
     )
