@@ -665,6 +665,13 @@ def get_metadata_schema(source_data: Dict[str, dict], interfaces: dict) -> Dict[
                         }
                     )
 
+    # Allow additional properties on Device definitions (e.g. manufacturer from neuroconv)
+    for modality_key in ("Ecephys", "Ophys"):
+        modality_schema = schema.get("properties", {}).get(modality_key, {})
+        device_def = modality_schema.get("definitions", {}).get("Device", {})
+        if device_def:
+            device_def["additionalProperties"] = True
+
     # TODO: generalize logging stuff
     log_base = GUIDE_ROOT_FOLDER / "logs"
     log_base.mkdir(exist_ok=True)
