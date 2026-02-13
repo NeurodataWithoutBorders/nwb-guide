@@ -1,7 +1,7 @@
 """API endpoint definitions for interacting with NeuroConv."""
 
 from flask_restx import Namespace, Resource, reqparse
-from manageNeuroconv import generate_dataset, generate_test_data
+from manageNeuroconv import download_test_data, generate_dataset, generate_test_data
 
 data_namespace = Namespace(name="data", description="API route for dataset generation in the NWB GUIDE.")
 
@@ -37,3 +37,16 @@ class GenerateDataset(Resource):
     def post(self):
         arguments = generate_test_dataset_parser.parse_args()
         return generate_dataset(input_path=arguments["input_path"], output_path=arguments["output_path"])
+
+
+download_test_data_parser = reqparse.RequestParser()
+download_test_data_parser.add_argument("output_path", type=str, required=True)
+
+
+@data_namespace.route("/download")
+@data_namespace.expect(download_test_data_parser)
+class DownloadTestData(Resource):
+    @data_namespace.doc(description="Generate SpikeGLX locally and download pre-built Phy data.")
+    def post(self):
+        arguments = download_test_data_parser.parse_args()
+        download_test_data(output_path=arguments["output_path"])
