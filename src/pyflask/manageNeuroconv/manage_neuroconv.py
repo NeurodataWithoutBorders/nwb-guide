@@ -331,14 +331,7 @@ def get_all_interface_info() -> dict:
         "CEDRecordingInterface",
         "OpenEphysBinaryRecordingInterface",
         "OpenEphysLegacyRecordingInterface",
-        # Ignored
-        "AxonaPositionDataInterface",
-        "AxonaUnitRecordingInterface",
-        "CsvTimeIntervalsInterface",
-        "ExcelTimeIntervalsInterface",
-        "Hdf5ImagingInterface",
-        "MaxOneRecordingInterface",
-        "OpenEphysSortingInterface",
+        # Unmaintained dependency
         "SimaSegmentationInterface",
     ]
 
@@ -1669,21 +1662,17 @@ userNotes=
     return meta_structure
 
 
-def generate_test_data(output_path: str):
-    """
-    Autogenerate the data formats needed for the tutorial pipeline.
-
-    Consists of a single-probe single-segment SpikeGLX recording (both AP and LF bands) as well as Phy sorting data.
-    """
+def _generate_spikeglx_data(base_path: Path):
+    """Generate synthetic SpikeGLX recording data (AP + LF bands). Fast — just writes binary files + meta."""
     import spikeinterface
-    import spikeinterface.exporters
     import spikeinterface.preprocessing
 
     spikeinterface.set_global_job_kwargs(n_jobs=-1)
 
-    base_path = Path(output_path)
     spikeglx_output_folder = base_path / "spikeglx"
-    phy_output_folder = base_path / "phy"
+
+    if spikeglx_output_folder.exists() and any(spikeglx_output_folder.rglob("*.bin")):
+        return  # Already exists
 
     # Define Neuropixels-like values for sampling rates and conversion factors
     duration_in_s = 3.0
@@ -1694,8 +1683,8 @@ def generate_test_data(output_path: str):
     lf_sampling_frequency = 2_500.0
     downsample_factor = int(ap_sampling_frequency / lf_sampling_frequency)
 
-    # Generate synthetic sorting and voltage traces with waveforms around them
-    artificial_ap_band_in_uV, sorting = spikeinterface.generate_ground_truth_recording(
+    # Generate synthetic voltage traces with waveforms around them
+    artificial_ap_band_in_uV, _sorting = spikeinterface.generate_ground_truth_recording(
         durations=[duration_in_s],
         sampling_frequency=ap_sampling_frequency,
         num_channels=number_of_channels,
@@ -1738,7 +1727,44 @@ def generate_test_data(output_path: str):
     with open(file=lf_meta_file_path, mode="w") as io:
         io.write(lf_meta_content)
 
-    # Make Phy folder - see https://spikeinterface.readthedocs.io/en/latest/modules/exporters.html
+
+def generate_test_data(output_path: str):
+    """
+    Autogenerate the data formats needed for the tutorial pipeline.
+
+    Consists of a single-probe single-segment SpikeGLX recording (both AP and LF bands) as well as Phy sorting data.
+    SpikeGLX data is generated locally (fast). Phy data requires PCA fitting and is generated from scratch.
+    """
+    import spikeinterface
+    import spikeinterface.exporters
+    import spikeinterface.preprocessing
+
+    spikeinterface.set_global_job_kwargs(n_jobs=-1)
+
+    base_path = Path(output_path)
+    phy_output_folder = base_path / "phy"
+
+    # Generate SpikeGLX data
+    _generate_spikeglx_data(base_path)
+
+    if phy_output_folder.exists() and any(phy_output_folder.iterdir()):
+        return  # Phy data already exists
+
+    # Generate Phy data (slow — requires PCA fitting)
+    duration_in_s = 3.0
+    number_of_units = 50
+    number_of_channels = 385
+    ap_sampling_frequency = 30_000.0
+
+    artificial_ap_band_in_uV, sorting = spikeinterface.generate_ground_truth_recording(
+        durations=[duration_in_s],
+        sampling_frequency=ap_sampling_frequency,
+        num_channels=number_of_channels,
+        dtype="float32",
+        num_units=number_of_units,
+        seed=0,
+    )
+
     sorting_analyzer = spikeinterface.create_sorting_analyzer(
         sorting=sorting, recording=artificial_ap_band_in_uV, mode="memory", sparse=False
     )
