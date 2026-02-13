@@ -334,7 +334,7 @@ def get_all_interface_info() -> dict:
         # Ignored
         "AxonaPositionDataInterface",
         "AxonaUnitRecordingInterface",
-        "CsvTimeIntervalsInterface",
+        # "CsvTimeIntervalsInterface",  # Re-enabled
         "ExcelTimeIntervalsInterface",
         "Hdf5ImagingInterface",
         "MaxOneRecordingInterface",
