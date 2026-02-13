@@ -63,7 +63,8 @@ export const testInterfaceInfo = {
   },
   single: {
     SpikeGLXRecordingInterface: {
-      folder_path: join(testDataPath, 'spikeglx', 'Session1_g0')
+      folder_path: join(testDataPath, 'spikeglx', 'Session1_g0'),
+      stream_id: 'imec0.ap'
     },
     PhySortingInterface: {
       folder_path: join(testDataPath, 'phy')
