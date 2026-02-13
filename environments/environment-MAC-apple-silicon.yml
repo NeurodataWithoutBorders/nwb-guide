@@ -23,6 +23,7 @@ dependencies:
       - werkzeug < 3.0 # werkzeug 3.0 deprecates features used by flask 2.3.2. Remove this when updating flask.
       # NOTE: the NeuroConv wheel on PyPI includes sonpy which is not compatible with arm64, so build and install
       # NeuroConv from GitHub, which will remove the sonpy dependency when building from Mac arm64
+      - h5py < 3.13 # 3.13+ uses HDF5 1.14.4 features not in pytables 3.10.2's bundled HDF5 1.14.2
       - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.7.0
       - pandas < 3.0  # pandas 3.0 returns read-only arrays, breaking spikeinterface Phy extractor
       - neo == 0.14.1 # 0.14.2 is not compatible with neuroconv < 0.7.5
