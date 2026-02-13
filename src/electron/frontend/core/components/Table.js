@@ -377,7 +377,7 @@ export class Table extends LitElement {
                     return;
                 }
 
-                const isUndefined = value == "";
+                const isUndefined = value === "" || value == null;
 
                 if (isUndefined && required) {
                     instanceThis.#handleValidationResult(

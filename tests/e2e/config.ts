@@ -53,7 +53,7 @@ export const testInterfaceInfo = {
   },
   multi: {
     SpikeGLXRecordingInterface: {
-      format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0/{subject_id}_{session_id}_g0_imec0/{subject_id}_{session_id}_g0_t0.imec0.ap.bin',
+      format: '{subject_id}/{subject_id}_{session_id}/{subject_id}_{session_id}_g0',
       autocomplete: {}
     },
     PhySortingInterface: {
@@ -63,7 +63,8 @@ export const testInterfaceInfo = {
   },
   single: {
     SpikeGLXRecordingInterface: {
-      file_path: join(testDataPath, 'spikeglx', 'Session1_g0', 'Session1_g0_imec0', 'Session1_g0_t0.imec0.ap.bin')
+      folder_path: join(testDataPath, 'spikeglx', 'Session1_g0'),
+      stream_id: 'imec0.ap'
     },
     PhySortingInterface: {
       folder_path: join(testDataPath, 'phy')
