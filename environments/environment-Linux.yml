@@ -15,7 +15,7 @@ dependencies:
       - flask-cors == 4.0.0
       - flask_restx == 1.1.0
       - werkzeug < 3.0 # werkzeug 3.0 deprecates features used by flask 2.3.2. Remove this when updating flask.
-      - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.9.1
+      - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.9.2
       - scikit-learn == 1.6.1 # Tutorial data generation
       - tqdm_publisher == 0.1.1 # Progress bars
       - tzlocal == 5.3.1 # Frontend timezone handling
