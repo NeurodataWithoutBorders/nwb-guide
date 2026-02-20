@@ -1,31 +1,24 @@
 {
     "required": [],
     "properties": {
-        "BrukerTiffSinglePlaneImagingInterface": {
+        "Plexon2RecordingInterface": {
             "properties": {
-                "folder_path": {
+                "file_path": {
                     "format": "path",
                     "type": "string",
-                    "description": "The folder containing the Bruker TIF image files and configuration files."
-                },
-                "stream_name": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "default": null
+                    "description": "Path to the .pl2 file."
                 },
                 "verbose": {
                     "default": false,
                     "type": "boolean"
+                },
+                "es_key": {
+                    "default": "ElectricalSeries",
+                    "type": "string"
                 }
             },
             "required": [
-                "folder_path"
+                "file_path"
             ],
             "type": "object",
             "additionalProperties": false
