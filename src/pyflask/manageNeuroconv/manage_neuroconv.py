@@ -186,19 +186,14 @@ def replace_none_with_nan(json_object: dict, json_schema: dict) -> dict:
                 # Also check regular properties (not elif — schemas can have both patternProperties and properties)
                 if key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
-                    if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
-                        obj[key] = (
-                            math.nan
-                        )  # Turn None into NaN if a number is expected (JavaScript JSON.stringify turns NaN into None)
-                    elif prop_schema.get("type") == "number" and isinstance(value, int):
-                        obj[key] = float(
-                            value
-                        )  # Turn integer into float if a number, the JSON Schema equivalent to float, is expected (JavaScript coerces floats with trailing zeros to integers)
-                    elif prop_schema.get("type") == "number" and isinstance(value, str):
-                        try:
-                            obj[key] = float(value)
-                        except ValueError:
-                            pass
+                    if prop_schema.get("type") == "number" and not isinstance(value, float):
+                        if value is None or value == "NaN":
+                            obj[key] = math.nan
+                        else:
+                            try:
+                                obj[key] = float(value)
+                            except (ValueError, TypeError):
+                                pass
                     else:
                         coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
