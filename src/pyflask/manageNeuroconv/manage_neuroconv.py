@@ -160,6 +160,28 @@ def resolve_references(schema: dict, root_schema: Optional[dict] = None) -> dict
     return schema
 
 
+def replace_nan_strings(obj):
+    """Recursively replace string 'NaN' values with float NaN throughout a nested dict/list structure.
+
+    This handles cases where the metadata schema is incomplete (e.g. BrukerTiffSinglePlaneConverter
+    doesn't provide Ophys schema), so schema-based coercion in replace_none_with_nan misses some fields.
+    String 'NaN' values are always JavaScript NaN artifacts from JSON serialization and never valid metadata.
+    """
+    if isinstance(obj, dict):
+        for key, value in obj.items():
+            if value == "NaN":
+                obj[key] = math.nan
+            else:
+                replace_nan_strings(value)
+    elif isinstance(obj, list):
+        for i, item in enumerate(obj):
+            if item == "NaN":
+                obj[i] = math.nan
+            else:
+                replace_nan_strings(item)
+    return obj
+
+
 def replace_none_with_nan(json_object: dict, json_schema: dict) -> dict:
     """
     Recursively search a JSON object and replace None values with NaN where appropriate.
@@ -1204,6 +1226,7 @@ def get_conversion_info(info: dict) -> dict:
 
     # Ensure Ophys NaN values are resolved
     resolved_metadata = replace_none_with_nan(info["metadata"], resolve_references(converter.get_metadata_schema()))
+    replace_nan_strings(resolved_metadata)
 
     ecephys_metadata = resolved_metadata.get("Ecephys")
 
