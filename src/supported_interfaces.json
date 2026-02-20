@@ -28,6 +28,7 @@
     "MEArecRecordingInterface",
     "PlexonRecordingInterface",
     "PlexonSortingInterface",
+    "Plexon2RecordingInterface",
     "AxonaRecordingInterface",
     "ExternalVideoInterface",
     "NeuralynxRecordingInterface",

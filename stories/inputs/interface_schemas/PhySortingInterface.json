@@ -4,7 +4,7 @@
         "PhySortingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "path",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "Path to the output Phy folder (containing the params.py)."
                 },

@@ -4,7 +4,7 @@
         "CnmfeSegmentationInterface": {
             "properties": {
                 "file_path": {
-                    "format": "path",
+                    "format": "file-path",
                     "type": "string"
                 },
                 "verbose": {

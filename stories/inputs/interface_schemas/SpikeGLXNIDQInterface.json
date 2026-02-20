@@ -4,7 +4,7 @@
         "SpikeGLXNIDQInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "path",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "Path to the folder containing the .nidq.bin file."
                 },

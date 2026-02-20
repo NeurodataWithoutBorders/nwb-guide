@@ -4,14 +4,14 @@
         "SLEAPInterface": {
             "properties": {
                 "file_path": {
-                    "format": "path",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to the .slp file (the output of sleap)"
                 },
                 "video_file_path": {
                     "anyOf": [
                         {
-                            "format": "path",
+                            "format": "file-path",
                             "type": "string"
                         },
                         {

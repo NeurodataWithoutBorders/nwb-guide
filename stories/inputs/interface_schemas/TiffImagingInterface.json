@@ -6,7 +6,7 @@
                 "file_path": {
                     "anyOf": [
                         {
-                            "format": "path",
+                            "format": "file-path",
                             "type": "string"
                         },
                         {
@@ -20,7 +20,7 @@
                     "anyOf": [
                         {
                             "items": {
-                                "format": "path",
+                                "format": "file-path",
                                 "type": "string"
                             },
                             "type": "array"

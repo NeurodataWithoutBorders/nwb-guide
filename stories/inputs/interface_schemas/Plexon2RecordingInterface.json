@@ -1,17 +1,16 @@
 {
     "required": [],
     "properties": {
-        "CellExplorerRecordingInterface": {
+        "Plexon2RecordingInterface": {
             "properties": {
-                "folder_path": {
-                    "format": "directory-path",
+                "file_path": {
+                    "format": "file-path",
                     "type": "string",
-                    "description": "Folder containing the .session.mat file"
+                    "description": "Path to the .pl2 file."
                 },
                 "verbose": {
                     "default": false,
-                    "type": "boolean",
-                    "description": "Whether to output verbose text."
+                    "type": "boolean"
                 },
                 "es_key": {
                     "default": "ElectricalSeries",
@@ -19,7 +18,7 @@
                 }
             },
             "required": [
-                "folder_path"
+                "file_path"
             ],
             "type": "object",
             "additionalProperties": false

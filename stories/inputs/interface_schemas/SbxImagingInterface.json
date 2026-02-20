@@ -4,7 +4,7 @@
         "SbxImagingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "path",
+                    "format": "file-path",
                     "type": "string"
                 },
                 "sampling_frequency": {

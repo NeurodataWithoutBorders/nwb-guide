@@ -4,7 +4,7 @@
         "IntanRecordingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "path",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to either a .rhd or a .rhs file"
                 },

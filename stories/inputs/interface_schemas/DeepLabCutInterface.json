@@ -4,14 +4,14 @@
         "DeepLabCutInterface": {
             "properties": {
                 "file_path": {
-                    "format": "path",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to the file output by dlc (.h5 or .csv)."
                 },
                 "config_file_path": {
                     "anyOf": [
                         {
-                            "format": "path",
+                            "format": "file-path",
                             "type": "string"
                         },
                         {
