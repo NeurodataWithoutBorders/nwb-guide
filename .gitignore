@@ -43,4 +43,8 @@ src/build
 # PyCharm
 .idea/
 
+# Auto-generated storybook schemas (regenerate with: python generateInterfaceSchema.py)
+stories/inputs/interface_schemas/
+stories/pages/SourceData.stories.js
+
 ophys_testing_data/
