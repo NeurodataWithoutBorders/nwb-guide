@@ -4,7 +4,7 @@
         "NeuroScopeLFPInterface": {
             "properties": {
                 "file_path": {
-                    "format": "file-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Path to .lfp or .eeg file."
                 },
@@ -22,7 +22,7 @@
                 "xml_file_path": {
                     "anyOf": [
                         {
-                            "format": "file-path",
+                            "format": "path",
                             "type": "string"
                         },
                         {
@@ -30,6 +30,14 @@
                         }
                     ],
                     "default": null
+                },
+                "verbose": {
+                    "default": false,
+                    "type": "boolean"
+                },
+                "es_key": {
+                    "default": "ElectricalSeries",
+                    "type": "string"
                 }
             },
             "required": [

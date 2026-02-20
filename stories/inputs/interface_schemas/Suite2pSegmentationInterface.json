@@ -4,7 +4,7 @@
         "Suite2pSegmentationInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Path to the folder containing Suite2p segmentation data. Should contain 'plane#' subfolder(s)."
                 },
@@ -43,7 +43,7 @@
                     "default": null
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 }
             },

@@ -4,11 +4,11 @@
         "CellExplorerSortingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "file-path",
+                    "format": "path",
                     "type": "string"
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 }
             },

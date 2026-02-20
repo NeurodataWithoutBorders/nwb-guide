@@ -4,12 +4,12 @@
         "MicroManagerTiffImagingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
+                    "format": "path",
                     "type": "string",
                     "description": "The folder containing the OME-TIF image files."
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 }
             },

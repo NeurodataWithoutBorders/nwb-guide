@@ -42,3 +42,5 @@ src/build
 
 # PyCharm
 .idea/
+
+ophys_testing_data/

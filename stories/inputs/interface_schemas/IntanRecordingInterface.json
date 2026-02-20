@@ -4,23 +4,12 @@
         "IntanRecordingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "file-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Path to either a .rhd or a .rhs file"
                 },
-                "stream_id": {
-                    "anyOf": [
-                        {
-                            "type": "string"
-                        },
-                        {
-                            "type": "null"
-                        }
-                    ],
-                    "default": null
-                },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 },
                 "es_key": {

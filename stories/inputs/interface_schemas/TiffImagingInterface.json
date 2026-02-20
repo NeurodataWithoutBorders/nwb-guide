@@ -4,15 +4,62 @@
         "TiffImagingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "file-path",
-                    "type": "string",
+                    "anyOf": [
+                        {
+                            "format": "path",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
                     "description": "Path to Tiff file."
                 },
+                "file_paths": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "format": "path",
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
                 "sampling_frequency": {
+                    "default": null,
                     "type": "number"
                 },
+                "dimension_order": {
+                    "default": "ZCT",
+                    "type": "string"
+                },
+                "num_channels": {
+                    "default": 1,
+                    "type": "integer"
+                },
+                "channel_name": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "num_planes": {
+                    "default": 1,
+                    "type": "integer"
+                },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 },
                 "photon_series_type": {
@@ -24,10 +71,6 @@
                     "type": "string"
                 }
             },
-            "required": [
-                "file_path",
-                "sampling_frequency"
-            ],
             "type": "object",
             "additionalProperties": false
         }

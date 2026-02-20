@@ -4,14 +4,28 @@
         "MiniscopeImagingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
-                    "type": "string",
-                    "description": "The main Miniscope folder. The microscope movie files are expected to be in sub folders within the main folder."
+                    "default": null,
+                    "format": "path",
+                    "type": "string"
+                },
+                "file_paths": {
+                    "default": null,
+                    "items": {},
+                    "type": "array"
+                },
+                "configuration_file_path": {
+                    "default": null,
+                    "type": "string"
+                },
+                "timeStamps_file_path": {
+                    "default": null,
+                    "type": "string"
+                },
+                "verbose": {
+                    "default": false,
+                    "type": "boolean"
                 }
             },
-            "required": [
-                "folder_path"
-            ],
             "type": "object",
             "additionalProperties": false
         }

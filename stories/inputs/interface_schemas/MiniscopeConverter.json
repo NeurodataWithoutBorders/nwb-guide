@@ -4,12 +4,18 @@
         "MiniscopeConverter": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
+                    "format": "path",
                     "type": "string",
                     "description": "The path to the main Miniscope folder."
                 },
+                "user_configuration_file_path": {
+                    "type": "string",
+                    "format": "file-path",
+                    "description": "Path to the Miniscope acquisition User Config JSON file (named 'UserConfigFile.json' in the Miniscope documentation and source code). When provided, the converter uses this configuration to interpret the folder hierarchy and device names instead of relying on a fixed directory structure.",
+                    "default": null
+                },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 }
             },

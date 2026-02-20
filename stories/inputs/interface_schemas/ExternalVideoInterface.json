@@ -1,11 +1,11 @@
 {
     "required": [],
     "properties": {
-        "VideoInterface": {
+        "ExternalVideoInterface": {
             "properties": {
                 "file_paths": {
                     "items": {
-                        "format": "file-path",
+                        "format": "path",
                         "type": "string"
                     },
                     "type": "array"
@@ -14,9 +14,16 @@
                     "default": false,
                     "type": "boolean"
                 },
-                "metadata_key_name": {
-                    "default": "Videos",
-                    "type": "string"
+                "video_name": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 }
             },
             "required": [

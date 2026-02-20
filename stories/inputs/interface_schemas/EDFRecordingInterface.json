@@ -4,17 +4,29 @@
         "EDFRecordingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "file-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Path to the .edf file."
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 },
                 "es_key": {
                     "default": "ElectricalSeries",
                     "type": "string"
+                },
+                "channels_to_skip": {
+                    "anyOf": [
+                        {
+                            "items": {},
+                            "type": "array"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 }
             },
             "required": [

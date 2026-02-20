@@ -4,14 +4,69 @@
         "ScanImageImagingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "file-path",
-                    "type": "string",
-                    "description": "Path to Tiff file."
+                    "anyOf": [
+                        {
+                            "format": "path",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 },
                 "channel_name": {
                     "anyOf": [
                         {
                             "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "slice_sample": {
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "plane_index": {
+                    "anyOf": [
+                        {
+                            "type": "integer"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "file_paths": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "format": "path",
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "interleave_slice_samples": {
+                    "anyOf": [
+                        {
+                            "type": "boolean"
                         },
                         {
                             "type": "null"
@@ -42,13 +97,10 @@
                     "default": null
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 }
             },
-            "required": [
-                "file_path"
-            ],
             "type": "object",
             "additionalProperties": false
         }

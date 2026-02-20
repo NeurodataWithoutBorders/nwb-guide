@@ -4,7 +4,7 @@
         "BrukerTiffMultiPlaneImagingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
+                    "format": "path",
                     "type": "string",
                     "description": "The folder that contains the Bruker TIF image files (.ome.tif) and configuration files (.xml, .env)."
                 },
@@ -20,7 +20,7 @@
                     "default": null
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 }
             },

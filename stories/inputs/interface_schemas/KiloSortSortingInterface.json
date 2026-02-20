@@ -4,7 +4,7 @@
         "KiloSortSortingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Path to the output Phy folder (containing the params.py)"
                 },
@@ -13,7 +13,7 @@
                     "type": "boolean"
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 }
             },
