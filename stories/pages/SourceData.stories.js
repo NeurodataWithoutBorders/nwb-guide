@@ -29,7 +29,7 @@ import MEArecRecordingInterfaceSchema from "../inputs/interface_schemas/MEArecRe
 import PlexonRecordingInterfaceSchema from "../inputs/interface_schemas/PlexonRecordingInterface.json";
 import PlexonSortingInterfaceSchema from "../inputs/interface_schemas/PlexonSortingInterface.json";
 import AxonaRecordingInterfaceSchema from "../inputs/interface_schemas/AxonaRecordingInterface.json";
-import VideoInterfaceSchema from "../inputs/interface_schemas/VideoInterface.json";
+import ExternalVideoInterfaceSchema from "../inputs/interface_schemas/ExternalVideoInterface.json";
 import NeuralynxRecordingInterfaceSchema from "../inputs/interface_schemas/NeuralynxRecordingInterface.json";
 import Suite2pSegmentationInterfaceSchema from "../inputs/interface_schemas/Suite2pSegmentationInterface.json";
 import AlphaOmegaRecordingInterfaceSchema from "../inputs/interface_schemas/AlphaOmegaRecordingInterface.json";
@@ -44,6 +44,7 @@ import BrukerTiffSinglePlaneConverterSchema from "../inputs/interface_schemas/Br
 import BrukerTiffMultiPlaneConverterSchema from "../inputs/interface_schemas/BrukerTiffMultiPlaneConverter.json";
 import MiniscopeConverterSchema from "../inputs/interface_schemas/MiniscopeConverter.json";
 import CellExplorerRecordingInterfaceSchema from "../inputs/interface_schemas/CellExplorerRecordingInterface.json";
+import WhiteMatterRecordingInterfaceSchema from "../inputs/interface_schemas/WhiteMatterRecordingInterface.json";
 
 export default {
     title: "Pages/Guided Mode/Source Data",
@@ -115,7 +116,8 @@ globalStateCopy.schema.source_data.properties.PlexonSortingInterface =
     PlexonSortingInterfaceSchema.properties.PlexonSortingInterface;
 globalStateCopy.schema.source_data.properties.AxonaRecordingInterface =
     AxonaRecordingInterfaceSchema.properties.AxonaRecordingInterface;
-globalStateCopy.schema.source_data.properties.VideoInterface = VideoInterfaceSchema.properties.VideoInterface;
+globalStateCopy.schema.source_data.properties.ExternalVideoInterface =
+    ExternalVideoInterfaceSchema.properties.ExternalVideoInterface;
 globalStateCopy.schema.source_data.properties.NeuralynxRecordingInterface =
     NeuralynxRecordingInterfaceSchema.properties.NeuralynxRecordingInterface;
 globalStateCopy.schema.source_data.properties.Suite2pSegmentationInterface =
@@ -142,6 +144,8 @@ globalStateCopy.schema.source_data.properties.MiniscopeConverter =
     MiniscopeConverterSchema.properties.MiniscopeConverter;
 globalStateCopy.schema.source_data.properties.CellExplorerRecordingInterface =
     CellExplorerRecordingInterfaceSchema.properties.CellExplorerRecordingInterface;
+globalStateCopy.schema.source_data.properties.WhiteMatterRecordingInterface =
+    WhiteMatterRecordingInterfaceSchema.properties.WhiteMatterRecordingInterface;
 
 const results = globalStateCopy.results;
 for (let sub in results) {
@@ -335,11 +339,11 @@ AxonaRecordingInterfaceGlobalCopy.interfaces.interface = AxonaRecordingInterface
 AxonaRecordingInterfaceGlobalCopy.schema.source_data = AxonaRecordingInterfaceSchema;
 AxonaRecordingInterface.args = { activePage, globalState: AxonaRecordingInterfaceGlobalCopy };
 
-export const VideoInterface = PageTemplate.bind({});
-const VideoInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
-VideoInterfaceGlobalCopy.interfaces.interface = VideoInterface;
-VideoInterfaceGlobalCopy.schema.source_data = VideoInterfaceSchema;
-VideoInterface.args = { activePage, globalState: VideoInterfaceGlobalCopy };
+export const ExternalVideoInterface = PageTemplate.bind({});
+const ExternalVideoInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+ExternalVideoInterfaceGlobalCopy.interfaces.interface = ExternalVideoInterface;
+ExternalVideoInterfaceGlobalCopy.schema.source_data = ExternalVideoInterfaceSchema;
+ExternalVideoInterface.args = { activePage, globalState: ExternalVideoInterfaceGlobalCopy };
 
 export const NeuralynxRecordingInterface = PageTemplate.bind({});
 const NeuralynxRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
@@ -424,3 +428,9 @@ const CellExplorerRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globa
 CellExplorerRecordingInterfaceGlobalCopy.interfaces.interface = CellExplorerRecordingInterface;
 CellExplorerRecordingInterfaceGlobalCopy.schema.source_data = CellExplorerRecordingInterfaceSchema;
 CellExplorerRecordingInterface.args = { activePage, globalState: CellExplorerRecordingInterfaceGlobalCopy };
+
+export const WhiteMatterRecordingInterface = PageTemplate.bind({});
+const WhiteMatterRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+WhiteMatterRecordingInterfaceGlobalCopy.interfaces.interface = WhiteMatterRecordingInterface;
+WhiteMatterRecordingInterfaceGlobalCopy.schema.source_data = WhiteMatterRecordingInterfaceSchema;
+WhiteMatterRecordingInterface.args = { activePage, globalState: WhiteMatterRecordingInterfaceGlobalCopy };

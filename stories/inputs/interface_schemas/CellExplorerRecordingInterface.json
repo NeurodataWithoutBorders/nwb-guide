@@ -4,12 +4,12 @@
         "CellExplorerRecordingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Folder containing the .session.mat file"
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean",
                     "description": "Whether to output verbose text."
                 },

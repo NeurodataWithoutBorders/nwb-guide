@@ -4,7 +4,7 @@
         "NeuroScopeRecordingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "file-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Path to .dat file."
                 },
@@ -22,7 +22,7 @@
                 "xml_file_path": {
                     "anyOf": [
                         {
-                            "format": "file-path",
+                            "format": "path",
                             "type": "string"
                         },
                         {
@@ -32,7 +32,7 @@
                     "default": null
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 },
                 "es_key": {

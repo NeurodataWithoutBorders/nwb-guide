@@ -4,7 +4,7 @@
         "TdtRecordingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
+                    "format": "path",
                     "type": "string"
                 },
                 "gain": {
@@ -15,12 +15,23 @@
                     "type": "string"
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 },
                 "es_key": {
                     "default": "ElectricalSeries",
                     "type": "string"
+                },
+                "stream_name": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
                 }
             },
             "required": [

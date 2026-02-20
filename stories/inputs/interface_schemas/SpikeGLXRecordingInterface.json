@@ -3,13 +3,17 @@
     "properties": {
         "SpikeGLXRecordingInterface": {
             "properties": {
-                "file_path": {
-                    "format": "file-path",
+                "folder_path": {
+                    "format": "path",
                     "type": "string",
-                    "description": "Path to SpikeGLX ap.bin or lf.bin file."
+                    "description": "Path to the folder containing the .ap.bin or .lf.bin SpikeGLX file."
+                },
+                "stream_id": {
+                    "type": "string",
+                    "description": "Stream ID of the SpikeGLX recording.\nExamples are 'imec0.ap', 'imec0.lf', 'imec1.ap', 'imec1.lf', etc."
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean",
                     "description": "Whether to output verbose text."
                 },
@@ -22,11 +26,13 @@
                             "type": "null"
                         }
                     ],
-                    "default": null
+                    "default": null,
+                    "description": "The key to access the metadata of the ElectricalSeries."
                 }
             },
             "required": [
-                "file_path"
+                "folder_path",
+                "stream_id"
             ],
             "type": "object",
             "additionalProperties": false

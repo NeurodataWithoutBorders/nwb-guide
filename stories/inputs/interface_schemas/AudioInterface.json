@@ -5,7 +5,7 @@
             "properties": {
                 "file_paths": {
                     "items": {
-                        "format": "file-path",
+                        "format": "path",
                         "type": "string"
                     },
                     "type": "array"

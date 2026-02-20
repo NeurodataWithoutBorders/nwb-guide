@@ -4,7 +4,7 @@
         "NeuralynxRecordingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Path to Neuralynx directory containing \".ncs\", \".nse\", \".ntt\", \".nse\", or \".nev\" files."
                 },

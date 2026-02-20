@@ -1,18 +1,34 @@
 {
     "required": [],
     "properties": {
-        "BlackrockRecordingInterface": {
+        "WhiteMatterRecordingInterface": {
             "properties": {
                 "file_path": {
                     "format": "path",
-                    "type": "string",
-                    "description": "Path to the Blackrock file with suffix being .ns1, .ns2, .ns3, .ns4m .ns4, or .ns6."
+                    "type": "string"
                 },
-                "nsx_override": {
+                "sampling_frequency": {
+                    "type": "number"
+                },
+                "num_channels": {
+                    "type": "integer"
+                },
+                "channel_ids": {
                     "anyOf": [
                         {
-                            "format": "path",
-                            "type": "string"
+                            "items": {},
+                            "type": "array"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null
+                },
+                "is_filtered": {
+                    "anyOf": [
+                        {
+                            "type": "boolean"
                         },
                         {
                             "type": "null"
@@ -30,7 +46,9 @@
                 }
             },
             "required": [
-                "file_path"
+                "file_path",
+                "sampling_frequency",
+                "num_channels"
             ],
             "type": "object",
             "additionalProperties": false

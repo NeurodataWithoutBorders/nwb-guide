@@ -4,27 +4,38 @@
         "DeepLabCutInterface": {
             "properties": {
                 "file_path": {
-                    "format": "file-path",
+                    "format": "path",
                     "type": "string",
-                    "description": "Path to the .h5 file output by dlc."
+                    "description": "Path to the file output by dlc (.h5 or .csv)."
                 },
                 "config_file_path": {
-                    "format": "file-path",
-                    "type": "string",
-                    "description": "Path to .yml config file"
+                    "anyOf": [
+                        {
+                            "format": "path",
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "default": null,
+                    "description": "Path to .yml config file."
                 },
                 "subject_name": {
                     "default": "ind1",
                     "type": "string"
                 },
+                "pose_estimation_metadata_key": {
+                    "default": "PoseEstimationDeepLabCut",
+                    "type": "string"
+                },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 }
             },
             "required": [
-                "file_path",
-                "config_file_path"
+                "file_path"
             ],
             "type": "object",
             "additionalProperties": false

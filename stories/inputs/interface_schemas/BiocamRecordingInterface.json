@@ -4,12 +4,12 @@
         "BiocamRecordingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "file-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Path to the .bwr file."
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 },
                 "es_key": {

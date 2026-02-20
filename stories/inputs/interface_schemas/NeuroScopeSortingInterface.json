@@ -4,7 +4,7 @@
         "NeuroScopeSortingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "directory-path",
+                    "format": "path",
                     "type": "string",
                     "description": "Path to folder containing .res and .clu files."
                 },
@@ -31,7 +31,7 @@
                 "xml_file_path": {
                     "anyOf": [
                         {
-                            "format": "file-path",
+                            "format": "path",
                             "type": "string"
                         },
                         {
@@ -42,7 +42,7 @@
                     "description": "Path to .xml file containing device and electrode configuration."
                 },
                 "verbose": {
-                    "default": true,
+                    "default": false,
                     "type": "boolean"
                 }
             },
