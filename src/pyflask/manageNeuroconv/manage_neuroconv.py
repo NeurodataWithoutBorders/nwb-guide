@@ -203,9 +203,7 @@ def replace_none_with_nan(json_object: dict, json_schema: dict) -> dict:
                         coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
             for item in obj:
-                coerce_schema_compliance_recursive(
-                    item, schema.get("items", schema if "properties" in schema else {})
-                )
+                coerce_schema_compliance_recursive(item, schema.get("items", schema if "properties" in schema else {}))
 
         return obj
 
