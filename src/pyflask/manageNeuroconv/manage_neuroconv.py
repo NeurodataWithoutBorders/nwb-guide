@@ -143,11 +143,16 @@ def resolve_references(schema: dict, root_schema: Optional[dict] = None) -> dict
 
     if "$ref" in schema:
         resolver = RefResolver.from_schema(root_schema)
-        return resolver.resolve(schema["$ref"])[1]
+        resolved = resolver.resolve(schema["$ref"])[1]
+        return resolve_references(resolved, root_schema)
 
     if "properties" in schema:
         for key, prop_schema in schema["properties"].items():
             schema["properties"][key] = resolve_references(prop_schema, root_schema)
+
+    if "patternProperties" in schema:
+        for key, prop_schema in schema["patternProperties"].items():
+            schema["patternProperties"][key] = resolve_references(prop_schema, root_schema)
 
     if "items" in schema:
         schema["items"] = resolve_references(schema["items"], root_schema)
@@ -178,7 +183,8 @@ def replace_none_with_nan(json_object: dict, json_schema: dict) -> dict:
                         if regex.match(key):
                             coerce_schema_compliance_recursive(value, pattern_schema)
 
-                elif key in schema.get("properties", {}):
+                # Also check regular properties (not elif — schemas can have both patternProperties and properties)
+                if key in schema.get("properties", {}):
                     prop_schema = schema["properties"][key]
                     if prop_schema.get("type") == "number" and (value is None or value == "NaN"):
                         obj[key] = (
@@ -188,13 +194,18 @@ def replace_none_with_nan(json_object: dict, json_schema: dict) -> dict:
                         obj[key] = float(
                             value
                         )  # Turn integer into float if a number, the JSON Schema equivalent to float, is expected (JavaScript coerces floats with trailing zeros to integers)
+                    elif prop_schema.get("type") == "number" and isinstance(value, str):
+                        try:
+                            obj[key] = float(value)
+                        except ValueError:
+                            pass
                     else:
                         coerce_schema_compliance_recursive(value, prop_schema)
         elif isinstance(obj, list):
             for item in obj:
                 coerce_schema_compliance_recursive(
-                    item, schema.get("items", schema if "properties" else {})
-                )  # NEUROCONV PATCH
+                    item, schema.get("items", schema if "properties" in schema else {})
+                )
 
         return obj
 
