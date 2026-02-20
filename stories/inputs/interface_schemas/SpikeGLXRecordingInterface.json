@@ -4,7 +4,7 @@
         "SpikeGLXRecordingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "path",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "Path to the folder containing the .ap.bin or .lf.bin SpikeGLX file."
                 },

@@ -4,7 +4,7 @@
         "TdtRecordingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "path",
+                    "format": "directory-path",
                     "type": "string"
                 },
                 "gain": {

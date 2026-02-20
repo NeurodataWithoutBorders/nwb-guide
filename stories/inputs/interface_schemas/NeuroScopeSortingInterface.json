@@ -4,7 +4,7 @@
         "NeuroScopeSortingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "path",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "Path to folder containing .res and .clu files."
                 },
@@ -31,7 +31,7 @@
                 "xml_file_path": {
                     "anyOf": [
                         {
-                            "format": "path",
+                            "format": "file-path",
                             "type": "string"
                         },
                         {

@@ -4,7 +4,7 @@
         "BrukerTiffSinglePlaneImagingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "path",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "The folder containing the Bruker TIF image files and configuration files."
                 },

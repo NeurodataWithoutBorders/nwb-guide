@@ -4,7 +4,7 @@
         "SpikeGLXConverterPipe": {
             "properties": {
                 "folder_path": {
-                    "format": "path",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "Path to the folder containing SpikeGLX streams."
                 },

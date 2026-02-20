@@ -5,7 +5,7 @@
             "properties": {
                 "folder_path": {
                     "default": null,
-                    "format": "path",
+                    "format": "directory-path",
                     "type": "string"
                 },
                 "file_paths": {

@@ -4,7 +4,7 @@
         "CellExplorerRecordingInterface": {
             "properties": {
                 "folder_path": {
-                    "format": "path",
+                    "format": "directory-path",
                     "type": "string",
                     "description": "Folder containing the .session.mat file"
                 },

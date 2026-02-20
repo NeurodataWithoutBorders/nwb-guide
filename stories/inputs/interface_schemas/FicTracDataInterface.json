@@ -4,7 +4,7 @@
         "FicTracDataInterface": {
             "properties": {
                 "file_path": {
-                    "format": "path",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to the .dat file (the output of fictrac)"
                 },
@@ -22,7 +22,7 @@
                 "configuration_file_path": {
                     "anyOf": [
                         {
-                            "format": "path",
+                            "format": "file-path",
                             "type": "string"
                         },
                         {

@@ -4,7 +4,7 @@
         "MEArecRecordingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "path",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to the MEArec .h5 file."
                 },

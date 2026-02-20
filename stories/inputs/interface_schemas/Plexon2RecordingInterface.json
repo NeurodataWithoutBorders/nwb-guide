@@ -4,7 +4,7 @@
         "Plexon2RecordingInterface": {
             "properties": {
                 "file_path": {
-                    "format": "path",
+                    "format": "file-path",
                     "type": "string",
                     "description": "Path to the .pl2 file."
                 },
