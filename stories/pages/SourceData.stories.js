@@ -28,6 +28,7 @@ import MCSRawRecordingInterfaceSchema from "../inputs/interface_schemas/MCSRawRe
 import MEArecRecordingInterfaceSchema from "../inputs/interface_schemas/MEArecRecordingInterface.json";
 import PlexonRecordingInterfaceSchema from "../inputs/interface_schemas/PlexonRecordingInterface.json";
 import PlexonSortingInterfaceSchema from "../inputs/interface_schemas/PlexonSortingInterface.json";
+import Plexon2RecordingInterfaceSchema from "../inputs/interface_schemas/Plexon2RecordingInterface.json";
 import AxonaRecordingInterfaceSchema from "../inputs/interface_schemas/AxonaRecordingInterface.json";
 import ExternalVideoInterfaceSchema from "../inputs/interface_schemas/ExternalVideoInterface.json";
 import NeuralynxRecordingInterfaceSchema from "../inputs/interface_schemas/NeuralynxRecordingInterface.json";
@@ -114,6 +115,8 @@ globalStateCopy.schema.source_data.properties.PlexonRecordingInterface =
     PlexonRecordingInterfaceSchema.properties.PlexonRecordingInterface;
 globalStateCopy.schema.source_data.properties.PlexonSortingInterface =
     PlexonSortingInterfaceSchema.properties.PlexonSortingInterface;
+globalStateCopy.schema.source_data.properties.Plexon2RecordingInterface =
+    Plexon2RecordingInterfaceSchema.properties.Plexon2RecordingInterface;
 globalStateCopy.schema.source_data.properties.AxonaRecordingInterface =
     AxonaRecordingInterfaceSchema.properties.AxonaRecordingInterface;
 globalStateCopy.schema.source_data.properties.ExternalVideoInterface =
@@ -332,6 +335,12 @@ const PlexonSortingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState))
 PlexonSortingInterfaceGlobalCopy.interfaces.interface = PlexonSortingInterface;
 PlexonSortingInterfaceGlobalCopy.schema.source_data = PlexonSortingInterfaceSchema;
 PlexonSortingInterface.args = { activePage, globalState: PlexonSortingInterfaceGlobalCopy };
+
+export const Plexon2RecordingInterface = PageTemplate.bind({});
+const Plexon2RecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));
+Plexon2RecordingInterfaceGlobalCopy.interfaces.interface = Plexon2RecordingInterface;
+Plexon2RecordingInterfaceGlobalCopy.schema.source_data = Plexon2RecordingInterfaceSchema;
+Plexon2RecordingInterface.args = { activePage, globalState: Plexon2RecordingInterfaceGlobalCopy };
 
 export const AxonaRecordingInterface = PageTemplate.bind({});
 const AxonaRecordingInterfaceGlobalCopy = JSON.parse(JSON.stringify(globalState));

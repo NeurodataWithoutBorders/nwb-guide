@@ -1,0 +1,34 @@
+{
+    "required": [],
+    "properties": {
+        "Plexon2RecordingInterface": {
+            "properties": {
+                "file_path": {
+                    "format": "path",
+                    "type": "string",
+                    "description": "Path to the .pl2 file."
+                },
+                "verbose": {
+                    "default": false,
+                    "type": "boolean"
+                },
+                "es_key": {
+                    "default": "ElectricalSeries",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "file_path"
+            ],
+            "type": "object",
+            "additionalProperties": false
+        }
+    },
+    "type": "object",
+    "additionalProperties": false,
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "source.schema.json",
+    "title": "Source data schema",
+    "description": "Schema for the source data, files and directories",
+    "version": "0.1.0"
+}
