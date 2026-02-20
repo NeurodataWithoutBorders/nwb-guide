@@ -9,7 +9,7 @@ dependencies:
   - lxml = 4.9.3 # PyPI build fails due to x64/arm64 mismatch so install from conda-forge
   - pyedflib = 0.1.38 # PyPI build fails due to x64/arm64 mismatch so install from conda-forge
   - numpy # May have x64/arm64 mismatch issues so install from conda-forge
-  - pytables = 3.9.1 # PyPI build fails on arm64; must be <3.9.2 per neuroconv 0.6.1 constraint
+  - pytables = 3.10.2 # PyPI build fails on arm64 so install from conda-forge (used by neuroconv deps)
   - jsonschema = 4.18.0 # Also installs jsonschema-specifications
   - pip
   - pip:
@@ -23,12 +23,11 @@ dependencies:
       - werkzeug < 3.0 # werkzeug 3.0 deprecates features used by flask 2.3.2. Remove this when updating flask.
       # NOTE: the NeuroConv wheel on PyPI includes sonpy which is not compatible with arm64, so build and install
       # NeuroConv from GitHub, which will remove the sonpy dependency when building from Mac arm64
-      - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.6.1
-      - pandas < 3.0  # pandas 3.0 returns read-only arrays, breaking spikeinterface Phy extractor
-      - neo == 0.14.1 # 0.14.2 is not compatible with neuroconv < 0.7.5
-      - scikit-learn == 1.4.0 # Tutorial data generation
-      - tqdm_publisher >= 0.0.1 # Progress bars
-      - tzlocal >= 5.2 # Frontend timezone handling
-      - ndx-pose == 0.1.1
-      - nwbinspector == 0.6.2
-      - numcodecs < 0.16.0  # numcodecs 0.16.0 is not compatible with zarr 2.18.5
+      - h5py < 3.13 # 3.13+ uses HDF5 1.14.4 features not in pytables 3.10.2's bundled HDF5 1.14.2
+      - neuroconv[dandi,compressors,ecephys,ophys,behavior,text] == 0.9.3
+      - scikit-learn == 1.6.1 # Tutorial data generation
+      - tqdm_publisher == 0.1.1 # Progress bars
+      - tzlocal == 5.3.1 # Frontend timezone handling
+      - ndx-pose == 0.2.2
+      - nwbinspector == 0.6.5
+      - numcodecs == 0.15.1

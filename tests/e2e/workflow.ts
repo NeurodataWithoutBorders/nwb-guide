@@ -322,6 +322,21 @@ export default async function runWorkflow(name, workflow, identifier) {
 
     test('Review source data information', async () => {
 
+      // Set stream_id for SpikeGLX interfaces (required in neuroconv >= 0.9.0)
+      await evaluate(async () => {
+        const dashboard = document.querySelector('nwb-dashboard')
+        const page = dashboard.page
+        for (const { form } of Object.values(page.forms)) {
+          const accordions = form.accordions
+          for (const [name, accordion] of Object.entries(accordions)) {
+            if (name.includes('SpikeGLX') && name.includes('Recording')) {
+              const streamInput = form.forms[name]?.getFormElement(['stream_id'])
+              if (streamInput) streamInput.updateData('imec0.ap')
+            }
+          }
+        }
+      })
+
       await takeScreenshot(join(identifier, 'sourcedata-page'), 100)
       await toNextPage('metadata')
 
