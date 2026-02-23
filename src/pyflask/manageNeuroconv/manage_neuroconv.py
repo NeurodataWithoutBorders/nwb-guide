@@ -1812,7 +1812,7 @@ def generate_test_data(output_path: str):
     sorting_analyzer = spikeinterface.create_sorting_analyzer(
         sorting=sorting, recording=artificial_ap_band_in_uV, mode="memory", sparse=False
     )
-    sorting_analyzer.compute(["random_spikes"])
+    sorting_analyzer.compute(["random_spikes", "waveforms", "templates"])
 
     spikeinterface.exporters.export_to_phy(
         sorting_analyzer=sorting_analyzer,
