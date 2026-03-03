@@ -26,6 +26,8 @@ jobs:
           - os: macos-latest  # Mac arm64 runner
             label: environments/environment-MAC-apple-silicon.yml
 
+          - os: macos-15-intel  # Mac x64 runner
+            label: environments/environment-MAC-intel.yml
 
           - os: windows-latest
             label: environments/environment-Windows.yml
