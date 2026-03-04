@@ -22,4 +22,4 @@ dependencies:
       - ndx-pose == 0.2.2
       - nwbinspector == 0.6.5
       - tables
-      - numcodecs == 0.15.1
+      - numcodecs == 0.15.1  # numcodecs 0.16.0 is not compatible with zarr 2.18.5
