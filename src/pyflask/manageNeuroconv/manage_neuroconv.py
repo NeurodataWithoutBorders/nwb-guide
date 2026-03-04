@@ -7,6 +7,7 @@ import json
 import math
 import os
 import re
+import sys
 import traceback
 import zoneinfo
 from datetime import datetime, timedelta
@@ -341,6 +342,10 @@ def get_all_interface_info() -> dict:
         "OpenEphysSortingInterface",
         "SimaSegmentationInterface",
     ]
+
+    # Plexon2 is only supported on Windows
+    if sys.platform != "win32":
+        exclude_interfaces_from_selection.append("Plexon2RecordingInterface")
 
     return {
         getattr(interface, "display_name", interface.__name__) or interface.__name__: derive_interface_info(interface)
