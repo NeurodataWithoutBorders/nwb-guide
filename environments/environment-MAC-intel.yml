@@ -23,6 +23,7 @@ dependencies:
       - tzlocal == 5.3.1 # Frontend timezone handling
       - ndx-pose == 0.2.2
       - nwbinspector == 0.6.5
+      - numpy < 2  # numpy 2.x breaks PyInstaller 6.7.0 bundling (missing numpy._core._exceptions)
       - numcodecs == 0.15.1  # numcodecs 0.16.0 is not compatible with zarr 2.18.5
       - h5py == 3.12.1 # 3.13.0 uses features in hdf5 1.14.4 that is not available in earlier hdf5 libs packaged
                        # with tables==3.9.1 (latest that can be used by neuroconv 0.6.0).
