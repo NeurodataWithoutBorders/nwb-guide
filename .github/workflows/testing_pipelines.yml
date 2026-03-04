@@ -73,7 +73,10 @@ jobs:
       # Load example data caches
       - name: Get ephy_testing_data current head hash
         id: ephys
-        run: echo "::set-output name=HASH_EPHY_DATASET::$(git ls-remote https://gin.g-node.org/NeuralEnsemble/ephy_testing_data.git HEAD | cut -f1)"
+        run: |
+          HASH=$(git ls-remote https://gin.g-node.org/NeuralEnsemble/ephy_testing_data.git HEAD | cut -f1)
+          if [ -z "$HASH" ]; then echo "Failed to fetch ephy_testing_data hash" && exit 1; fi
+          echo "HASH_EPHY_DATASET=$HASH" >> $GITHUB_OUTPUT
 
       - name: Cache ephys dataset - ${{ steps.ephys.outputs.HASH_EPHY_DATASET }}
         uses: actions/cache@v4
@@ -84,7 +87,10 @@ jobs:
 
       - name: Get ophys_testing_data current head hash
         id: ophys
-        run: echo "::set-output name=HASH_OPHYS_DATASET::$(git ls-remote https://gin.g-node.org/CatalystNeuro/ophys_testing_data.git HEAD | cut -f1)"
+        run: |
+          HASH=$(git ls-remote https://gin.g-node.org/CatalystNeuro/ophys_testing_data.git HEAD | cut -f1)
+          if [ -z "$HASH" ]; then echo "Failed to fetch ophys_testing_data hash" && exit 1; fi
+          echo "HASH_OPHYS_DATASET=$HASH" >> $GITHUB_OUTPUT
 
       - name: Cache ophys dataset - ${{ steps.ophys.outputs.HASH_OPHYS_DATASET }}
         uses: actions/cache@v4
@@ -95,14 +101,17 @@ jobs:
 
       - name: Get behavior_testing_data current head hash
         id: behavior
-        run: echo "::set-output name=HASH_BEHAVIOR_DATASET::$(git ls-remote https://gin.g-node.org/CatalystNeuro/behavior_testing_data.git HEAD | cut -f1)"
+        run: |
+          HASH=$(git ls-remote https://gin.g-node.org/CatalystNeuro/behavior_testing_data.git HEAD | cut -f1)
+          if [ -z "$HASH" ]; then echo "Failed to fetch behavior_testing_data hash" && exit 1; fi
+          echo "HASH_BEHAVIOR_DATASET=$HASH" >> $GITHUB_OUTPUT
 
       - name: Cache behavior dataset - ${{ steps.behavior.outputs.HASH_BEHAVIOR_DATASET }}
         uses: actions/cache@v4
         id: cache-behavior-datasets
         with:
           path: ./behavior_testing_data
-          key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_behavior_DATASET }}
+          key: behavior-datasets-${{ matrix.os }}-${{ steps.behavior.outputs.HASH_BEHAVIOR_DATASET }}
 
       # Run pipeline tests
       - if: matrix.os != 'ubuntu-latest'
