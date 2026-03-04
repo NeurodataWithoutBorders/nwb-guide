@@ -21,7 +21,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.12"]
-        os: [ubuntu-latest, windows-latest, macos-latest, macos-13]
+        os: [ubuntu-latest, windows-latest, macos-latest, macos-15-intel]
 
     steps:
 
@@ -33,7 +33,7 @@ jobs:
         id: cache-ephys-datasets
         with:
           path: ./ephy_testing_data
-          key: ephys-datasets-${{ matrix.os }}-${{ steps.ephys.outputs.HASH_EPHY_DATASET }}
+          key: ephys-datasets-v2-${{ matrix.os }}-${{ steps.ephys.outputs.HASH_EPHY_DATASET }}
       - name: Get ophys_testing_data current head hash
         id: ophys
         run: echo "::set-output name=HASH_OPHYS_DATASET::$(git ls-remote https://gin.g-node.org/CatalystNeuro/ophys_testing_data.git HEAD | cut -f1)"
