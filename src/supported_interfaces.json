@@ -44,5 +44,5 @@
     "BrukerTiffSinglePlaneConverter",
     "BrukerTiffMultiPlaneConverter",
     "MiniscopeConverter",
-    "CellExplorerRecordingInterface",
+    "CellExplorerRecordingInterface"
 ]
