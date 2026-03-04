@@ -246,7 +246,7 @@ Updating Tutorial Screenshots
 Before a release, you'll want to update the tutorial screenshots to reflect the latest changes in the application.
 
 #. To regenerate the dataset, you'll need to change ``regenerateTestData`` in the ``tests/e2e/config.ts`` to ``true`` or delete the test dataset directory ``rm -rf ~/NWB_GUIDE/.test``.
-#. Create a ``.env`` file with the following content: ``DANDI_STAGING_API_KEY={your_dandi_staging_api_key}`` where ``{your_dandi_staging_api_key}`` is your DANDI staging API key from https://gui-staging.dandiarchive.org.
+#. Create a ``.env`` file with the following content: ``DANDI_SANDBOX_API_KEY={your_dandi_sandbox_api_key}`` where ``{your_dandi_sandbox_api_key}`` is your DANDI sandbox API key from https://sandbox.dandiarchive.org.
 #. Run the End-to-End Tests locally using ``npm run test:tutorial``. This will generate new screenshots in the ``docs/assets/tutorials`` directory.
 #. Review the new screenshots to ensure they are accurate.
 #. If the screenshots are accurate, commit them to the repository. Their paths should be consistent across runs—allowing the new versions to show up on the tutorial.
@@ -355,7 +355,8 @@ Making a Release
 To make a release, follow these steps:
 
 1. Ensure that all changes are committed to the ``main`` branch.
-2. Update the version number in the ``package.json`` file.
+2. Update the version number in the ``package.json`` file. The version number should follow semantic versioning
+   (e.g. ``1.0.0``). Run `npm install` to update the ``package-lock.json`` file as well.
 3. Add a new entry for the new version in the ``docs/_static/switcher.json`` file.
 4. Update the tutorial screenshots as described in :ref:`Updating Tutorial Screenshots <updating_tutorial_screenshots>`.
 5. Make a pull request to merge these changes to the ``main`` branch.

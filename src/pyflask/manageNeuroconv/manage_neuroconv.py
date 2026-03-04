@@ -1346,7 +1346,7 @@ def upload_folder_to_dandi(
     dandiset_id: str,
     api_key: str,
     nwb_folder_path: Optional[str] = None,
-    staging: Optional[bool] = None,  # Override default staging=True
+    sandbox: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
@@ -1354,7 +1354,10 @@ def upload_folder_to_dandi(
 ) -> list[Path]:
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
-    os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+    # Set API key env var for both old (< 0.73.2) and new dandi versions
+    os.environ["DANDI_API_KEY"] = api_key
+    if sandbox:
+        os.environ["DANDI_SANDBOX_API_KEY"] = api_key
 
     if ignore_cache:
         os.environ["DANDI_CACHE"] = "ignore"
@@ -1364,7 +1367,7 @@ def upload_folder_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=Path(nwb_folder_path),
-        staging=staging,
+        staging=sandbox,  # Map sandbox parameter to staging for external API
         cleanup=cleanup,
         number_of_jobs=number_of_jobs or 1,
         number_of_threads=number_of_threads or 1,
@@ -1375,7 +1378,7 @@ def upload_project_to_dandi(
     dandiset_id: str,
     api_key: str,
     project: Optional[str] = None,
-    staging: Optional[bool] = None,  # Override default staging=True
+    sandbox: Optional[bool] = None,  # Override default staging=True
     cleanup: Optional[bool] = None,
     number_of_jobs: Optional[int] = None,
     number_of_threads: Optional[int] = None,
@@ -1384,8 +1387,10 @@ def upload_project_to_dandi(
     from neuroconv.tools.data_transfers import automatic_dandi_upload
 
     # CONVERSION_SAVE_FOLDER_PATH.mkdir(exist_ok=True, parents=True)  # Ensure base directory exists
-
-    os.environ["DANDI_API_KEY"] = api_key  # Update API Key
+    # Set API key env var for both old (< 0.73.2) and new dandi versions
+    os.environ["DANDI_API_KEY"] = api_key
+    if sandbox:
+        os.environ["DANDI_SANDBOX_API_KEY"] = api_key
 
     if ignore_cache:
         os.environ["DANDI_CACHE"] = "ignore"
@@ -1395,7 +1400,7 @@ def upload_project_to_dandi(
     return automatic_dandi_upload(
         dandiset_id=dandiset_id,
         nwb_folder_path=CONVERSION_SAVE_FOLDER_PATH / project,  # Scope valid DANDI upload paths to GUIDE projects
-        staging=staging,
+        staging=sandbox,  # Map sandbox parameter to staging for external API
         cleanup=cleanup,
         number_of_jobs=number_of_jobs,
         number_of_threads=number_of_threads,

@@ -669,13 +669,20 @@ export class Table extends LitElement {
         if (cell) {
             let message = "";
             let theme = "";
-            if (warnings.length) {
-                ((theme = "warning"), (message = warnings.map((error) => error.message).join("\n")));
-            } else cell.removeAttribute("warning");
+            if (warnings.length > 0) {
+                theme = "warning";
+                message = warnings.map((error) => error.message).join("\n");
+            } else {
+                cell.removeAttribute("warning");
+            }
 
-            if (errors.length) {
-                ((theme = "error"), (message = errors.map((error) => error.message).join("\n"))); // Class switching handled automatically
-            } else cell.removeAttribute("error");
+            if (errors.length > 0) {
+                theme = "error";
+                // Class switching handled automatically
+                message = errors.map((error) => error.message).join("\n");
+            } else {
+                cell.removeAttribute("error");
+            }
 
             if (theme) cell.setAttribute(theme, "");
 

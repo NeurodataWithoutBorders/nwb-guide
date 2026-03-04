@@ -39,10 +39,13 @@ modules_to_collect = [
     'dlc2nwb',
     'sleap_io',
     'ndx_pose',
+    'ndx_miniscope',
+    'ndx_events',
     'tzdata',
     'elephant',
     'ScanImageTiffReader',
     'deprecated',
+    'probeinterface',
 ]
 for module_name in modules_to_collect:
     collection = collect_all(module_name)
