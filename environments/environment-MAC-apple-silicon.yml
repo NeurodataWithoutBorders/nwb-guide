@@ -30,4 +30,5 @@ dependencies:
       - tzlocal == 5.3.1 # Frontend timezone handling
       - ndx-pose == 0.2.2
       - nwbinspector == 0.6.5
+      - numpy < 2  # numpy 2.x breaks PyInstaller 6.7.0 bundling (pin in pip too, since pip can override conda)
       - numcodecs == 0.15.1  # numcodecs 0.16.0 is not compatible with zarr 2.18.5
