@@ -43,5 +43,6 @@
     "BrukerTiffSinglePlaneConverter",
     "BrukerTiffMultiPlaneConverter",
     "MiniscopeConverter",
-    "CellExplorerRecordingInterface"
+    "CellExplorerRecordingInterface",
+    "Plexon2RecordingInterface"
 ]
