@@ -49,4 +49,4 @@ export const ENCRYPTION_IV = isElectron ? crypto.randomBytes(IV_LENGTH) : "";
 // Storybook
 export const isStorybook = window.location.href.includes("iframe.html");
 
-export { supportedInterfaces };
+export { supportedInterfaces, windowsOnlyInterfaces };

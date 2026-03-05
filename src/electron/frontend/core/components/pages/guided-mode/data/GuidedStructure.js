@@ -3,7 +3,7 @@ import { Page } from "../../Page.js";
 
 // For Multi-Select Form
 import { Button } from "../../../Button.js";
-import { supportedInterfaces } from "../../../../globals";
+import { supportedInterfaces, windowsOnlyInterfaces } from "../../../../globals";
 import { Search } from "../../../Search.js";
 import { Modal } from "../../../Modal";
 import { List } from "../../../List";
@@ -129,13 +129,19 @@ export class GuidedStructurePage extends Page {
                 suffixes: value.suffixes ?? [],
             };
 
+            const isSupported = supportedInterfaces.includes(interfaceName);
+            const disabledReason = !isSupported && windowsOnlyInterfaces.includes(interfaceName)
+                ? "Windows only"
+                : undefined;
+
             return {
                 ...value, // Contains label and name already (extra metadata)
                 key: displayName,
                 value: interfaceName,
                 structuredKeywords,
                 category,
-                disabled: !supportedInterfaces.includes(interfaceName),
+                disabled: !isSupported,
+                disabledReason,
             };
         });
 
