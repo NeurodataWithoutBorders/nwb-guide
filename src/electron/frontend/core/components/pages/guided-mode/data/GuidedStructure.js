@@ -130,9 +130,8 @@ export class GuidedStructurePage extends Page {
             };
 
             const isSupported = supportedInterfaces.includes(interfaceName);
-            const disabledReason = !isSupported && windowsOnlyInterfaces.includes(interfaceName)
-                ? "Windows only"
-                : undefined;
+            const disabledReason =
+                !isSupported && windowsOnlyInterfaces.includes(interfaceName) ? "Windows only" : undefined;
 
             return {
                 ...value, // Contains label and name already (extra metadata)
