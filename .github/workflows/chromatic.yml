@@ -1,3 +1,8 @@
+# Chromatic visual regression testing.
+# Runs only on PR approval (not every commit) to conserve Chromatic's free tier
+# snapshot quota (5,000/month as of March 2026). With ~47 stories, each build
+# uses ~47 snapshots, so running on every push would quickly exhaust the limit.
+# See PR #549, #585, and #614 for the full history of this decision.
 name: Chromatic
 
 on:
@@ -10,7 +15,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request_review' && github.event.review.state == 'approved')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v6
       - run: npm ci
       - uses: chromaui/action@v1
         with:

@@ -35,8 +35,10 @@ jobs:
             label: environments/environment-Windows.yml
 
     steps:
-      - uses: actions/checkout@v4
-      - run: git fetch --prune --unshallow --tags
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
       - name: Set up conda
@@ -44,6 +46,7 @@ jobs:
         with:
           miniforge-version: latest
           activate-environment: nwb-guide
+          conda-remove-defaults: true
 
       - name: Set cache date
         id: get-date
@@ -51,7 +54,7 @@ jobs:
         shell: bash
 
       - name: Cache Conda env
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
@@ -59,10 +62,10 @@ jobs:
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Create and activate environment
-        run: conda env update -n nwb-guide -f ${{ matrix.label }}
+        run: conda env update --name nwb-guide --file ${{ matrix.label }}
 
       - name: Use Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -94,7 +97,7 @@ jobs:
           xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" -- npm run coverage:tutorial
 
       - name: Archive E2E Test Screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-screenshots-${{ matrix.os }}
           path: docs/assets/tutorials
@@ -102,7 +105,7 @@ jobs:
           overwrite: true
 
       - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:

@@ -31,8 +31,10 @@ jobs:
             label: environments/environment-Windows.yml
 
     steps:
-      - uses: actions/checkout@v4
-      - run: git fetch --prune --unshallow --tags
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
       - name: Set up conda
@@ -40,6 +42,7 @@ jobs:
         with:
           miniforge-version: latest
           activate-environment: nwb-guide
+          conda-remove-defaults: true
 
       # Setup conda environment from cache
       - name: Set environment cache date
@@ -47,7 +50,7 @@ jobs:
         run: echo "today=$(/bin/date -u '+%Y%m%d')" >> $GITHUB_OUTPUT
         shell: bash
       - name: Cache Conda env
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.CONDA }}/envs
           key: conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
@@ -57,7 +60,7 @@ jobs:
         run: conda env update --name nwb-guide --file ${{ matrix.label }}
 
       - name: Use Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
@@ -79,7 +82,7 @@ jobs:
           echo "HASH_EPHY_DATASET=$HASH" >> $GITHUB_OUTPUT
 
       - name: Cache ephys dataset - ${{ steps.ephys.outputs.HASH_EPHY_DATASET }}
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-ephys-datasets
         with:
           path: ./ephy_testing_data
@@ -93,7 +96,7 @@ jobs:
           echo "HASH_OPHYS_DATASET=$HASH" >> $GITHUB_OUTPUT
 
       - name: Cache ophys dataset - ${{ steps.ophys.outputs.HASH_OPHYS_DATASET }}
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-ophys-datasets
         with:
           path: ./ophys_testing_data
@@ -107,7 +110,7 @@ jobs:
           echo "HASH_BEHAVIOR_DATASET=$HASH" >> $GITHUB_OUTPUT
 
       - name: Cache behavior dataset - ${{ steps.behavior.outputs.HASH_BEHAVIOR_DATASET }}
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-behavior-datasets
         with:
           path: ./behavior_testing_data
@@ -128,7 +131,7 @@ jobs:
 
       - name: Archive Pipeline Test Screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-pipelines-screenshots-${{ matrix.os }}
           path: docs/assets/tutorials/test-pipelines
