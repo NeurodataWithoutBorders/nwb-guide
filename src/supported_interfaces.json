@@ -13,7 +13,6 @@
     "CellExplorerSortingInterface",
     "KiloSortSortingInterface",
     "TdtRecordingInterface",
-    "Spike2RecordingInterface",
     "BrukerTiffSinglePlaneImagingInterface",
     "ExtractSegmentationInterface",
     "CnmfeSegmentationInterface",
