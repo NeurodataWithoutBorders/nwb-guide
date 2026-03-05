@@ -79,10 +79,6 @@ jobs:
       - name: Manually remove matplotlib
         run: pip uninstall matplotlib --yes
 
-      # Fix for macos build - remove bad sonpy .so file that only works on linux
-      - if: runner.os == 'macOS'
-        run: find "$CONDA_PREFIX" -path "*/sonpy/linux/sonpy.so" -delete 2>/dev/null || true
-
       - name: Build PyFlask distribution
         run: npm run build:flask
 
