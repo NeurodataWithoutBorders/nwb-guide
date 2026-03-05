@@ -31,9 +31,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          fetch-tags: true
 
       - name: Printout architecture
         run: uname -m
@@ -57,8 +54,6 @@ jobs:
           path: ${{ env.CONDA }}/envs
           key:
             conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
-        env:
-          CACHE_NUMBER: ${{ env.CACHE_NUMBER }}
         id: cache
 
       - if: steps.cache.outputs.cache-hit != 'true'

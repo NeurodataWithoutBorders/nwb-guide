@@ -35,9 +35,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          fetch-tags: true
 
       # see https://github.com/conda-incubator/setup-miniconda#caching-environments
       - name: Set up conda
