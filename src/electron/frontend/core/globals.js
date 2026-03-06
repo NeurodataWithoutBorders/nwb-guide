@@ -2,7 +2,12 @@ import { os, path, crypto, isElectron, isTestEnvironment } from "../utils/electr
 
 import paths from "../../../paths.config.json" assert { type: "json" };
 
-import supportedInterfaces from "../../../supported_interfaces.json" assert { type: "json" };
+import allSupportedInterfaces from "../../../supported_interfaces.json" assert { type: "json" };
+
+// Interfaces that are only supported on specific platforms
+const windowsOnlyInterfaces = ["Plexon2RecordingInterface"];
+const isWindows = os && os.platform() === "win32";
+const supportedInterfaces = allSupportedInterfaces.filter((name) => !windowsOnlyInterfaces.includes(name) || isWindows);
 
 export { isTestEnvironment };
 
@@ -44,4 +49,4 @@ export const ENCRYPTION_IV = isElectron ? crypto.randomBytes(IV_LENGTH) : "";
 // Storybook
 export const isStorybook = window.location.href.includes("iframe.html");
 
-export { supportedInterfaces };
+export { supportedInterfaces, windowsOnlyInterfaces };
