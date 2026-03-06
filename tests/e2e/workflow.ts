@@ -47,7 +47,7 @@ export const uploadToDandi = (subdirectory, forceSkip = false) => {
         modal.setAttribute('id', modalId)
       }, modalId)
 
-      await takeScreenshot(join(subdirectory, 'create-dandiset'), 100)
+      await takeScreenshot(join(subdirectory, 'create-dandiset'), 500)
 
       // Close modal
       await evaluate(( modalId: string ) => {

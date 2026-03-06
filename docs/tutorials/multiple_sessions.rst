@@ -64,7 +64,7 @@ When you submit this form, you'll notice that the Format String Path input has b
   :align: center
   :alt: Path expansion page with autocompleted format string
 
-Repeat this process for SpikeGLX, where ``multi_session_dataset/mouse1/mouse1_Session1/mouse1_Session1_g0/mouse1_Session1_g0_imec0/mouse1_Session1_g0_t0.imec0.ap.bin`` will be the example source data path.
+Repeat this process for SpikeGLX, where ``multi_session_dataset/mouse1/mouse1_Session1/mouse1_Session1_g0/mouse1_Session1_g0_imec0`` will be the example source data folder.
 
 .. figure:: ../assets/tutorials/multiple/pathexpansion-completed.png
   :align: center
@@ -96,7 +96,7 @@ Advance to the next page when you have entered subject metadata for all subjects
 Source Data Information
 -----------------------
 
-Because we used the Locate Data page to programmatically identify our source data, this page should mostly be complete. Verify that the identified paths appear as expected for each session by clicking the "Phy Sorting" header to expand the section for Phy data and examining the "Folder Path" value. Do the same for the SpikeGLX data.
+Because we used the Locate Data page to programmatically identify our source data, this page should mostly be complete. Verify that the identified paths appear as expected for each session by clicking the "Phy Sorting" header to expand the section for Phy data and examining the "Folder Path" value. Do the same for the SpikeGLX data. For SpikeGLX Recording, you will also need to enter the "Stream ID" (e.g., ``imec0.ap``) for each session.
 
 .. figure:: ../assets/tutorials/multiple/sourcedata-page.png
   :align: center
