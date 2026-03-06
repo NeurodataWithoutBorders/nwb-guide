@@ -33,6 +33,7 @@ autoUpdater.channel = "latest";
 if (runByTestSuite) {
   app.commandLine.appendSwitch('remote-debugging-port', `${8315}`) // Mirrors the global electronDebugPort variable
   app.commandLine.appendSwitch('remote-allow-origins', '*') // Allow all remote origins
+  if (process.env.CI) app.commandLine.appendSwitch('disable-gpu') // Avoid GPU process crashes on CI runners (e.g. macOS Intel)
 }
 
 /*************************************************************

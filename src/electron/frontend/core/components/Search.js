@@ -397,7 +397,11 @@ export class Search extends LitElement {
                         this.#onSelect(option);
                     });
 
-                    if (disabled) listItemElement.setAttribute("disabled", "");
+                    if (disabled) {
+                        listItemElement.setAttribute("disabled", "");
+                        if (option.disabledReason)
+                            listItemElement.style.setProperty("--disabled-label", `"${option.disabledReason}"`);
+                    }
 
                     const container = document.createElement("div");
 

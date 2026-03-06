@@ -87,7 +87,7 @@ Data Entry
 Source Data Information
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-On this page, specify the **phy** folder and **.ap.bin** (SpikeGLX) file so that the GUIDE can find this source data to complete the conversion.
+On this page, specify the **phy** folder and SpikeGLX folder so that the GUIDE can find this source data to complete the conversion.
 
 As discussed in the :doc:`Dataset Generation </tutorials/dataset>` tutorial, these can be found in the ``~/NWB_GUIDE/test-data/single_session_data`` directory, where ``~`` is the home directory of your system. If you just generated the dataset, this folder may still be open in your file navigator.
 
@@ -97,7 +97,7 @@ Click the **Phy Sorting** header to expand the section. Under "Folder Path", you
   :align: center
   :alt: Source Data page with source locations specified
 
-Next, click the **SpikeGLX Recording** header to expand the section. Under "File Path", you can either click the box to navigate to the **.ap.bin** file or drag-and-drop the **.ap.bin** file into the box from your file navigator. The **.ap.bin** file is located in the ``~/NWB_GUIDE/test-data/single_session_data/spikeglx/Session1_g0/Session1_g0_imec0`` folder.
+Next, click the **SpikeGLX Recording** header to expand the section. Under "Folder Path", you can either click the box to navigate to the folder containing the **.ap.bin** file or drag-and-drop the folder into the box from your file navigator. This folder is located at ``~/NWB_GUIDE/test-data/single_session_data/spikeglx/Session1_g0/Session1_g0_imec0``. Under "Stream ID", enter ``imec0.ap`` to specify the AP band recording stream.
 
 Press "Next" to extract metadata from these source data files and folders.
 

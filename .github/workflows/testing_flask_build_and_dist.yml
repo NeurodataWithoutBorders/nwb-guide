@@ -22,15 +22,15 @@ jobs:
           - os: macos-latest  # Mac arm64 runner
             label: environments/environment-MAC-apple-silicon.yml
 
-          - os: macos-13  # Mac x64 runner
+          - os: macos-15-intel  # Mac x64 runner
             label: environments/environment-MAC-intel.yml
+
 
           - os: windows-latest
             label: environments/environment-Windows.yml
 
     steps:
-      - uses: actions/checkout@v4
-      - run: git fetch --prune --unshallow --tags
+      - uses: actions/checkout@v6
 
       - name: Printout architecture
         run: uname -m
@@ -41,6 +41,7 @@ jobs:
         with:
           miniforge-version: latest
           activate-environment: nwb-guide
+          conda-remove-defaults: true
 
       - name: Set cache date
         id: get-date
@@ -48,21 +49,19 @@ jobs:
         shell: bash
 
       - name: Cache Conda env
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.CONDA }}/envs
           key:
             conda-${{ runner.os }}-${{ runner.arch }}-${{steps.get-date.outputs.today }}-${{ hashFiles(matrix.label) }}-${{ env.CACHE_NUMBER }}
-        env:
-          CACHE_NUMBER: ${{ env.CACHE_NUMBER }}
         id: cache
 
       - if: steps.cache.outputs.cache-hit != 'true'
         name: Update environment
-        run: conda env update -f ${{ matrix.label }}
+        run: conda env update --name nwb-guide --file ${{ matrix.label }}
 
       - name: Setup Node.js 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
 
@@ -74,10 +73,6 @@ jobs:
 
       - name: Manually remove matplotlib
         run: pip uninstall matplotlib --yes
-
-      # Fix for macos build - remove bad sonpy file
-      - if: matrix.os == 'macos-latest' || matrix.os == 'macos-13'
-        run: rm -f "$CONDA_PREFIX/lib/python3.9/site-packages/sonpy/linux/sonpy.so"
 
       - name: Build PyFlask distribution
         run: npm run build:flask

@@ -60,8 +60,7 @@ for (let sub in results){{
 """
 
 with open(sourceDataStoryPath, "w") as outfile:
-    outfile.write(
-        f"""import {{ globalState, PageTemplate }} from "./storyStates";
+    outfile.write(f"""import {{ globalState, PageTemplate }} from "./storyStates";
 {importCode}
 
 export default {{
@@ -82,5 +81,4 @@ export const All = PageTemplate.bind({{}});
 All.args = {{ activePage, globalState: globalStateCopy }};
 
 {storyCode}
-"""
-    )
+""")
