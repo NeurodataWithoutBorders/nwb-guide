@@ -105,6 +105,10 @@
       "gatekeeperAssess": false,
       "entitlements": "entitlements.mac.inherit.plist",
       "entitlementsInherit": "entitlements.mac.inherit.plist",
+      "signIgnore": [
+        "flask/_internal/tzdata/",
+        "flask/_internal/certifi/"
+      ],
       "extraResources": [
         {
           "from": "./build/flask/nwb-guide",
