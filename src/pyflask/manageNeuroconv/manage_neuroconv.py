@@ -7,6 +7,7 @@ import json
 import math
 import os
 import re
+import sys
 import traceback
 import zoneinfo
 from datetime import datetime, timedelta
@@ -27,6 +28,37 @@ from .info import (
 from .info.sse import format_sse
 
 progress_handler = TQDMProgressHandler()
+
+
+def create_link(target, link, target_is_dir=False):
+    """Create a filesystem link, using junctions/hard links on Windows when symlinks aren't available."""
+    target = str(target)
+    link = str(link)
+
+    if sys.platform != "win32":
+        os.symlink(target, link, target_is_dir=target_is_dir)
+        return
+
+    try:
+        os.symlink(target, link, target_is_dir=target_is_dir)
+        return
+    except OSError:
+        pass
+
+    if target_is_dir:
+        import _winapi
+
+        _winapi.CreateJunction(target, link)
+    else:
+        try:
+            os.link(target, link)
+        except OSError:
+            raise OSError(
+                f"Cannot create a link from '{link}' to '{target}'. "
+                "On Windows, either run NWB GUIDE as Administrator, "
+                "or ensure the source and destination are on the same drive."
+            )
+
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
 
@@ -1341,7 +1373,7 @@ def convert_to_nwb(
 
         # Create a pointer to the actual conversion outputs
         if not default_output_directory.exists():
-            os.symlink(resolved_output_directory, default_output_directory)
+            create_link(resolved_output_directory, default_output_directory, target_is_dir=True)
 
     return dict(file=str(output_path))
 
@@ -1675,7 +1707,7 @@ def _aggregate_symlinks_in_new_directory(paths, reason="", folder_path=None) -> 
                 list(map(lambda name: os.path.join(path, name), os.listdir(path))), None, new_path
             )
         else:
-            new_path.symlink_to(path, path.is_dir())
+            create_link(path, new_path, target_is_dir=path.is_dir())
 
     return folder_path
 
