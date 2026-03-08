@@ -79,7 +79,7 @@
       "asar": false,
       "target": "nsis",
       "icon": "src/electron/frontend/assets/app-icon/logo-guide-draft.ico",
-      "requestedExecutionLevel": "requireAdministrator"
+      "requestedExecutionLevel": "asInvoker"
     },
     "mac": {
       "asar": true,
