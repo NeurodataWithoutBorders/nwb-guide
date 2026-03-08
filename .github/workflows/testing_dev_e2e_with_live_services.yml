@@ -75,6 +75,42 @@ jobs:
       - name: Manually remove matplotlib
         run: pip uninstall matplotlib --yes
 
+      # Restore pre-generated Phy data from cache (avoids slow PCA fitting)
+      - name: Restore tutorial Phy data
+        uses: actions/cache@v4
+        with:
+          path: ./tutorial_phy_data
+          key: tutorial-phy-data-v1-${{ matrix.os }}
+          fail-on-cache-miss: false
+
+      - name: Set up tutorial Phy data from cache
+        shell: bash
+        run: |
+          TEST_DATA_DIR="$HOME/NWB_GUIDE/.test/test-data/single_session_data"
+          mkdir -p "$TEST_DATA_DIR"
+          if [ -d "./tutorial_phy_data" ]; then
+            cp -r ./tutorial_phy_data "$TEST_DATA_DIR/phy"
+            echo "Restored Phy data from cache"
+          fi
+
+      # Restore pre-generated Phy data (avoids slow PCA fitting; SpikeGLX is generated locally)
+      - name: Restore tutorial Phy data
+        uses: actions/cache@v4
+        with:
+          path: ./tutorial_phy_data
+          key: tutorial-phy-data-v1-${{ matrix.os }}
+          fail-on-cache-miss: false
+
+      - name: Set up tutorial Phy data from cache
+        shell: bash
+        run: |
+          TEST_DATA_DIR="$HOME/NWB_GUIDE/.test/test-data/single_session_data"
+          mkdir -p "$TEST_DATA_DIR"
+          if [ -d "./tutorial_phy_data" ]; then
+            cp -r ./tutorial_phy_data "$TEST_DATA_DIR/phy"
+            echo "Restored Phy data from cache"
+          fi
+
       - name: Create env file
         run: |
           touch .env
