@@ -25,6 +25,7 @@ datas += collect_data_files('jsonschema_specifications')
 # Various consequences of lazy imports
 modules_to_collect = [
     'dandi',
+    'dandischema',
     'keyrings',
     'unittest',
     'nwbinspector',
