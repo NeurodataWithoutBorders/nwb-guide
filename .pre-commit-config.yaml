@@ -8,13 +8,13 @@ repos:
     -   id: trailing-whitespace
 
 -   repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 26.1.0
+    rev: 26.3.1
     hooks:
     -   id: black
         exclude: ^docs/
 
 -   repo: https://github.com/PyCQA/isort
-    rev: 8.0.1
+    rev: 9.0.0a3
     hooks:
     -   id: isort
 
@@ -25,7 +25,7 @@ repos:
         types_or: [css, javascript]
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
+  rev: v2.4.2
   hooks:
   - id: codespell
     additional_dependencies:
