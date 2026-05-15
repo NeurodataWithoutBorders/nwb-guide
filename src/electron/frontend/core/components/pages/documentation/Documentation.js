@@ -81,7 +81,7 @@ export class DocumentationPage extends Page {
                 </p>
                 <p>
                     For help on creating a Dandiset and uploading to DANDI, please see the
-                    <a target="_blank" href="https://docs.dandiarchive.org/13_upload/"
+                    <a target="_blank" href="https://docs.dandiarchive.org/user-guide-sharing/uploading-data/"
                         >DANDI Documentation</a
                     >.
                 </p>
