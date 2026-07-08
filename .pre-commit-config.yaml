@@ -1,3 +1,7 @@
+ci:
+  # Report formatting issues as check failures instead of pushing auto-fix commits onto pull requests.
+  autofix_prs: false
+
 repos:
 
 -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -23,6 +27,8 @@ repos:
     hooks:
     -   id: prettier
         types_or: [css, javascript]
+        additional_dependencies:
+        -   prettier@3.8.5 # Pin prettier for reproducible formatting
 
 - repo: https://github.com/codespell-project/codespell
   rev: v2.4.1

@@ -1,3 +1,6 @@
 tools/**/*
 **/dist/**/*
 **/build/**/*
+
+# prettier mangles CSS attribute selectors containing "//" (e.g. a[href^="http://"]) by moving the brace to its own line
+src/electron/frontend/assets/css/nativize.css
