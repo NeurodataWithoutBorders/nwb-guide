@@ -24,76 +24,35 @@ Start by cloning the repository
 Install Python Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Install the appropriate Python dependencies for your operating system.
+NWB GUIDE uses `uv <https://docs.astral.sh/uv/>`_ to manage its Python environment. Install ``uv`` by following the `uv installation instructions <https://docs.astral.sh/uv/getting-started/installation/>`_.
 
-**Windows**
-
-.. code-block:: bash
-
-    conda env create --file ./environments/environment-Windows.yml
-
-**Mac with x64 architecture**
+From the root of the repository, create the Python environment. ``uv`` reads the pinned Python version from ``.python-version`` (downloading it if necessary) and installs the locked dependencies into a ``.venv`` directory.
 
 .. code-block:: bash
 
-    conda env create --file ./environments/environment-MAC-intel.yml
-
-**Mac with arm64 architecture**
-
-.. code-block:: bash
-
-    conda env create --file ./environments/environment-MAC-apple-silicon.yml
-
-**Linux**
-
-.. code-block:: bash
-
-    conda env create --file ./environments/environment-Linux.yml
-
-
-.. note::
-
-    The NWB GUIDE environment can be quite large. If your base folder for ``conda`` is on a small mounted partition, you may need to setup the environment elsewhere on your system. You can do this using:
-
-    .. code-block:: bash
-
-        conda env create --file ./environments/environment-< platform >.yml --prefix < explicit location to setup environment >
-
-    For example, on a remote Linux server, this might look like:
-
-    .. code-block:: bash
-
-        conda env create --file ./environments/environment-Linux.yml --prefix /mnt/data/nwb-guide
+    uv sync
 
 
 Activate the Python Environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Before starting NWB GUIDE, you'll need to ensure that the Python environment is activated.
+Before starting NWB GUIDE, activate the environment so that ``python`` resolves to the project interpreter.
 
 .. code-block:: bash
 
-    conda activate nwb-guide
+    source .venv/bin/activate
 
-.. note::
+On Windows, activate the environment instead with:
 
-    If you had to use the ``--prefix`` flag in the previous step, then this becomes
+.. code-block:: bash
 
-    .. code-block:: bash
-
-        conda activate < explicit location of environment >
-
-    Such as, using the previous example:
-
-    .. code-block:: bash
-
-        conda activate /mnt/data/nwb-guide
+    .venv\Scripts\activate
 
 
 Install JavaScript Dependencies
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Next, install all JavaScript dependencies based on the `package-lock.json` file.
+NWB GUIDE requires `Node.js <https://nodejs.org/en/download>`_ 18 or later. After installing Node.js, install all JavaScript dependencies based on the ``package-lock.json`` file.
 
 .. code-block:: bash
 

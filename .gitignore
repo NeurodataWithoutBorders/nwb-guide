@@ -22,6 +22,7 @@ build/
 yarn.lock
 
 *.pyc
+.venv/
 .DS_Store
 electron-builder.yml
 website/.eslintcache

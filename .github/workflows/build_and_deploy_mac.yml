@@ -8,7 +8,6 @@ on:
 jobs:
   deploy-on-mac:
     runs-on: macos-15-intel
-    # NOTE: if changing this to macos-latest (arm64), make sure to use the apple-silicon conda environment.
 
     defaults:
       run:
@@ -17,15 +16,22 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Set up conda
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
         with:
-          miniforge-version: latest
-          activate-environment: nwb-guide
-          conda-remove-defaults: true
+          enable-cache: true
 
-      - name: Create and activate environment
-        run: conda env update --name nwb-guide --file environments/environment-MAC-intel.yml
+      - name: Install Python dependencies
+        run: uv sync --locked
+
+      - name: Add the virtual environment to PATH
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            echo "$GITHUB_WORKSPACE\\.venv\\Scripts" >> "$GITHUB_PATH"
+          else
+            echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+          fi
+          echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> "$GITHUB_ENV"
 
       - name: Use Node.js 20
         uses: actions/setup-node@v6
