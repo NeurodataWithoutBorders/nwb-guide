@@ -55,7 +55,7 @@ jobs:
         run: npm ci --verbose
 
       - name: Manually remove matplotlib
-        run: uv pip uninstall matplotlib
+        run: uv pip uninstall matplotlib || true
 
       # Load example data caches
       - name: Get ephy_testing_data current head hash

@@ -58,7 +58,7 @@ jobs:
         run: npm ci --verbose
 
       - name: Manually remove matplotlib
-        run: uv pip uninstall matplotlib
+        run: uv pip uninstall matplotlib || true
 
       - if: matrix.os != 'ubuntu-latest'
         name: Run tests

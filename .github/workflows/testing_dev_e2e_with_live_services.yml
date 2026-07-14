@@ -59,7 +59,7 @@ jobs:
         run: npm ci --verbose
 
       - name: Manually remove matplotlib
-        run: uv pip uninstall matplotlib
+        run: uv pip uninstall matplotlib || true
 
       - name: Create env file
         run: |

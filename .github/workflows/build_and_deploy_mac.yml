@@ -41,6 +41,10 @@ jobs:
       - name: Install package.json modules and their dependencies (not via `npm ci`)
         run: npm install --verbose
 
+      # Keep the released bundle consistent with the one exercised by the build tests.
+      - name: Manually remove matplotlib
+        run: uv pip uninstall matplotlib || true
+
       - uses: apple-actions/import-codesign-certs@v6
         with:
           # Currently this is set to Ryan's Developer ID certificate

@@ -58,7 +58,7 @@ jobs:
         run: npm ci --verbose
 
       - name: Manually remove matplotlib
-        run: uv pip uninstall matplotlib
+        run: uv pip uninstall matplotlib || true
 
       - name: Build PyFlask distribution
         run: npm run build:flask
