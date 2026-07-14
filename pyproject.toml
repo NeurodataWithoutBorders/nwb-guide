@@ -40,9 +40,13 @@ constraint-dependencies = [
     # ruamel.yaml.clib 0.2.13 fails to build on Intel macOS.
     # https://github.com/catalystneuro/roiextractors/issues/489
     "ruamel.yaml.clib!=0.2.13",
-    # Tutorial data generation builds an LFP band with a 0.5 Hz bandpass filter, which this
-    # spikeinterface release accepts. Pulled in transitively by neuroconv[ecephys].
-    "spikeinterface==0.103.0",
+    # Tutorial data generation passes ignore_low_freq_error to bandpass_filter, added in 0.104.8.
+    "spikeinterface>=0.104.8",
+    # nwb-guide.spec bundles scipy._external.array_api_compat.numpy.fft, which moved there in scipy 1.18.0.
+    "scipy>=1.18.0",
+    # pandas 3.0 makes DataFrame.values read-only (copy-on-write), which breaks spikeinterface's
+    # in-place Phy unit_id assignment. https://github.com/SpikeInterface/spikeinterface/issues/4687
+    "pandas<3",
 ]
 
 [tool.black]
