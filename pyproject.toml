@@ -1,6 +1,7 @@
 [project]
 name = "nwb-guide"
-version = "1.1.0"
+# The authoritative version lives in package.json; this project is never built or published.
+dynamic = ["version"]
 description = "NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB."
 readme = "README.md"
 license = { text = "MIT" }
