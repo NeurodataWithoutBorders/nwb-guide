@@ -27,6 +27,7 @@ from manageNeuroconv.info import (
     resource_path,
 )
 from namespaces import (  # neurosift_namespace,
+    ai_namespace,
     dandi_namespace,
     data_namespace,
     neuroconv_namespace,
@@ -64,6 +65,7 @@ api.add_namespace(neuroconv_namespace)
 api.add_namespace(data_namespace)
 api.add_namespace(system_namespace)
 api.add_namespace(dandi_namespace)
+api.add_namespace(ai_namespace)
 # api.add_namespace(neurosift_namespace)  # TODO: enable later
 api.init_app(flask_app)
 

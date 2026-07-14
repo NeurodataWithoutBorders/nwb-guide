@@ -31,6 +31,7 @@ import { InspectPage } from "./components/pages/inspect/InspectPage";
 import { PreviewPage } from "./components/pages/preview/PreviewPage";
 import { GuidedPreform } from "./components/pages/guided-mode/setup/Preform";
 import { GuidedDandiResultsPage } from "./components/pages/guided-mode/results/GuidedDandiResults";
+import { AIAssistantPage } from "./components/pages/ai-assistant/AIAssistantPage";
 
 let dashboard = document.querySelector("nwb-dashboard");
 if (!dashboard) dashboard = new Dashboard();
@@ -80,6 +81,19 @@ style="margin-right: 30px;"
 >                  <path
   d="M511.1 63.1v287.1c0 35.25-28.75 63.1-64 63.1h-144l-124.9 93.68c-7.875 5.75-19.12 .0497-19.12-9.7v-83.98h-96c-35.25 0-64-28.75-64-63.1V63.1c0-35.25 28.75-63.1 64-63.1h384C483.2 0 511.1 28.75 511.1 63.1z"
 ></path></svg>
+`;
+
+const aiAssistantIcon = `
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    height="20px"
+    width="20px"
+    fill="white"
+    style="margin-right: 30px;"
+>
+<path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+</svg>
 `;
 
 const pages = {
@@ -169,6 +183,10 @@ const pages = {
                 section: sections[3],
             }),
         },
+    }),
+    assistant: new AIAssistantPage({
+        label: "AI Assistant",
+        icon: aiAssistantIcon,
     }),
     validate: new InspectPage({
         label: "Validate",

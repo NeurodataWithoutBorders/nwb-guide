@@ -31,3 +31,4 @@ dependencies:
                        # with tables==3.9.1 (latest that can be used by neuroconv 0.6.0).
                        # h5py and tables need to be consistent for electron build for unknown reason
       - ruamel.yaml.clib != 0.2.13 # 0.2.13 throws a build error on intel Mac -- see https://github.com/catalystneuro/roiextractors/issues/489
+      - claude-agent-sdk >= 0.1.0  # AI conversion assistant

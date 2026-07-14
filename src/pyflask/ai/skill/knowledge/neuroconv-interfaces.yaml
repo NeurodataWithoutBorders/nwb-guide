@@ -1,0 +1,2172 @@
+ecephys:
+  recordings:
+    - name: SpikeGLXRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "SpikeGLX Neuropixels (.ap.bin/.lf.bin + .meta)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Folder path containing the binary files of the SpikeGLX recording"
+        stream_id:
+          type: str
+          description: "Stream ID of the SpikeGLX recording (e.g. 'imec0.ap', 'imec0.lf', 'imec1.ap')"
+        verbose:
+          type: bool
+          description: "Whether to output verbose text"
+          optional: true
+          default: false
+        es_key:
+          type: str
+          description: "The key to access the metadata of the ElectricalSeries"
+          optional: true
+      creates:
+        - ElectricalSeries
+        - Device (Neuropixels)
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset of data for testing"
+        write_as:
+          type: str
+          description: "How to save traces: 'raw', 'lfp', or 'processed'"
+        write_electrical_series:
+          type: bool
+          description: "If False, only write device/electrode metadata without data"
+        iterator_type:
+          type: str
+          description: "Iterator type for chunked writing ('v2' or None)"
+
+    - name: AlphaOmegaRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "AlphaOmega (.mpx)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to the folder of .mpx files"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'raw', 'lfp', or 'processed'"
+
+    - name: AxonRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Axon Binary Format (.abf) - extracellular"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to an Axon Binary Format (.abf) file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - ElectricalSeriesRaw
+        - Device (Axon Instruments)
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'raw', 'lfp', or 'processed'"
+
+    - name: AxonaRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Axona DacqUSB (.bin + .set)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .bin file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device (Axona)
+        - ElectrodeGroup (tetrode-based)
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'raw', 'lfp', or 'processed'"
+
+    - name: BiocamRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Biocam (.bwr)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .bwr file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: BlackrockRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Blackrock (.ns0-.ns6)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to Blackrock .ns1/.ns2/.ns3/.ns4/.ns5/.ns6 file"
+        nsx_override:
+          type: FilePath
+          description: "NSx file to load if file_path suffix is empty"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: CellExplorerRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "CellExplorer (.dat + .session.mat)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Folder containing the .session.mat file and .dat binary"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: EDFRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "European Data Format (.edf)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .edf file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+        channels_to_skip:
+          type: list
+          description: "Channels to skip (e.g. non-neural channels)"
+          optional: true
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: IntanRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Intan RHD/RHS amplifier channels (.rhd/.rhs)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to either a .rhd or a .rhs file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+        ignore_integrity_checks:
+          type: bool
+          description: "If True, load data that violates integrity assumptions"
+          optional: true
+          default: false
+      creates:
+        - ElectricalSeries
+        - ElectricalSeriesRaw
+        - Device (Intan)
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: MaxOneRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "MaxOne/Maxwell (.raw.h5)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .raw.h5 file"
+        hdf5_plugin_path:
+          type: DirectoryPath
+          description: "Path to HDF5 plugin library"
+          optional: true
+        download_plugin:
+          type: bool
+          description: "Whether to download the decompression plugin"
+          optional: true
+          default: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device (Maxwell)
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+      notes: "Linux only"
+
+    - name: MCSRawRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "MCSRaw Multi Channel Systems (.raw)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .raw file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: MEArecRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "MEArec simulated recording (.h5)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the MEArec .h5 file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device (probe-specific)
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: NeuralynxRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Neuralynx (.ncs/.nse/.ntt/.nev)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to Neuralynx directory"
+        stream_name:
+          type: str
+          description: "The name of the recording stream to load"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device (acquisition system)
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: NeuroScopeRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "NeuroScope (.dat + .xml)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .dat file"
+        gain:
+          type: float
+          description: "Conversion factors from int16 to Volts (e.g. 0.195 for Intan)"
+          optional: true
+        xml_file_path:
+          type: FilePath
+          description: "Path to .xml file containing device and electrode config"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table (with shank_electrode_number, group_name)
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: OpenEphysRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "OpenEphys (legacy .continuous or binary .dat)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to OpenEphys directory"
+        stream_name:
+          type: str
+          description: "The name of the recording stream"
+          optional: true
+        block_index:
+          type: int
+          description: "The index of the block to extract"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+      notes: "Auto-detects legacy vs binary format and delegates to appropriate sub-interface"
+
+    - name: OpenEphysBinaryRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "OpenEphys Binary (.dat + .oebin)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to directory containing OpenEphys binary files"
+        stream_name:
+          type: str
+          description: "The name of the recording stream to load"
+          optional: true
+        block_index:
+          type: int
+          description: "The index of the block to extract"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: OpenEphysLegacyRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "OpenEphys Legacy (.continuous)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to directory containing OpenEphys legacy files"
+        stream_name:
+          type: str
+          description: "The name of the recording stream"
+          optional: true
+        block_index:
+          type: int
+          description: "The index of the block to extract"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: PlexonRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Plexon wideband (.plx)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .plx file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+        stream_name:
+          type: str
+          optional: true
+          default: "WB-Wideband"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: Plexon2RecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Plexon2 (.pl2)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .pl2 file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: Spike2RecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Spike2/CED (.smrx/.smr)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .smr or .smrx file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: SpikeGadgetsRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "SpikeGadgets (.rec)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .rec file"
+        stream_id:
+          type: str
+          optional: true
+          default: "trodes"
+        gains:
+          type: ArrayType
+          description: "Conversion factors for each channel (or single value for all)"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: TdtRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Tucker-Davis Technologies (.tbk/.tev/.tsq/.tbx)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to directory with TDT files (TSQ, TBK, TEV, SEV)"
+        gain:
+          type: float
+          description: "Conversion factor from int16 to microvolts"
+        stream_id:
+          type: str
+          description: "Stream to select (deprecated, use stream_name)"
+          optional: true
+          default: "0"
+        stream_name:
+          type: str
+          description: "Name of the stream to select"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: WhiteMatterRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "WhiteMatter binary (.bin)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the binary file"
+        sampling_frequency:
+          type: float
+          description: "The sampling frequency"
+        num_channels:
+          type: int
+          description: "Number of channels in the recording"
+        channel_ids:
+          type: list
+          description: "A list of channel ids"
+          optional: true
+        is_filtered:
+          type: bool
+          description: "If True, the recording is assumed to be filtered"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeries"
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+  sorting:
+    - name: BlackrockSortingInterface
+      module: neuroconv.datainterfaces
+      format: "Blackrock spike data (.nev)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .nev data file"
+        sampling_frequency:
+          type: float
+          description: "Sampling frequency for the sorting extractor"
+          optional: true
+        nsx_to_load:
+          type: "int | list | str"
+          description: "IDs of nsX file from which to load data"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - Units table
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'units' or 'processing'"
+        units_name:
+          type: str
+          description: "Name of the units table"
+
+    - name: CellExplorerSortingInterface
+      module: neuroconv.datainterfaces
+      format: "CellExplorer (.spikes.cellinfo.mat)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .spikes.cellinfo.mat file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - Units table (with clu_id, group_id, location, cell_type)
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'units' or 'processing'"
+        write_ecephys_metadata:
+          type: bool
+          description: "Write electrode information from metadata"
+
+    - name: KiloSortSortingInterface
+      module: neuroconv.datainterfaces
+      format: "KiloSort output (Phy folder with params.py, .npy files)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to the output Phy folder (containing the params.py)"
+        keep_good_only:
+          type: bool
+          description: "If True, only Kilosort-labeled 'good' units are returned"
+          optional: true
+          default: false
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - Units table (with KSLabel, Amplitude, ContamPct, depth, fr, etc.)
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'units' or 'processing'"
+
+    - name: NeuralynxSortingInterface
+      module: neuroconv.datainterfaces
+      format: "Neuralynx sorting (.nse/.ntt/.nev)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to folder containing Neuralynx sorting files"
+        sampling_frequency:
+          type: float
+          description: "Specific sampling frequency if desired"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        stream_id:
+          type: str
+          description: "Used to calculate t_start"
+          optional: true
+      creates:
+        - Units table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'units' or 'processing'"
+
+    - name: NeuroScopeSortingInterface
+      module: neuroconv.datainterfaces
+      format: "NeuroScope (.res/.clu + .xml)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to folder containing .clu and .res files"
+        keep_mua_units:
+          type: bool
+          description: "Whether to return sorted spikes from multi-unit activity"
+          optional: true
+          default: true
+        exclude_shanks:
+          type: "list[int]"
+          description: "List of shank indices to ignore"
+          optional: true
+        xml_file_path:
+          type: FilePath
+          description: "Path to .xml file with electrode config"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - Units table
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'units' or 'processing'"
+
+    - name: OpenEphysSortingInterface
+      module: neuroconv.datainterfaces
+      format: "OpenEphys sorting (.spikes)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to directory containing OpenEphys .spikes files"
+        experiment_id:
+          type: int
+          optional: true
+          default: 0
+        recording_id:
+          type: int
+          optional: true
+          default: 0
+      creates:
+        - Units table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: PhySortingInterface
+      module: neuroconv.datainterfaces
+      format: "Phy output (.npy files)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to the output Phy folder (containing the params.py)"
+        exclude_cluster_groups:
+          type: "list[str]"
+          description: "Cluster groups to exclude (e.g. 'noise', 'mua')"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - Units table (with KSLabel, Amplitude, ContamPct, depth, fr, etc.)
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'units' or 'processing'"
+
+    - name: PlexonSortingInterface
+      module: neuroconv.datainterfaces
+      format: "Plexon sorting (.plx)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .plx file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - Units table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'units' or 'processing'"
+
+  lfp:
+    - name: AxonaLFPDataInterface
+      module: neuroconv.datainterfaces
+      format: "Axona LFP (.eeg files + .set)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .bin or .set file"
+      creates:
+        - ElectricalSeriesLFP (in ecephys processing module)
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'raw', 'lfp', or 'processed' (default: 'lfp')"
+      notes: "Loads all data into memory (not lazy)"
+
+    - name: CellExplorerLFPInterface
+      module: neuroconv.datainterfaces
+      format: "CellExplorer LFP (.lfp + .session.mat)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Folder containing the .session.mat file and .lfp binary"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeriesLFP"
+      creates:
+        - ElectricalSeriesLFP (in ecephys processing module)
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'raw', 'lfp', or 'processed' (default: 'lfp')"
+
+    - name: NeuroScopeLFPInterface
+      module: neuroconv.datainterfaces
+      format: "NeuroScope LFP (.lfp/.eeg + .xml)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .lfp or .eeg file"
+        gain:
+          type: float
+          description: "Conversion factor int16 to Volts (e.g. 0.195)"
+          optional: true
+        xml_file_path:
+          type: FilePath
+          description: "Path to .xml file with electrode config"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - ElectricalSeriesLFP (in ecephys processing module)
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        write_as:
+          type: str
+          description: "'raw', 'lfp', or 'processed' (default: 'lfp')"
+
+    - name: PlexonLFPInterface
+      module: neuroconv.datainterfaces
+      format: "Plexon low-pass filtered (.plx)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .plx file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        es_key:
+          type: str
+          optional: true
+          default: "ElectricalSeriesLF"
+        stream_name:
+          type: str
+          optional: true
+          default: "FPl-Low Pass Filtered"
+      creates:
+        - ElectricalSeriesLFP (in ecephys processing module)
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+  analog:
+    - name: SpikeGLXNIDQInterface
+      module: neuroconv.datainterfaces
+      format: "SpikeGLX NIDQ board (.nidq.bin + .nidq.meta)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to folder containing the .nidq.bin file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        metadata_key:
+          type: str
+          optional: true
+          default: "SpikeGLXNIDQ"
+        analog_channel_groups:
+          type: "dict[str, dict]"
+          description: "Dictionary mapping group names to analog channel configurations"
+          optional: true
+        digital_channel_groups:
+          type: "dict[str, dict]"
+          description: "Dictionary mapping group names to digital channel configurations with labels_map"
+          optional: true
+      creates:
+        - TimeSeries (analog channels)
+        - LabeledEvents (digital channels, from ndx-events)
+        - Device (NIDQBoard)
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        always_write_timestamps:
+          type: bool
+          description: "If True, always writes timestamps instead of sampling rate"
+
+    - name: SpikeGLXSyncChannelInterface
+      module: neuroconv.datainterfaces
+      format: "SpikeGLX sync channel from Neuropixel probes"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to folder containing the SpikeGLX .imec files"
+        stream_id:
+          type: str
+          description: "The stream ID for the sync channel (e.g. 'imec0.ap-SYNC', 'imec1.lf-SYNC')"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        metadata_key:
+          type: str
+          optional: true
+          default: "SpikeGLXSync"
+      creates:
+        - TimeSeries (sync channel)
+        - Device (NeuropixelsImec)
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: IntanAnalogInterface
+      module: neuroconv.datainterfaces
+      format: "Intan non-amplifier analog streams (.rhd/.rhs)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to either a .rhd or a .rhs file"
+        stream_name:
+          type: str
+          description: "Stream name: 'RHD2000 auxiliary input channel', 'USB board ADC input channel', 'DC Amplifier channel', etc."
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        metadata_key:
+          type: str
+          optional: true
+          default: "TimeSeriesAnalogIntan"
+      creates:
+        - TimeSeries (analog data in acquisition)
+        - Device (Intan)
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: EDFAnalogInterface
+      module: neuroconv.datainterfaces
+      format: "EDF auxiliary/analog channels (.edf)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .edf file"
+        channels_to_include:
+          type: "list[str]"
+          description: "Specific channel IDs to include"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        metadata_key:
+          type: str
+          optional: true
+          default: "analog_edf_metadata_key"
+      creates:
+        - TimeSeries (analog data in acquisition)
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: OpenEphysBinaryAnalogInterface
+      module: neuroconv.datainterfaces
+      format: "OpenEphys Binary ADC/analog channels (.dat + .oebin)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to OpenEphys directory (.dat files)"
+        stream_name:
+          type: str
+          description: "The name of the recording stream to load"
+          optional: true
+        block_index:
+          type: int
+          description: "The index of the block to extract"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        time_series_name:
+          type: str
+          optional: true
+          default: "TimeSeriesOpenEphysAnalog"
+      creates:
+        - TimeSeries (ADC/analog data in acquisition)
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+  position:
+    - name: AxonaPositionDataInterface
+      module: neuroconv.datainterfaces
+      format: "Axona position tracking (.bin/.set)"
+      source_data:
+        file_path:
+          type: str
+          description: "Path to .bin or .set file"
+      creates:
+        - Position (SpatialSeries in behavior processing module)
+      conversion_options: {}
+
+    - name: AxonaUnitRecordingInterface
+      module: neuroconv.datainterfaces
+      format: "Axona unit recording (.bin/.set)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to Axona file"
+        noise_std:
+          type: float
+          optional: true
+          default: 3.5
+      creates:
+        - ElectricalSeries
+        - Device
+        - ElectrodeGroup
+        - electrodes table
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+ophys:
+  imaging:
+    - name: BrukerTiffMultiPlaneImagingInterface
+      module: neuroconv.datainterfaces
+      format: "Bruker TIFF multi-plane (.ome.tif + .xml + .env)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Folder containing Bruker TIF image files and config files"
+        stream_name:
+          type: str
+          description: "The name of the recording stream (e.g. 'Ch2')"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - TwoPhotonSeries (volumetric)
+        - ImagingPlane
+        - Device (BrukerFluorescenceMicroscope)
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        stub_frames:
+          type: int
+          description: "Number of frames for stub test"
+        photon_series_type:
+          type: str
+          description: "'TwoPhotonSeries' or 'OnePhotonSeries'"
+
+    - name: BrukerTiffSinglePlaneImagingInterface
+      module: neuroconv.datainterfaces
+      format: "Bruker TIFF single plane (.ome.tif + .xml + .env)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Folder containing Bruker TIF image files and config files"
+        stream_name:
+          type: str
+          description: "The name of the recording stream (e.g. 'Ch2')"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - TwoPhotonSeries
+        - ImagingPlane
+        - Device (BrukerFluorescenceMicroscope)
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        photon_series_type:
+          type: str
+          description: "'TwoPhotonSeries' or 'OnePhotonSeries'"
+
+    - name: FemtonicsImagingInterface
+      module: neuroconv.datainterfaces
+      format: "Femtonics MESc (.mesc)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .mesc file"
+        session_name:
+          type: str
+          description: "Name of the MSession (e.g. 'MSession_0')"
+          optional: true
+        munit_name:
+          type: str
+          description: "Name of the MUnit (e.g. 'MUnit_0')"
+          optional: true
+        channel_name:
+          type: str
+          description: "Name of the channel to extract (e.g. 'UG', 'UR')"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - TwoPhotonSeries
+        - ImagingPlane (with grid_spacing, geometric transformations)
+        - Device (Femtonics microscope)
+        - OpticalChannel (with PMT settings)
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        photon_series_type:
+          type: str
+          description: "'TwoPhotonSeries' or 'OnePhotonSeries'"
+
+    - name: Hdf5ImagingInterface
+      module: neuroconv.datainterfaces
+      format: "HDF5 imaging (.h5/.hdf5)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .h5 or .hdf5 file"
+        mov_field:
+          type: str
+          optional: true
+          default: "mov"
+        sampling_frequency:
+          type: float
+          optional: true
+        start_time:
+          type: float
+          optional: true
+        metadata:
+          type: dict
+          optional: true
+        channel_names:
+          type: ArrayType
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        photon_series_type:
+          type: str
+          optional: true
+          default: "TwoPhotonSeries"
+      creates:
+        - TwoPhotonSeries or OnePhotonSeries
+        - ImagingPlane
+        - Device
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: InscopixImagingInterface
+      module: neuroconv.datainterfaces
+      format: "Inscopix (.isxd)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .isxd Inscopix file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - OnePhotonSeries
+        - ImagingPlane (with acquisition details)
+        - Device (Inscopix microscope with serial number)
+        - OpticalChannel
+        - Subject metadata
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+      notes: "Automatically detects multiplane files and raises error (not yet supported)"
+
+    - name: MicroManagerTiffImagingInterface
+      module: neuroconv.datainterfaces
+      format: "Micro-Manager TIFF (.ome.tif + DisplaySettings.json)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Folder containing OME-TIF image files and DisplaySettings JSON"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - TwoPhotonSeries
+        - ImagingPlane
+        - Device
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: MiniscopeImagingInterface
+      module: neuroconv.datainterfaces
+      format: "Miniscope (.avi + metaData.json + timeStamps.csv)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to Miniscope folder containing .avi files and metaData.json"
+          optional: true
+        file_paths:
+          type: list
+          description: "List of .avi file paths for non-standard folder structures"
+          optional: true
+        configuration_file_path:
+          type: str
+          description: "Path to metaData.json (deprecated)"
+          optional: true
+        timeStamps_file_path:
+          type: str
+          description: "Path to timeStamps.csv file"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - OnePhotonSeries
+        - ImagingPlane
+        - Device (Miniscope, via ndx-miniscope)
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        photon_series_type:
+          type: str
+          description: "'OnePhotonSeries' (default) or 'TwoPhotonSeries'"
+
+    - name: SbxImagingInterface
+      module: neuroconv.datainterfaces
+      format: "Scanbox (.sbx)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .sbx file"
+        sampling_frequency:
+          type: float
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        photon_series_type:
+          type: str
+          optional: true
+          default: "TwoPhotonSeries"
+      creates:
+        - TwoPhotonSeries or OnePhotonSeries
+        - ImagingPlane
+        - Device (Scanbox)
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: ScanImageImagingInterface
+      module: neuroconv.datainterfaces
+      format: "ScanImage TIFF (.tif/.tiff)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the ScanImage TIFF file (first file in multi-file series)"
+          optional: true
+        channel_name:
+          type: str
+          description: "Name of the channel to extract (e.g. 'Channel 1')"
+          optional: true
+        slice_sample:
+          type: int
+          description: "Specific frame from each slice in volumetric data"
+          optional: true
+        plane_index:
+          type: int
+          description: "Specific plane to extract from volumetric data"
+          optional: true
+        file_paths:
+          type: "list[FilePath]"
+          description: "Override automatic file detection with explicit file list"
+          optional: true
+        interleave_slice_samples:
+          type: bool
+          description: "Whether to interleave all slice samples as separate time points"
+          optional: true
+        fallback_sampling_frequency:
+          type: float
+          description: "Fallback sampling frequency if not in metadata"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - TwoPhotonSeries
+        - ImagingPlane
+        - Device
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        photon_series_type:
+          type: str
+          description: "'TwoPhotonSeries' or 'OnePhotonSeries'"
+
+    - name: ScanImageLegacyImagingInterface
+      module: neuroconv.datainterfaces
+      format: "ScanImage Legacy TIFF (.tif/.tiff)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to ScanImage TIFF file"
+        channel_name:
+          type: str
+          description: "Name of the channel to extract"
+          optional: true
+        plane_name:
+          type: str
+          description: "Name of the plane to extract"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - TwoPhotonSeries
+        - ImagingPlane
+        - Device
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: TiffImagingInterface
+      module: neuroconv.datainterfaces
+      format: "Multi-page TIFF (.tif/.tiff)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to TIFF file (deprecated, use file_paths)"
+          optional: true
+        file_paths:
+          type: "list[FilePath]"
+          description: "List of paths to TIFF files"
+          optional: true
+        sampling_frequency:
+          type: float
+          description: "Sampling frequency in Hz"
+        dimension_order:
+          type: str
+          optional: true
+          default: "ZCT"
+          description: "Order of dimensions (Z, C, T)"
+        num_channels:
+          type: int
+          optional: true
+          default: 1
+        channel_name:
+          type: str
+          optional: true
+        num_planes:
+          type: int
+          optional: true
+          default: 1
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        photon_series_type:
+          type: str
+          optional: true
+          default: "TwoPhotonSeries"
+      creates:
+        - TwoPhotonSeries or OnePhotonSeries
+        - ImagingPlane
+        - Device
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: ThorImagingInterface
+      module: neuroconv.datainterfaces
+      format: "ThorImageLS TIFF (.tif + Experiment.xml)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to first OME TIFF file (e.g. ChanA_001_001_001_001.tif)"
+        channel_name:
+          type: str
+          description: "Name of the channel to extract (must match Experiment.xml)"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - TwoPhotonSeries
+        - ImagingPlane
+        - Device (ThorLabs 2P Microscope)
+        - OpticalChannel
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+  segmentation:
+    - name: CaimanSegmentationInterface
+      module: neuroconv.datainterfaces
+      format: "CaImAn output (.hdf5)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .hdf5 file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - ImageSegmentation (PlaneSegmentation with ROI masks)
+        - Fluorescence (RoiResponseSeries)
+        - ImagingPlane
+        - Device
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        include_roi_centroids:
+          type: bool
+          description: "Include ROI centroid coordinates"
+        include_roi_acceptance:
+          type: bool
+          description: "Include ROI acceptance status"
+        mask_type:
+          type: str
+          description: "'image', 'pixel', or 'voxel'"
+
+    - name: CnmfeSegmentationInterface
+      module: neuroconv.datainterfaces
+      format: "CNMF-E output (.mat)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .mat file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - ImageSegmentation (PlaneSegmentation with ROI masks)
+        - Fluorescence (RoiResponseSeries)
+        - ImagingPlane
+        - Device
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: ExtractSegmentationInterface
+      module: neuroconv.datainterfaces
+      format: "EXTRACT output (.mat)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .mat file"
+        sampling_frequency:
+          type: float
+          description: "Sampling frequency"
+        output_struct_name:
+          type: str
+          description: "Name of the output struct in the .mat file"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - ImageSegmentation (PlaneSegmentation with ROI masks)
+        - Fluorescence (RoiResponseSeries)
+        - ImagingPlane
+        - Device
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: InscopixSegmentationInterface
+      module: neuroconv.datainterfaces
+      format: "Inscopix segmentation (.isxd)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .isxd Inscopix file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - ImageSegmentation (PlaneSegmentation with ROI masks)
+        - Fluorescence (RoiResponseSeries)
+        - ImagingPlane
+        - Device (Inscopix)
+        - Subject metadata
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: MinianSegmentationInterface
+      module: neuroconv.datainterfaces
+      format: "Minian output (.zarr)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to .zarr output folder"
+        sampling_frequency:
+          type: float
+          description: "Sampling frequency in Hz"
+          optional: true
+        timestamps_path:
+          type: FilePath
+          description: "Path to the timeStamps.csv file"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - ImageSegmentation (PlaneSegmentation with ROI masks)
+        - Fluorescence (RoiResponseSeries)
+        - ImagingPlane
+        - Device
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        include_background_segmentation:
+          type: bool
+          description: "Include background segmentation"
+        include_roi_centroids:
+          type: bool
+          description: "Include ROI centroid coordinates"
+        mask_type:
+          type: str
+          description: "'image', 'pixel', or 'voxel'"
+
+    - name: SimaSegmentationInterface
+      module: neuroconv.datainterfaces
+      format: "SIMA output (.sima)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .sima file"
+        sima_segmentation_label:
+          type: str
+          optional: true
+          default: "auto_ROIs"
+      creates:
+        - ImageSegmentation (PlaneSegmentation with ROI masks)
+        - Fluorescence (RoiResponseSeries)
+        - ImagingPlane
+        - Device
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+
+    - name: Suite2pSegmentationInterface
+      module: neuroconv.datainterfaces
+      format: "Suite2p output (.npy files in plane# folders)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to Suite2p folder containing 'plane#' sub-folders"
+        channel_name:
+          type: str
+          description: "The name of the channel to load"
+          optional: true
+        plane_name:
+          type: str
+          description: "The name of the plane to load (e.g. 'plane0')"
+          optional: true
+        plane_segmentation_name:
+          type: str
+          description: "The name of the plane segmentation to be added"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - ImageSegmentation (PlaneSegmentation with ROI masks)
+        - Fluorescence (RoiResponseSeries)
+        - ImagingPlane
+        - Device
+      conversion_options:
+        stub_test:
+          type: bool
+          description: "Only convert a small subset"
+        include_roi_centroids:
+          type: bool
+          description: "Include ROI centroid coordinates"
+        include_roi_acceptance:
+          type: bool
+          description: "Include iscell classification"
+        mask_type:
+          type: str
+          description: "'image', 'pixel', or 'voxel'"
+
+  fiber_photometry:
+    - name: TDTFiberPhotometryInterface
+      module: neuroconv.datainterfaces
+      format: "TDT fiber photometry (Tbk/Tdx/tev/tin/tsq)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "Path to the folder containing TDT data"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - FiberPhotometry (ndx-fiber-photometry)
+        - OpticFiber, ExcitationSource, Photodetector (ndx-ophys-devices)
+      conversion_options: {}
+
+behavior:
+  pose_estimation:
+    - name: DeepLabCutInterface
+      module: neuroconv.datainterfaces
+      format: "DeepLabCut output (.h5 or .csv)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the DLC output file (.h5 or .csv)"
+        config_file_path:
+          type: FilePath
+          description: "Path to .yml config file"
+          optional: true
+        subject_name:
+          type: str
+          optional: true
+          default: "ind1"
+        pose_estimation_metadata_key:
+          type: str
+          optional: true
+          default: "PoseEstimationDeepLabCut"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - PoseEstimation (ndx-pose, in behavior processing module)
+        - PoseEstimationSeries (per bodypart)
+        - Skeleton
+      conversion_options: {}
+
+    - name: SLEAPInterface
+      module: neuroconv.datainterfaces
+      format: "SLEAP output (.slp)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .slp file"
+        video_file_path:
+          type: FilePath
+          description: "Path of the video for extracting timestamps"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        frames_per_second:
+          type: float
+          description: "FPS of the video"
+          optional: true
+      creates:
+        - PoseEstimation (ndx-pose, in behavior processing module)
+        - PoseEstimationSeries (per bodypart)
+        - Skeleton
+      conversion_options: {}
+
+    - name: LightningPoseDataInterface
+      module: neuroconv.datainterfaces
+      format: "Lightning Pose predictions (.csv + .mp4)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to .csv file with predictions"
+        original_video_file_path:
+          type: FilePath
+          description: "Path to the original video file (.mp4)"
+        labeled_video_file_path:
+          type: FilePath
+          description: "Path to the labeled video file (.mp4)"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - PoseEstimation (ndx-pose, in behavior processing module)
+        - PoseEstimationSeries (per bodypart)
+      conversion_options: {}
+
+  tracking:
+    - name: FicTracDataInterface
+      module: neuroconv.datainterfaces
+      format: "FicTrac (.dat)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the FicTrac .dat file"
+        configuration_file_path:
+          type: FilePath
+          description: "Path to the FicTrac configuration file"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - Position (multiple SpatialSeries in behavior processing module)
+        - SpatialSeries for rotation, heading, speed, movement
+      conversion_options:
+        reference_frame:
+          type: str
+          description: "Reference frame for spatial series"
+
+    - name: NeuralynxNvtInterface
+      module: neuroconv.datainterfaces
+      format: "Neuralynx position tracking (.nvt)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the .nvt file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - Position (SpatialSeries in behavior processing module)
+        - CompassDirection (SpatialSeries for head angle)
+      conversion_options: {}
+
+  video:
+    - name: ExternalVideoInterface
+      module: neuroconv.datainterfaces
+      format: "Video files (.mp4/.avi/.wmv/.mov/.flv/.mkv) - external reference"
+      source_data:
+        file_paths:
+          type: "list[FilePath]"
+          description: "List of video file paths in sorted, consecutive order"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        video_name:
+          type: str
+          description: "Name of this video in the ImageSeries"
+          optional: true
+      creates:
+        - ImageSeries (with external_file reference)
+        - Device (camera)
+      conversion_options: {}
+      notes: "Videos stored as external references (file paths), not embedded in NWB"
+
+    - name: InternalVideoInterface
+      module: neuroconv.datainterfaces
+      format: "Video file (.mp4/.avi/.wmv/.mov/.flv/.mkv) - embedded"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the video file"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+        video_name:
+          type: str
+          description: "Name of this video in the ImageSeries"
+          optional: true
+      creates:
+        - ImageSeries (with data stored internally)
+        - Device (camera)
+      conversion_options: {}
+      notes: "Video data embedded directly in NWB file"
+
+    - name: MiniscopeBehaviorInterface
+      module: neuroconv.datainterfaces
+      format: "Miniscope behavior camera (.avi + metaData.json)"
+      source_data:
+        folder_path:
+          type: DirectoryPath
+          description: "The main Miniscope folder with BehavCam subfolders"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - ImageSeries (BehavCamImageSeries with external file)
+        - Device (Miniscope BehavCam, via ndx-miniscope)
+      conversion_options: {}
+
+  orientation:
+    - name: MiniscopeHeadOrientationInterface
+      module: neuroconv.datainterfaces
+      format: "Miniscope head orientation (headOrientation.csv from BNO055 IMU)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to headOrientation.csv with columns: Time Stamp (ms), qw, qx, qy, qz"
+        metadata_key:
+          type: str
+          optional: true
+          default: "TimeSeriesMiniscopeHeadOrientation"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - TimeSeries (quaternion data in behavior processing module)
+      conversion_options: {}
+
+  audio:
+    - name: AudioInterface
+      module: neuroconv.datainterfaces
+      format: "WAV audio (.wav)"
+      source_data:
+        file_paths:
+          type: "list[FilePath]"
+          description: "List of .wav file paths in sorted, consecutive order"
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - AcousticWaveformSeries (ndx-sound, in acquisition)
+      conversion_options: {}
+
+  operant:
+    - name: MedPCInterface
+      module: neuroconv.datainterfaces
+      format: "MedPC output (.txt)"
+      source_data:
+        file_path:
+          type: FilePath
+          description: "Path to the MedPC file"
+        session_conditions:
+          type: dict
+          description: "Conditions defining the session (e.g. {'Start Date': '11/09/18'})"
+        start_variable:
+          type: str
+          description: "Name of the variable that starts the session"
+        metadata_medpc_name_to_info_dict:
+          type: dict
+          description: "Mapping of MedPC variable names to info dicts with 'name' and 'is_array'"
+        aligned_timestamp_names:
+          type: "list[str]"
+          description: "Variables with externally aligned timestamps"
+          optional: true
+        verbose:
+          type: bool
+          optional: true
+          default: false
+      creates:
+        - Events (ndx-events, in acquisition)
+        - BehavioralEpochs (IntervalSeries)
+      conversion_options: {}
+
+icephys:
+  - name: AbfInterface
+    module: neuroconv.datainterfaces
+    format: "Axon Binary Format for intracellular electrophysiology (.abf)"
+    source_data:
+      file_paths:
+        type: "list[FilePath]"
+        description: "Array of paths to ABF files"
+      icephys_metadata:
+        type: dict
+        description: "Metadata for this experiment"
+        optional: true
+      icephys_metadata_file_path:
+        type: FilePath
+        description: "Path to JSON file containing metadata"
+        optional: true
+    creates:
+      - IntracellularRecordingsTable
+      - CurrentClampStimulusSeries / VoltageClampStimulusSeries
+      - CurrentClampSeries / VoltageClampSeries
+      - Device (Axon Instruments)
+      - IntracellularElectrode
+    conversion_options: {}
+
+text:
+  - name: CsvTimeIntervalsInterface
+    module: neuroconv.datainterfaces
+    format: "CSV file (.csv)"
+    source_data:
+      file_path:
+        type: FilePath
+        description: "Path to the CSV file"
+      read_kwargs:
+        type: dict
+        description: "Additional kwargs passed to pandas.read_csv()"
+        optional: true
+      verbose:
+        type: bool
+        optional: true
+        default: false
+    creates:
+      - TimeIntervals (trials table or custom intervals)
+    conversion_options:
+      tag:
+        type: str
+        description: "Tag for the time intervals table (e.g. 'trials')"
+
+  - name: ExcelTimeIntervalsInterface
+    module: neuroconv.datainterfaces
+    format: "Excel file (.xlsx/.xls/.xlsm)"
+    source_data:
+      file_path:
+        type: FilePath
+        description: "Path to the Excel file"
+      read_kwargs:
+        type: dict
+        description: "Additional kwargs passed to pandas.read_excel()"
+        optional: true
+      verbose:
+        type: bool
+        optional: true
+        default: false
+    creates:
+      - TimeIntervals (trials table or custom intervals)
+    conversion_options:
+      tag:
+        type: str
+        description: "Tag for the time intervals table (e.g. 'trials')"
+
+image:
+  - name: ImageInterface
+    module: neuroconv.datainterfaces
+    format: "Image files (.png/.jpg/.jpeg/.tiff/.tif/.webp)"
+    source_data:
+      file_paths:
+        type: "list[str | Path]"
+        description: "List of paths to image files"
+        optional: true
+      folder_path:
+        type: "str | Path"
+        description: "Path to folder containing images"
+        optional: true
+      images_location:
+        type: str
+        description: "'acquisition' or 'stimulus'"
+        optional: true
+        default: "acquisition"
+      metadata_key:
+        type: str
+        optional: true
+        default: "Images"
+      verbose:
+        type: bool
+        optional: true
+        default: true
+    creates:
+      - Images container (GrayscaleImage, RGBImage, or RGBAImage)
+    conversion_options: {}
+    notes: "Either file_paths or folder_path must be provided, not both"
