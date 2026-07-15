@@ -307,8 +307,7 @@ function initialize() {
         const chokidar = require('chokidar');
         chokidar.watch(path.join(__dirname, PY_FLASK_FOLDER), {
           ignored:  ['**/__pycache__/**']
-        }).on('all', async (event: string, changedPath: string) => {
-          if (event === 'change') console.log(`[chokidar-diagnostic] ${event}: ${changedPath}`) // TODO(uv-migration): remove after identifying the intel-mac restart trigger
+        }).on('all', async (event: string) => {
           if (event === 'change' && !globals.python.restart) {
             globals.python.restart = true
             await exitPyProc();
