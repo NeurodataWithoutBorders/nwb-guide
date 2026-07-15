@@ -38,19 +38,23 @@ if (runByTestSuite) {
 
 // TODO(e2e-flake): temporary diagnostics to pin why Electron quits mid-test on the macOS Intel runner. Remove once identified.
 if (runByTestSuite) {
+  // Log which signal (if any) arrives, then re-raise it so the default behavior is unchanged (no masking).
   ;['SIGINT', 'SIGTERM', 'SIGHUP'].forEach((sig) =>
-    process.on(sig as NodeJS.Signals, () => {
+    process.once(sig as NodeJS.Signals, () => {
       console.log(`[quit-diagnostic] process received ${sig}`)
-      app.quit() // preserve graceful shutdown while logging the signal
+      process.kill(process.pid, sig as NodeJS.Signals)
     })
   )
   process.on('exit', (code) => console.log(`[quit-diagnostic] main process exit, code ${code}`))
   app.on('render-process-gone', (_e, _wc, details) =>
-    console.log(`[quit-diagnostic] render-process-gone: ${JSON.stringify(details)}`)
+    console.log(`[quit-diagnostic] app render-process-gone: ${JSON.stringify(details)}`)
   )
   app.on('child-process-gone', (_e, details) =>
-    console.log(`[quit-diagnostic] child-process-gone: ${JSON.stringify(details)}`)
+    console.log(`[quit-diagnostic] app child-process-gone: ${JSON.stringify(details)}`)
   )
+  app.on('will-quit', () => console.log('[quit-diagnostic] app will-quit'))
+  app.on('quit', () => console.log('[quit-diagnostic] app quit'))
+  app.on('window-all-closed', () => console.log('[quit-diagnostic] app window-all-closed'))
 }
 
 /*************************************************************
@@ -431,7 +435,18 @@ app.on('activate', () => {
 
 const root = runByTestSuite ? path.join(paths.root, '.test') : paths.root
 
-if (runByTestSuite) onWindowReady(() => console.log('WINDOW READY FOR TESTING'))
+if (runByTestSuite) onWindowReady((win) => {
+  console.log('WINDOW READY FOR TESTING')
+  // TODO(e2e-flake): temporary window/renderer lifecycle diagnostics. Remove once identified.
+  const wc = win.webContents
+  wc.on('render-process-gone', (_e, details) => console.log(`[quit-diagnostic] webContents render-process-gone: ${JSON.stringify(details)}`))
+  wc.on('unresponsive', () => console.log('[quit-diagnostic] webContents unresponsive'))
+  wc.on('responsive', () => console.log('[quit-diagnostic] webContents responsive'))
+  wc.on('destroyed', () => console.log('[quit-diagnostic] webContents destroyed'))
+  wc.on('did-fail-load', (_e, code, desc) => console.log(`[quit-diagnostic] webContents did-fail-load: ${code} ${desc}`))
+  win.on('close', () => console.log('[quit-diagnostic] window close'))
+  win.on('closed', () => console.log('[quit-diagnostic] window closed'))
+})
 
 
 const homeDirectory = app.getPath("home");
