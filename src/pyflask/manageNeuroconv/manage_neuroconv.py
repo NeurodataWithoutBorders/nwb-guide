@@ -36,28 +36,51 @@ def create_link(target, link, target_is_dir=False):
     link = str(link)
 
     if sys.platform != "win32":
-        os.symlink(target, link, target_is_dir=target_is_dir)
+        os.symlink(target, link, target_is_directory=target_is_dir)
         return
 
     try:
-        os.symlink(target, link, target_is_dir=target_is_dir)
+        os.symlink(target, link, target_is_directory=target_is_dir)
         return
     except OSError:
         pass
 
+    link_error = OSError(
+        f"Cannot create a link from '{link}' to '{target}'. On Windows, enable Developer Mode "
+        "or run NWB GUIDE as Administrator to allow symbolic links. For files, the source and "
+        "destination must also be on the same drive."
+    )
+
     if target_is_dir:
         import _winapi
 
-        _winapi.CreateJunction(target, link)
+        try:
+            # Junctions require an absolute target path.
+            _winapi.CreateJunction(os.path.abspath(target), link)
+        except OSError:
+            raise link_error
     else:
         try:
             os.link(target, link)
         except OSError:
-            raise OSError(
-                f"Cannot create a link from '{link}' to '{target}'. "
-                "On Windows, either run NWB GUIDE as Administrator, "
-                "or ensure the source and destination are on the same drive."
-            )
+            raise link_error
+
+
+def _is_link(path) -> bool:
+    """Return True if path is a symlink or a Windows directory junction."""
+    return path.is_symlink() or os.path.isjunction(path)
+
+
+def _remove_link(path) -> None:
+    """Remove a symlink or junction at path, leaving the target it points to intact.
+
+    Directory symlinks and junctions are removed with rmdir; file symlinks and hard links
+    are removed with unlink.
+    """
+    try:
+        os.rmdir(path)
+    except NotADirectoryError:
+        os.unlink(path)
 
 
 EXCLUDED_RECORDING_INTERFACE_PROPERTIES = ["contact_vector", "contact_shapes", "group", "location"]
@@ -1241,9 +1264,9 @@ def get_conversion_info(info: dict) -> dict:
     resolved_output_directory = path_info["directory"]
     default_output_directory = path_info["default"]
 
-    # Remove symlink placed at the default_output_directory if this will hold real data
-    if resolved_output_directory == default_output_directory and default_output_directory.is_symlink():
-        default_output_directory.unlink()
+    # Remove a link placed at the default_output_directory if this will hold real data
+    if resolved_output_directory == default_output_directory and _is_link(default_output_directory):
+        _remove_link(default_output_directory)
 
     resolved_output_path.parent.mkdir(exist_ok=True, parents=True)  # Ensure all parent directories exist
 
@@ -1356,20 +1379,18 @@ def convert_to_nwb(
 
     create_file(info, log_url=log_url)
 
-    # Create a symlink between the fake data and custom data
+    # Create a link between the fake data and custom data
     if not resolved_output_directory == default_output_directory:
-        if default_output_directory.exists():
-            # If default default_output_directory is not a symlink, delete all contents and create a symlink there
-            if not default_output_directory.is_symlink():
-                rmtree(default_output_directory)
+        # A symlink or junction (reported here regardless of whether its target still exists) may
+        # point to a stale location. Remove the link itself, leaving its target contents intact,
+        # so it can be recreated pointing at the current output directory.
+        if _is_link(default_output_directory):
+            _remove_link(default_output_directory)
 
-            # If the location is already a symlink, but points to a different output location
-            # remove the existing symlink before creating a new one
-            elif (
-                default_output_directory.is_symlink()
-                and default_output_directory.readlink() is not resolved_output_directory
-            ):
-                default_output_directory.unlink()
+        # A real directory holds outputs from a previous conversion. Delete it so a link can
+        # take its place.
+        elif default_output_directory.exists():
+            rmtree(default_output_directory)
 
         # Create a pointer to the actual conversion outputs
         if not default_output_directory.exists():
