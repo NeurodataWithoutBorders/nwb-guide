@@ -37,6 +37,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install package.json modules and their dependencies (not via `npm ci`)
         run: npm install --verbose

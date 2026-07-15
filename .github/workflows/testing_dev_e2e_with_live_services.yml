@@ -54,6 +54,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install GUIDE
         run: npm ci --verbose
@@ -66,7 +67,17 @@ jobs:
           touch .env
           echo DANDI_SANDBOX_API_KEY=${{ secrets.DANDI_SANDBOX_API_KEY }} >> .env
 
-      - if: matrix.os != 'ubuntu-latest'
+      # The macOS x64 runner intermittently crashes Chromium/Electron subprocesses (GPU and
+      # network-service), which fails the E2E run. Retry only on that runner.
+      - if: matrix.os == 'macos-15-intel'
+        name: Run tests (retried on the flaky x64 runner)
+        uses: nick-fields/retry@ad984534de44a9489a53aefd81eb77f87c70dc60 # v4.0.0
+        with:
+          timeout_minutes: 25
+          max_attempts: 3
+          command: npm run coverage:tutorial
+
+      - if: matrix.os == 'macos-latest' || matrix.os == 'windows-latest'
         name: Run tests
         run: npm run coverage:tutorial
 
