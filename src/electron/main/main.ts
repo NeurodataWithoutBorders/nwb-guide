@@ -36,6 +36,23 @@ if (runByTestSuite) {
   if (process.env.CI) app.commandLine.appendSwitch('disable-gpu') // Avoid GPU process crashes on CI runners (e.g. macOS Intel)
 }
 
+// TODO(e2e-flake): temporary diagnostics to pin why Electron quits mid-test on the macOS Intel runner. Remove once identified.
+if (runByTestSuite) {
+  ;['SIGINT', 'SIGTERM', 'SIGHUP'].forEach((sig) =>
+    process.on(sig as NodeJS.Signals, () => {
+      console.log(`[quit-diagnostic] process received ${sig}`)
+      app.quit() // preserve graceful shutdown while logging the signal
+    })
+  )
+  process.on('exit', (code) => console.log(`[quit-diagnostic] main process exit, code ${code}`))
+  app.on('render-process-gone', (_e, _wc, details) =>
+    console.log(`[quit-diagnostic] render-process-gone: ${JSON.stringify(details)}`)
+  )
+  app.on('child-process-gone', (_e, details) =>
+    console.log(`[quit-diagnostic] child-process-gone: ${JSON.stringify(details)}`)
+  )
+}
+
 /*************************************************************
  * Python Process
  *************************************************************/
@@ -449,6 +466,8 @@ app.on("window-all-closed", () => {
 })
 
 app.on("before-quit", async (ev: Event) => {
+
+  if (runByTestSuite) console.log(`[quit-diagnostic] before-quit fired\n${new Error().stack}`) // TODO(e2e-flake): remove once identified
 
   ev.preventDefault()
     if (!runByTestSuite) {
