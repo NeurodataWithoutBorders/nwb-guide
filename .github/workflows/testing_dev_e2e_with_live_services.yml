@@ -22,17 +22,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            label: environments/environment-Linux.yml
-
-          - os: macos-latest  # Mac arm64 runner
-            label: environments/environment-MAC-apple-silicon.yml
-
+          # NOTE: diagnostic branch only. Reduced to the flaky x64 runner. Do not merge.
           - os: macos-15-intel  # Mac x64 runner
             label: environments/environment-MAC-intel.yml
-
-          - os: windows-latest
-            label: environments/environment-Windows.yml
 
     steps:
       - uses: actions/checkout@v6
