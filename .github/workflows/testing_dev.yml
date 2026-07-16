@@ -57,6 +57,10 @@ jobs:
       - name: Install GUIDE
         run: npm ci --verbose
 
+      # matplotlib arrives transitively through neuroconv's extras and GUIDE never imports it.
+      # PyInstaller bundles whatever is installed, and matplotlib's hidden libraries break the
+      # packaged build, so every job drops it to keep tests and releases on the same environment.
+      # `uv tree --invert --package matplotlib` lists what currently pulls it in.
       - name: Manually remove matplotlib
         run: uv pip uninstall matplotlib || true
 
