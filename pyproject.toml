@@ -1,3 +1,55 @@
+[project]
+name = "nwb-guide"
+# The authoritative version lives in package.json; this project is never built or published.
+dynamic = ["version"]
+description = "NWB GUIDE is a desktop app that provides a no-code user interface for converting neurophysiology data to NWB."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "CatalystNeuro" }]
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "chardet==5.1.0",
+    "configparser==6.0.0",
+    "flask==2.3.2",
+    "flask-cors==4.0.0",
+    "flask-restx==1.1.0",
+    "werkzeug<3.0", # werkzeug 3.0 deprecates features used by flask 2.3.2. Remove this when updating flask.
+    "h5py<3.13", # keep the HDF5 version aligned with the pytables build for a working PyInstaller bundle
+    "jsonschema==4.18.0", # also installs jsonschema-specifications
+    "neuroconv[dandi,compressors,ecephys,ophys,behavior,text]==0.9.3",
+    "scikit-learn==1.6.1", # tutorial data generation
+    "tqdm-publisher==0.1.1", # progress bars
+    "tzlocal==5.3.1", # frontend timezone handling
+    "ndx-pose==0.2.2",
+    "nwbinspector==0.6.5",
+    "numcodecs==0.15.1", # numcodecs 0.16.0 is not compatible with zarr 2.18.5
+    "setuptools==70.0.0", # provides pkg_resources for bundled dependencies
+    "pywin32==308; sys_platform == 'win32'",
+]
+
+[dependency-groups]
+dev = [
+    "pyinstaller==6.14.2", # builds the standalone backend distributable
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.uv]
+package = false
+# Constraints apply only to transitive dependencies that another package already pulls in.
+constraint-dependencies = [
+    # ruamel.yaml.clib 0.2.13 fails to build on Intel macOS.
+    # https://github.com/catalystneuro/roiextractors/issues/489
+    "ruamel.yaml.clib!=0.2.13",
+    # Tutorial data generation passes ignore_low_freq_error to bandpass_filter, added in 0.104.8.
+    "spikeinterface>=0.104.8",
+    # nwb-guide.spec bundles scipy._external.array_api_compat.numpy.fft, which moved there in scipy 1.18.0.
+    "scipy>=1.18.0",
+    # pandas 3.0 makes DataFrame.values read-only (copy-on-write), which breaks spikeinterface's
+    # in-place Phy unit_id assignment. https://github.com/SpikeInterface/spikeinterface/issues/4687
+    "pandas<3",
+]
+
 [tool.black]
 line-length = 120
 target-version = ['py37']
