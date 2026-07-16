@@ -258,6 +258,7 @@ export class GuidedPathExpansionPage extends Page {
 
                 const value = entry[prop];
                 delete entry[prop];
+                delete structure[key][prop]; // project.SourceData holds these values
 
                 const interfaceDefaults = projectSourceData[key] ?? (projectSourceData[key] = {});
                 if (value === undefined || value === "") delete interfaceDefaults[prop];
