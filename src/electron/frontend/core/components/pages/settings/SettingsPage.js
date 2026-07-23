@@ -179,20 +179,37 @@ export class SettingsPage extends Page {
 
     generateTestData = async () => {
         if (!fs.existsSync(DATA_OUTPUT_PATH)) {
-            await run(
-                "data/generate",
-                {
-                    output_path: DATA_OUTPUT_PATH,
-                },
-                {
-                    title: "Generating test data",
-                    html: "<small>This will take several minutes to complete.</small>",
-                    base: "data",
-                }
-            ).catch((error) => {
-                this.notify(error.message, "error");
-                throw error;
-            });
+            // Try fast path: generate SpikeGLX locally + download pre-built Phy data
+            try {
+                await run(
+                    "data/download",
+                    {
+                        output_path: DATA_OUTPUT_PATH,
+                    },
+                    {
+                        title: "Setting up tutorial data",
+                        html: "<small>Generating recordings and downloading sorting data...</small>",
+                        base: "data",
+                    }
+                );
+            } catch (downloadError) {
+                // Fall back to full generation if download fails (e.g. offline)
+                console.warn("Download failed, falling back to full generation:", downloadError);
+                await run(
+                    "data/generate",
+                    {
+                        output_path: DATA_OUTPUT_PATH,
+                    },
+                    {
+                        title: "Generating test data",
+                        html: "<small>This will take several minutes to complete.</small>",
+                        base: "data",
+                    }
+                ).catch((error) => {
+                    this.notify(error.message, "error");
+                    throw error;
+                });
+            }
         }
 
         await run(
@@ -202,7 +219,7 @@ export class SettingsPage extends Page {
                 output_path: DATASET_OUTPUT_PATH,
             },
             {
-                title: "Generating test dataset",
+                title: "Creating multi-session dataset",
                 base: "data",
             }
         ).catch((error) => {
@@ -212,7 +229,7 @@ export class SettingsPage extends Page {
 
         const sanitizedOutputPath = DATASET_OUTPUT_PATH.replace(homeDirectory, "~");
 
-        this.notify(`Test dataset successfully generated at ${sanitizedOutputPath}!`);
+        this.notify(`Test dataset ready at ${sanitizedOutputPath}!`);
 
         return DATASET_OUTPUT_PATH;
     };
