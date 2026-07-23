@@ -20,6 +20,9 @@ import { run } from "../../../../../utils/run";
 
 const propOrder = ["path", "subject_id", "session_id"];
 
+// Source-data properties describing file locations, which the path-expansion form derives from the format string
+const PATH_PROPERTIES = ["folder_path", "file_path", "file_paths"];
+
 export async function autocompleteFormatString(path) {
     let notification;
 
@@ -240,11 +243,28 @@ export class GuidedPathExpansionPage extends Page {
 
         const globalBaseDirectory = this.workflow.base_directory.value;
 
+        const project = globalState.project ?? (globalState.project = {});
+        const projectSourceData = project.SourceData ?? (project.SourceData = {});
+
         const finalStructure = {};
         for (let key in structure) {
             const entry = { ...structure[key] };
             const fstring = entry.format_string_path;
             if (!fstring) continue;
+
+            // Route shared source-data values (e.g. the SpikeGLX stream) to the global defaults applied to every session
+            for (let prop of Object.keys(entry)) {
+                if (prop === "base_directory" || prop === "format_string_path") continue;
+
+                const value = entry[prop];
+                delete entry[prop];
+                delete structure[key][prop]; // project.SourceData holds these values
+
+                const interfaceDefaults = projectSourceData[key] ?? (projectSourceData[key] = {});
+                if (value === undefined || value === "") delete interfaceDefaults[prop];
+                else interfaceDefaults[prop] = value;
+            }
+
             if (fstring.split(".").length > 1) entry.file_path = fstring;
             else entry.folder_path = fstring;
             delete entry.format_string_path;
@@ -333,11 +353,40 @@ export class GuidedPathExpansionPage extends Page {
         const baseDirectory = this.workflow.base_directory.value;
         const globals = (structureState.globals = {});
 
+        const projectSourceData = this.info.globalState.project?.SourceData ?? {};
+
         for (let key in this.info.globalState.interfaces) {
-            generatedSchema.properties[key] = {
+            const interfaceSchema = {
                 type: "object",
                 ...pathExpansionSchema,
+                properties: { ...pathExpansionSchema.properties },
+                required: [...pathExpansionSchema.required],
             };
+
+            // Expose shared source-data fields (e.g. the SpikeGLX stream) so they can be set once for all sessions
+            const sourceProperties = this.info.globalState.schema?.source_data?.properties?.[key];
+            if (sourceProperties) {
+                (sourceProperties.required ?? [])
+                    .filter((name) => !PATH_PROPERTIES.includes(name))
+                    .forEach((name) => {
+                        const propSchema = sourceProperties.properties?.[name];
+                        if (!propSchema) return;
+
+                        const sharedSchema = (interfaceSchema.properties[name] = structuredClone(propSchema));
+
+                        // Clarify that the value applies to every session and can be overridden per session
+                        const description = sharedSchema.description ? `${sharedSchema.description}<br>` : "";
+                        sharedSchema.description = `${description}Applied to all sessions. You can override it for individual sessions on the <b>Source Data</b> page.`;
+
+                        // Seed from existing global defaults so the value round-trips
+                        const existing = projectSourceData[key]?.[name];
+                        if (existing === undefined) return;
+                        const results = structureState.results[key] ?? (structureState.results[key] = {});
+                        if (results[name] === undefined) results[name] = existing;
+                    });
+            }
+
+            generatedSchema.properties[key] = interfaceSchema;
 
             if (baseDirectory) globals[key] = { base_directory: baseDirectory };
 

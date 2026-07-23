@@ -1,3 +1,7 @@
+ci:
+  # Report formatting issues as check failures instead of pushing auto-fix commits onto pull requests.
+  autofix_prs: false
+
 repos:
 
 -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -8,13 +12,13 @@ repos:
     -   id: trailing-whitespace
 
 -   repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 26.1.0
+    rev: 26.5.1
     hooks:
     -   id: black
         exclude: ^docs/
 
 -   repo: https://github.com/PyCQA/isort
-    rev: 8.0.1
+    rev: 9.0.0b1
     hooks:
     -   id: isort
 
@@ -23,9 +27,11 @@ repos:
     hooks:
     -   id: prettier
         types_or: [css, javascript]
+        additional_dependencies:
+        -   prettier@3.8.5 # Pin prettier for reproducible formatting
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.4.1
+  rev: v2.4.3
   hooks:
   - id: codespell
     additional_dependencies:
