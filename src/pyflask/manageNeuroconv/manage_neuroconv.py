@@ -1834,8 +1834,10 @@ def generate_test_data(output_path: str):
     int16_artificial_ap_band = unscaled_artificial_ap_band.astype(dtype="int16")
     int16_artificial_ap_band.set_channel_gains(conversion_factor_to_uV)
 
+    # The low freq_min is intended for this synthetic LFP band. spikeinterface guards low freq_min values with an
+    # error, and ignore_low_freq_error permits them.
     unscaled_artificial_lf_filter = spikeinterface.preprocessing.bandpass_filter(
-        recording=unscaled_artificial_ap_band, freq_min=0.5, freq_max=1_000
+        recording=unscaled_artificial_ap_band, freq_min=0.5, freq_max=1_000, ignore_low_freq_error=True
     )
     unscaled_artificial_lf_band = spikeinterface.preprocessing.decimate(
         recording=unscaled_artificial_lf_filter, decimation_factor=downsample_factor

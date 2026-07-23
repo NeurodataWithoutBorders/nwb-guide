@@ -45,7 +45,10 @@ export const serverGlobals = {
     species: new Promise((res, rej) => {
       onServerOpen(() => {
         fetch(new URL("/dandi/get-recommended-species", baseUrl))
-          .then((res) => res.json())
+          .then((res) => {
+            if (!res.ok) throw new Error(`Failed to fetch species: ${res.status}`);
+            return res.json();
+          })
           .then((species) => {
             res(species)
             serverGlobals.species = species
@@ -56,7 +59,10 @@ export const serverGlobals = {
     cpus: new Promise((res, rej) => {
       onServerOpen(() => {
         fetch(new URL("/system/cpus", baseUrl))
-          .then((res) => res.json())
+          .then((res) => {
+            if (!res.ok) throw new Error(`Failed to fetch CPUs: ${res.status}`);
+            return res.json();
+          })
           .then((cpus) => {
             res(cpus)
             serverGlobals.cpus = cpus
